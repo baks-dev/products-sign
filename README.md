@@ -29,7 +29,7 @@ $ php bin/console doctrine:migrations:migrate
 Тесты
 
 ``` bash
-$ php bin/phpunit --group=products-stocks-sign
+$ php bin/phpunit --group=products-sign
 ```
 
 ## Лицензия ![License](https://img.shields.io/badge/MIT-green)
