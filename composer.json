@@ -1,0 +1,45 @@
+{
+  "name": "baks-dev/products-sign",
+  "description": "Модуль Честный знак продукции ",
+  "homepage": "https://github.com/baks-dev/products-sign",
+  "keywords": [
+    "symfony",
+    "bundle",
+    "library",
+    "module",
+    "plugin",
+    "product",
+    "sign",
+    "baksdev"
+  ],
+  "license": "MIT",
+  "type": "symfony-bundle",
+  "authors": [
+    {
+      "name": "Baks Development",
+      "email": "admin@baks.dev"
+    }
+  ],
+  "require": {
+    "php": ">=8.2"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest"
+  },
+  "autoload": {
+    "psr-4": {
+      "BaksDev\\Products\\Sign\\": ""
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "BaksDev\\Products\\Sign\\Tests\\": "Tests/"
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "symfony/flex": true
+    }
+  }
+}

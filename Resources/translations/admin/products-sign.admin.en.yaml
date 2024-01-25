@@ -1,0 +1,49 @@
+admin:
+
+  page:
+    orders: 'Incoming orders'
+    purchase: 'Product purchase'
+
+    index: 'Inventory'
+    new: 'Add a credit note'
+    edit: 'Edit Receipt Order'
+    delete: 'Delete incoming order'
+    warehouse: 'Warehouse Receipts'
+    moving: 'Move'
+    package: 'Order Pack'
+
+  breadcrumb:
+    orders: 'Incoming orders'
+    purchase: 'Product purchase'
+
+    index: 'Product inventory'
+    new: 'Add a credit note'
+    edit: 'Edit Receipt Order'
+    delete: 'Delete incoming order'
+    warehouse: 'Warehouse Receipts'
+    moving: 'Move between warehouses'
+    package: 'Packing Load Orders'
+
+  success:
+    new: 'Incoming order successfully added'
+    update: 'Incoming order successfully updated'
+    delete: 'Incoming order has been successfully deleted to the cart'
+    restore: 'Incoming order successfully restored'
+    purchase: 'Products purchase sheet successfully added'
+    warehouse: 'Products successfully sent to the warehouse'
+    accept: 'Incoming has been successfully added to the warehouse'
+    move: 'Move products to warehouse added successfully'
+    package: 'Packaging request added successfully'
+    extradition: 'Order completed successfully'
+
+  danger:
+    new: '%s: Error adding incoming order'
+    update: '%s: Error updating receipt order'
+    delete: '%s: Error while deleting incoming order'
+    restore: '%s: Error restoring receipt order'
+    purchase: '%s: Error adding purchase'
+    warehouse: '%s: Error sending products to warehouse'
+    accept: '%s: Error arriving products to warehouse'
+    move: '%s: Error moving products to warehouse'
+    package: '%s: Error adding package request'
+    extradition: '%s: Error building ticket'
