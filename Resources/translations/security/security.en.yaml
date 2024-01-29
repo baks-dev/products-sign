@@ -1,0 +1,23 @@
+ROLE_PRODUCT_SIGN:
+  name: 'Products'
+  desc: 'Product List'
+
+ROLE_PRODUCT_SIGN_INDEX:
+  name: 'View'
+  desc: ''
+
+ROLE_PRODUCT_SIGN_NEW:
+  name: 'Add'
+  desc: ''
+
+ROLE_PRODUCT_SIGN_EDIT:
+  name: 'Edit'
+  desc: ''
+
+ROLE_PRODUCT_SIGN_DELETE:
+  name: 'Delete'
+  desc: ''
+
+ROLE_PRODUCT_SIGN_STATUS:
+  name: 'Status'
+  desc: ''
