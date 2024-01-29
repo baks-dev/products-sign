@@ -23,17 +23,38 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
+
 return static function (ContainerConfigurator $configurator): void {
+
     $services = $configurator->services()
         ->defaults()
         ->autowire()
-        ->autoconfigure();
+        ->autoconfigure()
+        ->public()
+    ;
 
     $NAMESPACE = 'BaksDev\Products\Sign\\';
 
     $MODULE = substr(__DIR__, 0, strpos(__DIR__, "Resources"));
 
     $services->load($NAMESPACE, $MODULE)
-        ->exclude($MODULE.'{Entity,Resources,Type,*DTO.php,*Message.php}');
+        ->exclude([
+            $MODULE.'{Entity,Resources,Type}',
+            $MODULE.'**/*Message.php',
+            $MODULE.'**/*DTO.php',
+        ])
+    ;
+
+    /* Статусы заказов */
+    $services->load($NAMESPACE.'Type\Status\ProductSignStatus\\', $MODULE.'Type/Status/ProductSignStatus');
+
+    /** @see https://symfony.com/doc/current/service_container/autowiring.html#dealing-with-multiple-implementations-of-the-same-type */
+    $services->alias(ProductSignStatusInterface::class.' $productSignStatusNew', ProductSignStatusNew::class);
+    $services->alias(ProductSignStatusInterface::class.' $productSignStatusDone', ProductSignStatusDone::class);
+
+    $services->alias(ProductSignStatusInterface::class, ProductSignStatusNew::class);
 
 };
