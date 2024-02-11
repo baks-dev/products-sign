@@ -23,16 +23,13 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Repository\ExistsProductSignCode;
+namespace BaksDev\Products\Sign\Repository\ProductSignCode;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
-use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
-use BaksDev\Users\User\Type\Id\UserUid;
+use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 
-final class ExistsProductSignCode implements ExistsProductSignCodeInterface
+final class ProductSignCodeRepository implements ProductSignCodeRepositoryInterface
 {
     private DBALQueryBuilder $DBALQueryBuilder;
 
@@ -43,31 +40,23 @@ final class ExistsProductSignCode implements ExistsProductSignCodeInterface
         $this->DBALQueryBuilder = $DBALQueryBuilder;
     }
 
-    /** Метод проверяет имеется ли у пользователя такой код (Без ошибки)  */
-    public function isExists(UserUid $user, string $code): bool
+
+    /**
+     * Метод возвращает QR-код честного знака
+     */
+    public function getCodeByProductSign(ProductSignUid $sign): array|bool
     {
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
 
         $dbal
-            ->from(ProductSignCode::TABLE, 'sign')
-            ->where('sign.code = :code')
-            ->setParameter('code', $code)
-            ->andWhere('sign.usr = :usr')
-            ->setParameter('usr', $user, UserUid::TYPE);
+            ->addSelect('code.code AS sign_code')
+            ->addSelect('code.qr AS sign_qr')
+            ->from(ProductSignCode::class, 'code')
+            ->where('code.sign = :sign')
+            ->setParameter('sign', $sign, ProductSignUid::TYPE)
+        ;
 
-        $dbal
-            ->join(
-                'sign',
-                ProductSignEvent::class,
-                'event',
-                'event.id = sign.event AND event.status != :status'
-            )
-            ->setParameter(
-                'status',
-                new ProductSignStatus(ProductSignStatusError::class),
-                ProductSignStatus::TYPE
-            );
-
-        return $dbal->fetchExist();
+        return $dbal
+            ->fetchAssociative();
     }
 }

@@ -82,8 +82,7 @@ final class AllProductSign implements AllProductSignInterface
     {
         $dbal = $this->DBALQueryBuilder
             ->createQueryBuilder(self::class)
-            ->bindLocal()
-        ;
+            ->bindLocal();
 
         $dbal
             ->addSelect('code.code AS sign_code')
@@ -355,11 +354,11 @@ final class AllProductSign implements AllProductSignInterface
             'product_event_category.event = product_event.id AND product_event_category.root = true'
         );
 
-//        if($this->filter?->getCategory())
-//        {
-//            $dbal->andWhere('product_event_category.category = :category');
-//            $dbal->setParameter('category', $this->filter->getCategory(), ProductCategoryUid::TYPE);
-//        }
+        //        if($this->filter?->getCategory())
+        //        {
+        //            $dbal->andWhere('product_event_category.category = :category');
+        //            $dbal->setParameter('category', $this->filter->getCategory(), ProductCategoryUid::TYPE);
+        //        }
 
         $dbal->leftJoin(
             'product_event_category',
@@ -380,46 +379,43 @@ final class AllProductSign implements AllProductSignInterface
         $dbal
             ->addSelect('category_trans.name AS category_name')
             ->leftJoin(
-            'category',
-            ProductCategoryTrans::TABLE,
-            'category_trans',
-            'category_trans.event = category.event AND category_trans.local = :local'
-        );
+                'category',
+                ProductCategoryTrans::TABLE,
+                'category_trans',
+                'category_trans.event = category.event AND category_trans.local = :local'
+            );
 
 
         /** Ответственное лицо */
 
         $dbal
-
             ->join(
-            'event',
-            UserProfile::TABLE,
-            'users_profile',
-            'users_profile.id = event.profile'
-        );
+                'event',
+                UserProfile::TABLE,
+                'users_profile',
+                'users_profile.id = event.profile'
+            );
 
 
         $dbal
             ->addSelect('users_profile_personal.username AS users_profile_username')
             ->addSelect('users_profile_personal.location AS users_profile_location')
             ->join(
-            'users_profile',
-            UserProfilePersonal::TABLE,
-            'users_profile_personal',
-            'users_profile_personal.event = users_profile.event'
-        );
+                'users_profile',
+                UserProfilePersonal::TABLE,
+                'users_profile_personal',
+                'users_profile_personal.event = users_profile.event'
+            );
 
         /* Поиск */
         if($this->search?->getQuery())
         {
-            //            $this->DBALQueryBuilder
-            //                ->createSearchQueryBuilder($search)
-            //                
-            //                ->addSearchEqualUid('product.id')
-            //
-            //                ->addSearchLike('product_trans.name')
+            $dbal
+                ->createSearchQueryBuilder($this->search)
+                //->addSearchEqualUid('account.id')
 
-
+                ->addSearchLike('code.code')
+            ;
         }
 
 
