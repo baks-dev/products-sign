@@ -32,12 +32,14 @@ use BaksDev\Users\Profile\Group\Security\RoleInterface;
 use BaksDev\Users\Profile\Group\Security\VoterInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
+/**
+ * Статус Done «Выполнен»
+ */
 #[AutoconfigureTag('baks.sign.status')]
 class ProductSignStatusDone implements ProductSignStatusInterface
 {
     public const STATUS = 'done';
 
-    /** Возвращает значение (value) */
     public function getValue(): string
     {
         return self::STATUS;

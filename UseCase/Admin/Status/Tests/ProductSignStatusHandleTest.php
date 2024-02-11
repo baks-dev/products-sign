@@ -39,6 +39,7 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use BaksDev\Products\Sign\UseCase\Admin\Status\Code\ProductSignCodeDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\Tests\ProductSignEditHandleTest;
@@ -67,23 +68,24 @@ final class ProductSignStatusHandleTest extends KernelTestCase
 
         /** @see ProductSignStatusDTO */
 
-        $ProductSignDTO = new ProductSignStatusDTO();
+        $ProductSignDTO = new ProductSignStatusDTO($UserProfileUid = clone new UserProfileUid());
         $ProductSignEvent->getDto($ProductSignDTO);
+        self::assertSame($UserProfileUid, $ProductSignDTO->getProfile());
 
         self::assertTrue($ProductSignDTO->getStatus()->equals(ProductSignStatusDone::class));
         $ProductSignDTO->setStatus(ProductSignStatusCancel::class);
 
-        /** @see ProductSignCodeDTO */
-
-        $ProductSignCodeDTO = $ProductSignDTO->getCode();
-
-        self::assertEquals('code_edit', $ProductSignCodeDTO->getCode());
-        self::assertEquals('qr_edit', $ProductSignCodeDTO->getQr());
-
-        self::assertFalse($ProductSignCodeDTO->getProduct()->equals(ProductUid::TEST));
-        self::assertFalse($ProductSignCodeDTO->getOffer()->equals(ProductOfferConst::TEST));
-        self::assertFalse($ProductSignCodeDTO->getVariation()->equals(ProductVariationConst::TEST));
-        self::assertFalse($ProductSignCodeDTO->getModification()->equals(ProductModificationConst::TEST));
+//        /** @see ProductSignCodeDTO */
+//
+//        $ProductSignCodeDTO = $ProductSignDTO->getCode();
+//
+//        self::assertEquals('code_edit', $ProductSignCodeDTO->getCode());
+//        self::assertEquals('qr_edit', $ProductSignCodeDTO->getQr());
+//
+//        self::assertFalse($ProductSignCodeDTO->getProduct()->equals(ProductUid::TEST));
+//        self::assertFalse($ProductSignCodeDTO->getOffer()->equals(ProductOfferConst::TEST));
+//        self::assertFalse($ProductSignCodeDTO->getVariation()->equals(ProductVariationConst::TEST));
+//        self::assertFalse($ProductSignCodeDTO->getModification()->equals(ProductModificationConst::TEST));
 
 
         /** @var ProductSignStatusHandler $ProductSignHandler */

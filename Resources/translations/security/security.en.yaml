@@ -1,7 +1,9 @@
+# Role
 ROLE_PRODUCT_SIGN:
-  name: 'Products'
-  desc: 'Product List'
+  name: 'Honest Sign'
+  desc: 'List of QR codes for "Honest Sign" products'
 
+# Rules
 ROLE_PRODUCT_SIGN_INDEX:
   name: 'View'
   desc: ''

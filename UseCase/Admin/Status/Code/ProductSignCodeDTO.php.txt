@@ -30,6 +30,7 @@ use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCodeInterface;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -38,28 +39,28 @@ final class ProductSignCodeDTO implements ProductSignCodeInterface
 {
 
     /** Честный знак */
-    private ?string $code = null;
+    private readonly ?string $code;
 
     /** QR знака */
     #[Assert\NotBlank]
-    private string $qr;
+    private readonly  string $qr;
 
     /** ID продукта */
     #[Assert\NotBlank]
     #[Assert\Uuid]
-    private ProductUid $product;
+    private readonly ProductUid $product;
 
     /** Постоянный уникальный идентификатор ТП */
     #[Assert\Uuid]
-    private ?ProductOfferConst $offer = null;
+    private readonly ?ProductOfferConst $offer = null;
 
     /** Постоянный уникальный идентификатор варианта */
     #[Assert\Uuid]
-    private ?ProductVariationConst $variation = null;
+    private readonly ?ProductVariationConst $variation = null;
 
     /** Постоянный уникальный идентификатор модификации */
     #[Assert\Uuid]
-    private ?ProductModificationConst $modification = null;
+    private readonly ?ProductModificationConst $modification = null;
 
     /**
      * Code
@@ -109,4 +110,11 @@ final class ProductSignCodeDTO implements ProductSignCodeInterface
         return $this->modification;
     }
 
+    /**
+     * Profile
+     */
+    public function getProfile(): ?UserProfileUid
+    {
+        return $this->profile;
+    }
 }

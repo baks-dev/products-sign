@@ -29,6 +29,7 @@ namespace BaksDev\Products\Sign\Controller\Admin;
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Form\Search\SearchForm;
 use BaksDev\Products\Sign\Repository\AllProductSign\AllProductSignInterface;
+use BaksDev\Users\User\Type\Id\UserUid;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use BaksDev\Core\Controller\AbstractController;
@@ -59,7 +60,9 @@ final class IndexController extends AbstractController
         // $filterForm->handleRequest($request);
 
         // Получаем список
-        $ProductSign = $allProductSign->fetchAllProductSignAssociative($search);
+        $ProductSign = $allProductSign
+            ->search($search)
+            ->fetchAllProductSignAssociative($this->getUsr()?->getId());
 
         return $this->render(
             [

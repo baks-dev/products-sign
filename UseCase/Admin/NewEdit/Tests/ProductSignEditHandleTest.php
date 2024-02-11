@@ -38,6 +38,7 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\Code\ProductSignCodeDTO;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignDTO;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignHandler;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
@@ -65,8 +66,9 @@ final class ProductSignEditHandleTest extends KernelTestCase
 
         /** @see ProductSignDTO */
 
-        $ProductSignDTO = new ProductSignDTO();
+        $ProductSignDTO = new ProductSignDTO($UserProfileUid = clone new UserProfileUid());
         $ProductSignEvent->getDto($ProductSignDTO);
+        self::assertSame($UserProfileUid, $ProductSignDTO->getProfile());
 
         self::assertTrue($ProductSignDTO->getStatus()->equals(ProductSignStatusNew::class));
         $ProductSignDTO->setStatus(ProductSignStatusDone::class);
@@ -78,9 +80,7 @@ final class ProductSignEditHandleTest extends KernelTestCase
         self::assertEquals('code', $ProductSignCodeDTO->getCode());
         $ProductSignCodeDTO->setCode('code_edit');
 
-        self::assertEquals('qr', $ProductSignCodeDTO->getQr());
-        $ProductSignCodeDTO->setQr('qr_edit');
-
+        self::assertNotNull($ProductSignCodeDTO->getQr());
 
         self::assertTrue($ProductSignCodeDTO->getProduct()->equals(ProductUid::TEST));
         $ProductSignCodeDTO->setProduct(clone $ProductSignCodeDTO->getProduct());

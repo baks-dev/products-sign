@@ -29,20 +29,25 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductSignEvent */
 final class ProductSignDTO implements ProductSignEventInterface
 {
-
     /**
      * Идентификатор события
      */
     #[Assert\Uuid]
     private ?ProductSignEventUid $id = null;
 
+    /**
+     * Код честного знака
+     */
+    #[Assert\Valid]
     private Code\ProductSignCodeDTO $code;
 
     /**
@@ -51,10 +56,24 @@ final class ProductSignDTO implements ProductSignEventInterface
     #[Assert\NotBlank]
     private ProductSignStatus $status;
 
-    public function __construct()
+
+    /**
+     * Профиль пользователя
+     */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private readonly UserProfileUid $profile;
+
+
+    /** Добавить лист закупки */
+    private bool $purchase = false;
+
+
+    public function __construct(UserProfileUid $profile)
     {
         $this->status = new ProductSignStatus(ProductSignStatusNew::class);
         $this->code = new Code\ProductSignCodeDTO();
+        $this->profile = $profile;
     }
 
     /**
@@ -78,9 +97,9 @@ final class ProductSignDTO implements ProductSignEventInterface
         return $this->status;
     }
 
-    public function setStatus(ProductSignStatus|string $status): self
+    public function setStatus(ProductSignStatus|ProductSignStatusInterface|string $status): self
     {
-        if(is_string($status))
+        if(!$status instanceof ProductSignStatus)
         {
             $status = new ProductSignStatus($status);
         }
@@ -101,6 +120,28 @@ final class ProductSignDTO implements ProductSignEventInterface
     public function setCode(Code\ProductSignCodeDTO $code): self
     {
         $this->code = $code;
+        return $this;
+    }
+
+    /**
+     * Profile
+     */
+    public function getProfile(): UserProfileUid
+    {
+        return $this->profile;
+    }
+
+    /**
+     * Purchase
+     */
+    public function isPurchase(): bool
+    {
+        return $this->purchase;
+    }
+
+    public function setPurchase(bool $purchase): self
+    {
+        $this->purchase = $purchase;
         return $this;
     }
 

@@ -32,12 +32,14 @@ use BaksDev\Users\Profile\Group\Security\RoleInterface;
 use BaksDev\Users\Profile\Group\Security\VoterInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
+/**
+ * Статус Cancel «Отменен»
+ */
 #[AutoconfigureTag('baks.sign.status')]
 class ProductSignStatusCancel implements ProductSignStatusInterface
 {
     public const STATUS = 'cancel';
 
-    /** Возвращает значение (value) */
     public function getValue(): string
     {
         return self::STATUS;

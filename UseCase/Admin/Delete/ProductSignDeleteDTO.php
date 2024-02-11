@@ -28,6 +28,7 @@ namespace BaksDev\Products\Sign\UseCase\Admin\Delete;
 
 use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductSignEvent */
@@ -46,10 +47,18 @@ final class ProductSignDeleteDTO implements ProductSignEventInterface
     #[Assert\Valid]
     private Modify\ModifyDTO $modify;
 
+    /**
+     * Профиль пользователя
+     */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private UserProfileUid $profile;
 
-    public function __construct()
+
+    public function __construct(UserProfileUid $profile)
     {
         $this->modify = new Modify\ModifyDTO();
+        $this->profile = $profile;
     }
 
     /**
@@ -68,4 +77,11 @@ final class ProductSignDeleteDTO implements ProductSignEventInterface
         return $this->modify;
     }
 
+    /**
+     * Profile
+     */
+    public function getProfile(): UserProfileUid
+    {
+        return $this->profile;
+    }
 }

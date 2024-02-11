@@ -1,0 +1,167 @@
+
+{% set card = product.vars.data.card %}
+
+<div id='item_{{ product.vars.id }}' class="d-flex border-bottom mb-3 pb-3">
+	
+	
+	
+	{% set img_path = card.product_image_cdn == true ? CDN_HOST : '' %}
+	{% set product_image_ext = card.product_image_cdn == true ? 'small.'~card.product_image_ext : card.product_image_ext %}
+	
+	<div class="me-3">
+		
+		<a href="{{ path('Product:user.detail', {
+			url : card.product_url ,
+			offer: card.product_offer_value,
+			variation: card.product_variation_value,
+			modification: card.product_modification_value
+		}) }}" class="icon rounded-4 mb-2 lazy bg-contain p-1"
+				data-bg="{{ card.product_image ? img_path ~ card.product_image ~ product_image_ext : '/assets/img/blank.svg' }}"
+				style="width: 75px; height: 75px;"
+		></a>
+		
+		
+	</div>
+
+
+	<div class="d-flex flex-column">
+
+		<div class="d-flex justify-content-between">
+			<div class="w-75 lh-normal small">
+
+				<a href="{{ path('Product:user.detail', {
+					url : card.product_url ,
+					offer: card.product_offer_value,
+					variation: card.product_variation_value,
+					modification: card.product_modification_value
+				}) }}" class="text-dark me-3 text-uppercase">
+					
+					{{ card.product_name }}
+					
+					{{ card.product_offer_value|call_twig_func(card.product_offer_reference) }}
+					{{ card.product_variation_value|call_twig_func(card.product_variation_reference) }}
+					{{ card.product_modification_value|call_twig_func(card.product_modification_reference) }}
+				
+				</a>
+
+				<div class="small text-muted py-2">Артикул: {{ card.product_article }}</div>
+			</div>
+
+			
+			{# TODO: Добавить в избранное  #}
+			{# <button class="btn btn-link py-0 align-items-baseline"
+					aria-label="Добавить в избранное"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor"
+					 class="bi bi-heart-fill" viewBox="0 0 16 16">
+					<path fill-rule="evenodd"
+						  d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"></path>
+				</svg>
+			</button> #}
+
+		</div>
+
+		<div class="d-flex flex-column">
+
+			<div class="d-flex justify-content-between">
+				
+				{% set discount_price = user_profile_discount(card.product_price) %}
+				
+				<div>
+					{{ discount_price ? money(discount_price, card.product_currency) : money(card.product_price, card.product_currency) }}
+					
+					{% if discount_price %}
+						<span class="badge bg-danger rounded-2 ms-1">
+							<span class="text-uppercase">-{{ baks_profile.profile_discount }}%</span>
+						</span>
+					{% endif %}
+					
+				</div>
+
+				{# УДАЛИТЬ #}
+				<a
+						href='{{ path('Orders:user.delete', {
+							product : card.event ,
+							offer: card.product_offer_uid,
+							variation: card.product_variation_uid,
+							modification: card.product_modification_uid
+						}) }}'
+						class="btn btn-sm btn-link text-decoration-underline small text-muted delete-product"
+						data-id='item_{{ product.vars.id }}'
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+							class="bi bi-x me-1" viewBox="0 0 16 16">
+						<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"></path>
+					</svg>
+					<span class="small">Удалить</span>
+				</a>
+				
+			</div>
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			<div class="d-flex justify-content-between align-items-center">
+				<div class="d-flex justify-content-center align-items-center text-center small">
+
+					<button type="button" class="btn btn-sm minus"
+							aria-label="Уменьшить количество"
+							data-id='{{ product.price.total.vars.id }}'
+					>
+						<span class="h4 text-muted opacity-50">-</span>
+					</button>
+					
+					
+					{{ form_widget(product.price.total, {
+						label: false,
+						attr: {
+							class : 'form-control-sm mx-1 rounded-3 total',
+							style: 'width: 60px;',
+							'data-price' : ''~card.product_price,
+							'data-discount' : baks_profile.profile_discount is defined ? baks_profile.profile_discount,
+							'data-currency' : card.product_currency|upper,
+							'data-max' : card.product_quantity
+						} } ) }}
+					
+
+					<small class="text-muted">шт.</small>
+					
+					<button type="button" class="btn btn-sm plus"
+							aria-label="Увеличить количество"
+							data-id='{{ product.price.total.vars.id }}'
+					>
+						<span class="h5 text-muted opacity-50">+</span>
+					</button>
+				</div>
+				
+				
+				
+				{% set summ = (product.price.vars.data.total * card.product_price) %}
+				{% set discount = user_profile_discount(summ) %}
+				
+				<strong class="h5 mb-0" id='summ_{{ product.price.total.vars.id }}'
+						data-price='{{ card.product_price }}'
+						data-discount='{{ baks_profile.profile_discount is defined ? baks_profile.profile_discount }}'
+						data-currency='{{ card.product_currency|upper }}'
+				>
+					{{ discount ? money(discount, card.product_currency) : money(summ, card.product_currency) }}
+					
+				</strong>
+
+			</div>
+			
+		
+
+		</div>
+
+	</div>
+
+</div>

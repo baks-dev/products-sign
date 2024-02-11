@@ -42,8 +42,6 @@ final class Role implements RoleInterface, MenuAdminInterface
         return self::ROLE;
     }
 
-
-
     /**
      * Добавляем раздел в меню администрирования.
      */
@@ -52,7 +50,7 @@ final class Role implements RoleInterface, MenuAdminInterface
     /** Метод возвращает PATH раздела */
     public function getPath(): string
     {
-        return 'products-product:admin.index';
+        return 'products-sign:admin.index';
     }
 
     /** Метод возвращает секцию, в которую помещается ссылка на раздел */

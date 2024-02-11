@@ -30,19 +30,30 @@ use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCodeInterface;
+use BaksDev\Users\User\Type\Id\UserUid;
+use chillerlan\QRCode\QRCode;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductSignCode */
 final class ProductSignCodeDTO implements ProductSignCodeInterface
 {
+    /** QR-код */
+    public ?File $file = null;
 
     /** Честный знак */
+    #[Assert\NotBlank]
     private ?string $code = null;
 
     /** QR знака */
     #[Assert\NotBlank]
     private string $qr;
+
+    /** Пользователь */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private UserUid $usr;
 
     /** ID продукта */
     #[Assert\NotBlank]
@@ -71,7 +82,9 @@ final class ProductSignCodeDTO implements ProductSignCodeInterface
 
     public function setCode(?string $code): self
     {
-        $this->code = $code;
+        $this->code = trim($code);
+        $this->qr = (new QRCode())->render($this->code);
+
         return $this;
     }
 
@@ -145,5 +158,17 @@ final class ProductSignCodeDTO implements ProductSignCodeInterface
         return $this;
     }
 
+    /**
+     * Usr
+     */
+    public function getUsr(): UserUid
+    {
+        return $this->usr;
+    }
 
+    public function setUsr(UserUid $usr): self
+    {
+        $this->usr = $usr;
+        return $this;
+    }
 }

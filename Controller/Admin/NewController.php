@@ -28,7 +28,10 @@ namespace BaksDev\Products\Sign\Controller\Admin;
 
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
+use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Products\Sign\Entity\ProductSign;
+use BaksDev\Products\Sign\Messenger\ProductStocks\CreateProductStockMessage;
+use BaksDev\Products\Sign\Repository\ExistsProductSignCode\ExistsProductSignCodeInterface;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignDTO;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignForm;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignHandler;
@@ -44,19 +47,36 @@ final class NewController extends AbstractController
     #[Route('/admin/product/sign/new', name: 'admin.newedit.new', methods: ['GET', 'POST'])]
     public function news(
         Request $request,
+        ExistsProductSignCodeInterface $existsProductSignCode,
         ProductSignHandler $ProductSignHandler,
+        MessageDispatchInterface $messageDispatch,
     ): Response
     {
-        $ProductSignDTO = new ProductSignDTO();
+        $ProductSignDTO = new ProductSignDTO($this->getProfileUid());
+        $ProductSignDTO->getCode()->setUsr($this->getUsr()?->getId());
 
         // Форма
         $form = $this->createForm(ProductSignForm::class, $ProductSignDTO, [
             'action' => $this->generateUrl('products-sign:admin.newedit.new'),
         ]);
+
         $form->handleRequest($request);
 
         if($form->isSubmitted() && $form->isValid() && $form->has('product_sign'))
         {
+            if($existsProductSignCode->isExists($this->getUsr()?->getId(), $ProductSignDTO->getCode()->getCode()))
+            {
+                $this->addFlash
+                (
+                    'page.new',
+                    'success.new',
+                    'products-sign.admin'
+                );
+
+                return $this->redirectToRoute('products-sign:admin.index');
+            }
+
+
             $handle = $ProductSignHandler->handle($ProductSignDTO);
 
             $this->addFlash
@@ -66,6 +86,15 @@ final class NewController extends AbstractController
                 'products-sign.admin',
                 $handle
             );
+
+            /** Созадем на указанный код лист закупки */
+            if($handle instanceof ProductSign && $ProductSignDTO->isPurchase())
+            {
+                $messageDispatch->dispatch(
+                    new CreateProductStockMessage($handle->getId()),
+                    transport: 'products-sign'
+                );
+            }
 
             return $this->redirectToRoute('products-sign:admin.index');
         }

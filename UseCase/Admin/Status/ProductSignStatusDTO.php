@@ -31,6 +31,7 @@ use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductSignEvent */
@@ -40,9 +41,17 @@ final class ProductSignStatusDTO implements ProductSignEventInterface
      * Идентификатор события
      */
     #[Assert\Uuid]
-    private ?ProductSignEventUid $id = null;
+    #[Assert\NotBlank]
+    private readonly ProductSignEventUid $id;
 
-    private Code\ProductSignCodeDTO $code;
+    //private Code\ProductSignCodeDTO $code;
+
+    /**
+     * Профиль пользователя
+     */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private readonly UserProfileUid $profile;
 
     /**
      * Статус
@@ -50,10 +59,11 @@ final class ProductSignStatusDTO implements ProductSignEventInterface
     #[Assert\NotBlank]
     private ProductSignStatus $status;
 
-    public function __construct()
+    public function __construct(UserProfileUid $profile)
     {
         $this->status = new ProductSignStatus(ProductSignStatusNew::class);
-        $this->code = new Code\ProductSignCodeDTO();
+        //$this->code = new Code\ProductSignCodeDTO();
+        $this->profile = $profile;
     }
 
     /**
@@ -90,11 +100,25 @@ final class ProductSignStatusDTO implements ProductSignEventInterface
     }
 
     /**
-     * Code
+     * Profile
      */
-    public function getCode(): Code\ProductSignCodeDTO
+    public function getProfile(): UserProfileUid
     {
-        return $this->code;
+        return $this->profile;
     }
+
+//    public function setProfile(UserProfileUid $profile): self
+//    {
+//        $this->profile = $profile;
+//        return $this;
+//    }
+
+//    /**
+//     * Code
+//     */
+//    public function getCode(): Code\ProductSignCodeDTO
+//    {
+//        return $this->code;
+//    }
 
 }

@@ -1,0 +1,64 @@
+{% if isProducts %}
+
+
+
+<div class="w-100 d-flex flex-column gap-3">
+	
+	
+	{% set block_user = false %}
+	
+	{% if app.user is null %}
+		
+		{% set block_user = true %}
+		
+		
+			{# Аккаунт пользователя #}
+			{{ include(_self|replace({ "ordering.html.twig": "form/account.html.twig" })) }}
+		
+		
+			{# Профиль пользователя #}
+			{{ include(_self|replace({ "ordering.html.twig": "form/userprofile.html.twig" })) }}
+		
+	{% else %}
+		
+		{% if baks_profile.id is null %}
+			{% set block_user = true %}
+			
+			
+				{{ include(_self|replace({ "ordering.html.twig": "form/userprofile.html.twig" })) }}
+		
+		{% endif %}
+	
+	{% endif %}
+	
+	<hr>
+	
+	{# Способы оплаты  #}
+	{{ include(_self|replace({ "ordering.html.twig": "form/payment.html.twig" })) }}
+	
+	<hr>
+	
+	{# Способы доставки #}
+	{{ include(_self|replace({ "ordering.html.twig": "form/delivery.html.twig" })) }}
+	
+</div>
+
+{% endif %}
+	
+
+		
+
+	
+	
+
+
+
+
+	
+	
+	
+	
+	
+	
+	
+	

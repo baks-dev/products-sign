@@ -26,7 +26,9 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\UseCase\Admin\NewEdit;
 
 
+use BaksDev\Products\Sign\UseCase\Admin\NewEdit\Code\ProductSignCodeForm;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -37,7 +39,10 @@ final class ProductSignForm extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        //$builder->add('image', TextType::class, ['required' => false]);
+        $builder->add('code', ProductSignCodeForm::class);
+
+        $builder->add('purchase', CheckboxType::class, ['required' => false]);
+
 
         /* Сохранить ******************************************************/
         $builder->add(

@@ -30,12 +30,13 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Messenger\ProductSignMessage;
 use DomainException;
+use Imagick;
 
 
 final class ProductSignHandler extends AbstractHandler
 {
 
-    public function handle(ProductSignDTO $command) : string|ProductSign
+    public function handle(ProductSignDTO $command): string|ProductSign
     {
 
         /** Валидация DTO  */
@@ -51,6 +52,23 @@ final class ProductSignHandler extends AbstractHandler
         catch(DomainException $errorUniqid)
         {
             return $errorUniqid->getMessage();
+        }
+
+        /**
+         * Присваиваем QR при загрузки файла
+         */
+
+        $ProductSignCodeDTO = $command->getCode();
+
+        if($ProductSignCodeDTO->file !== null)
+        {
+            $Imagick = new Imagick();
+            $Imagick->setResolution(200, 200);
+            $Imagick->readImage($command->getCode()->file->getRealPath());
+            $Imagick->setImageFormat('png');
+            $imageString = $Imagick->getImageBlob();
+            $base64Image = 'data:image/png;base64,'.base64_encode($imageString);
+            $ProductSignCodeDTO->setQr($base64Image);
         }
 
         /** Валидация всех объектов */

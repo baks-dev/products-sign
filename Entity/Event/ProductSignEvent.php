@@ -33,6 +33,7 @@ use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
@@ -86,11 +87,22 @@ class ProductSignEvent extends EntityEvent
     #[ORM\Column(type: ProductSignStatus::TYPE)]
     private ProductSignStatus $status;
 
+    /**
+     * Профиль пользователя
+     */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    #[ORM\Column(type: UserProfileUid::TYPE)]
+    private UserProfileUid $profile;
+
+    /** Комментарий */
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    private string $comment;
+
     public function __construct()
     {
         $this->id = new ProductSignEventUid();
         $this->modify = new ProductSignModify($this);
-
     }
 
     /**
@@ -130,6 +142,15 @@ class ProductSignEvent extends EntityEvent
     {
         return $this->main;
     }
+
+    /**
+     * Profile
+     */
+    public function getProfile(): UserProfileUid
+    {
+        return $this->profile;
+    }
+
 
     public function getDto($dto): mixed
     {

@@ -8,110 +8,92 @@
         {{ include(_self|replace({ "card.html.twig": "_usecase.html.twig" })) }}
     </td>
 
+    <td class="text-center">
+        {{ product_sign__status(item.sign_status) }}
+    </td>
 
     <td class="text-center">
-        {{ item.delivery_sort }}
+
+        <div class="text-muted text-nowrap pointer copy" data-copy="{{ item.sign_code }}">
+
+        <span class="me-1">
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="14" height="14"
+                 fill="currentColor" viewBox="0 0 115.77 122.88">
+                <path d="M89.62,13.96v7.73h12.19h0.01v0.02c3.85,0.01,7.34,1.57,9.86,4.1c2.5,2.51,4.06,5.98,4.07,9.82h0.02v0.02 v73.27v0.01h-0.02c-0.01,3.84-1.57,7.33-4.1,9.86c-2.51,2.5-5.98,4.06-9.82,4.07v0.02h-0.02h-61.7H40.1v-0.02 c-3.84-0.01-7.34-1.57-9.86-4.1c-2.5-2.51-4.06-5.98-4.07-9.82h-0.02v-0.02V92.51H13.96h-0.01v-0.02c-3.84-0.01-7.34-1.57-9.86-4.1 c-2.5-2.51-4.06-5.98-4.07-9.82H0v-0.02V13.96v-0.01h0.02c0.01-3.85,1.58-7.34,4.1-9.86c2.51-2.5,5.98-4.06,9.82-4.07V0h0.02h61.7 h0.01v0.02c3.85,0.01,7.34,1.57,9.86,4.1c2.5,2.51,4.06,5.98,4.07,9.82h0.02V13.96L89.62,13.96z M79.04,21.69v-7.73v-0.02h0.02 c0-0.91-0.39-1.75-1.01-2.37c-0.61-0.61-1.46-1-2.37-1v0.02h-0.01h-61.7h-0.02v-0.02c-0.91,0-1.75,0.39-2.37,1.01 c-0.61,0.61-1,1.46-1,2.37h0.02v0.01v64.59v0.02h-0.02c0,0.91,0.39,1.75,1.01,2.37c0.61,0.61,1.46,1,2.37,1v-0.02h0.01h12.19V35.65 v-0.01h0.02c0.01-3.85,1.58-7.34,4.1-9.86c2.51-2.5,5.98-4.06,9.82-4.07v-0.02h0.02H79.04L79.04,21.69z M105.18,108.92V35.65v-0.02 h0.02c0-0.91-0.39-1.75-1.01-2.37c-0.61-0.61-1.46-1-2.37-1v0.02h-0.01h-61.7h-0.02v-0.02c-0.91,0-1.75,0.39-2.37,1.01 c-0.61,0.61-1,1.46-1,2.37h0.02v0.01v73.27v0.02h-0.02c0,0.91,0.39,1.75,1.01,2.37c0.61,0.61,1.46,1,2.37,1v-0.02h0.01h61.7h0.02 v0.02c0.91,0,1.75-0.39,2.37-1.01c0.61-0.61,1-1.46,1-2.37h-0.02V108.92L105.18,108.92z"></path>
+            </svg>
+        </span>
+            {{ item.sign_code }}
+        </div>
     </td>
 
 
-    <td class="text-center">
-        {% if item.delivery_active %}
-            <span class="badge text-bg-success">Активный</span>
-        {% else %}
-            <span class="badge text-bg-danger">Отключен</span>
-        {% endif %}
-    </td>
+    <td class="align-middle">
+        <div class="d-flex">
 
-    <td class="w-100">
-
-        <div class="w-100 d-flex align-items-center gap-5">
-
-            {# Обложка  #}
+            {# Обложка #}
             {% set image_path = '/assets/img/blank.svg' %}
 
-            {% if item.delivery_cover_ext is defined and item.delivery_cover_ext is not null %}
-                {% set img_host =  item.delivery_cover_cdn == true  ? CDN_HOST : '' %}
-                {% set img_dir = item.delivery_cover_name %}
-                {% set img_file = (img_host is empty ? '/image.' : '/small.') ~ item.delivery_cover_ext %}
+            {% if item.product_image_ext is defined and item.product_image_ext is not null %}
+                {% set img_host =  item.product_image_cdn == true  ? CDN_HOST : '' %}
+                {% set img_dir = item.product_image %}
+                {% set img_file = (img_host is empty ? '/image.' : '/small.') ~ item.product_image_ext %}
                 {% set image_path = img_host ~ img_dir ~ img_file %}
             {% endif %}
 
-
-
-            {% if is_granted(ROLE~'_EDIT') or is_granted('ROLE_ADMIN') %}
-                <a href="{{ path('delivery:admin.newedit.edit', { id: item.event }) }}" class="pe-3">
-                    <div
-                            class="rounded-3 bg-contain lazy p-1"
-                            style="width: 50px; height: 50px;"
-                            data-bg="{{ image_path }}">
-                    </div>
-                </a>
-            {% else %}
-                <div
-                        class="rounded-3 bg-contain lazy p-1"
-                        style="width: 50px; height: 50px;"
-                        data-bg="{{ image_path }}">
-                </div>
-            {% endif %}
-
-
-            <div class="ms-0">
-
-                {% if is_granted(ROLE~'_EDIT') or is_granted('ROLE_ADMIN') %}
-                    {# Название #}
-                    <a href="{{ path('delivery:admin.newedit.edit', {id: item.event }) }}"
-                       class="text-decoration-none"
-                    >{{ item.delivery_name }}</a>
-                {% else %}
-                    {{ item.delivery_name }}
-                {% endif %}
-
-                {# Описание #}
-                <div class="text-muted">
-                    {{ string_width(item.delivery_description, 150)|raw }}
-                </div>
-
+            <div>
+                <a href="#" class="icon rounded-3 mb-2 lazy bg-cover p-1"
+                   data-bg="{{ image_path }}"
+                   style="width: 45px; height: 45px;"
+                ></a>
             </div>
+
+            <div class="ms-3">
+
+                {# {{ dd(item) }} #}
+
+                {# Название #}
+                <a href="{{ path('products-product:user.detail', {
+                    category: item.category_url,
+                    url : item.product_url ,
+                    offer: item.product_offer_value,
+                    variation: item.product_variation_value,
+                    modification: item.product_modification_value
+                }) }} "
+                   class="text-decoration-none mb-1 fw-bolder text-muted"
+                   target="_detail"
+                >
+
+                    {{ item.product_name }}
+
+                    {# Значение множественного варианта ТП #}
+                    {{ item.product_variation_value|call_twig_func(item.product_variation_reference~'_render')
+                    ~ item.product_modification_value|call_twig_func(item.product_modification_reference~'_render') }}
+
+                    {# Значение торгового предложения #}
+                    {{ item.product_offer_value|call_twig_func(item.product_offer_reference~'_render') }}
+
+                    {# Постфикс торгового предложения #}
+                    {{ item.product_offer_postfix }}
+                    {# Постфикс множественного варианта #}
+                    {{ item.product_variation_postfix }}
+                    {# Постфикс модификации #}
+                    {{ item.product_modification_postfix }}
+
+                </a>
+
+
+                {# Артикул #}
+                <div class="text-muted ">
+                    <strong>Артикул:</strong> &nbsp;<small>{{ item.product_article }}</small>
+                </div>
+            </div>
+
         </div>
-
     </td>
 
-    <td class="text-center">
-        {% if item.delivery_price %}
-
-            {{ money(item.delivery_price, item.delivery_currency) }}
-
-            {% if item.delivery_excess %}
-                <span class="badge text-bg-danger">+ {{ money(item.delivery_excess, item.delivery_currency) }} за 1 км</span>
-            {% endif %}
-
-
-        {% else %}
-            <span class="badge text-bg-light">Бесплатно</span>
-
-        {% endif %}
+    <td class="text-center text-nowrap">
+        {{ item.users_profile_username }}
     </td>
 
-    <td class="text-center">
-        {% if item.type_profile_name %}
-            <span class="badge text-bg-warning">{{ item.type_profile_name }}</span>
-
-
-        {% else %}
-            <span class="badge text-bg-light">Доступно всем</span>
-
-        {% endif %}
-    </td>
-
-    <td class="text-center">
-        {% if item.region_name %}
-            <span class="badge text-bg-warning">{{ item.region_name }}</span>
-
-
-        {% else %}
-            <span class="badge text-bg-light">Доступно всем</span>
-
-        {% endif %}
-    </td>
 
 </tr>

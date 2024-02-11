@@ -34,7 +34,9 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignSt
 use BaksDev\Products\Sign\UseCase\Admin\Delete\ProductSignDeleteDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Delete\ProductSignDeleteHandler;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignDTO;
+use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\Tests\ProductSignStatusHandleTest;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
@@ -66,8 +68,9 @@ final class ProductSignDeleteHandleTest extends KernelTestCase
 
         /** @see ProductSignDTO */
 
-        $ProductSignDTO = new ProductSignDeleteDTO();
+        $ProductSignDTO = new ProductSignDeleteDTO($UserProfileUid = clone new UserProfileUid());
         $ProductSignEvent->getDto($ProductSignDTO);
+        self::assertSame($UserProfileUid, $ProductSignDTO->getProfile());
 
 
         /** @var ProductSignDeleteHandler $ProductSignHandler */

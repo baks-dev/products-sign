@@ -1,0 +1,228 @@
+{# {{ include(_self|replace({ "content.html.twig": "header.html.twig" })) }} #}
+
+
+<main class="main">
+	
+	{{ form_start(form) }}
+	
+	<section id="orders">
+		
+		<div class="container d-flex justify-content-start align-items-center my-4 gap-3">
+			
+			<h1 class="h4 text-uppercase fw-bolder mb-0">Корзина</h1>
+			
+			<div class="small">
+				
+				{% if isProducts %}
+					
+					<a href='{{ path('Orders:user.truncate') }}'
+							class="btn btn-sm btn-outline-light text-dark text-decoration-underline small shadow-sm text-muted rounded-3 pt-0">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+								class="bi bi-x me-1" viewBox="0 0 16 16">
+							<path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+						</svg>
+						<span class="small">Очистить</span>
+					</a>
+				
+				{% endif %}
+			
+			</div>
+		</div>
+
+
+		{% if isProducts %}
+			
+			
+			
+			
+			<div class="bg-light container py-3">
+				
+				
+				{% set total_summ_product = 0 %}
+				{% set total_summ_currency = null %}
+				
+				{% for product in form.product %}
+					
+					
+					{% set card = product.vars.data.card %}
+					{% set summ = (product.price.vars.data.total * card.product_price) %}
+					
+					{% set total_summ_product = total_summ_product + summ %}
+					{% set total_summ_currency = card.product_currency %}
+					
+					
+					
+					
+					{{ include(_self|replace({ "content.html.twig": "products.html.twig" })) }}
+				
+				
+				{% endfor %}
+				
+				<div class="d-flex align-items-stretch justify-content-between">
+					
+					<div class='w-100'>
+						Позиций: <span class="text-primary">{{ baks_basket.counter }}
+							{{ 'num_of_products'|trans({'count': baks_basket.counter}, 'messages') }}
+					</span>
+					</div>
+					
+					
+					<span class="small me-3 pt-1">Итого: </span>
+					
+					{% set discount = user_profile_discount(total_summ_product) %}
+					
+					<span id='total_result' class="fw-bolder h3">
+					{{ discount ?  money(discount) : money(total_summ_product) }}
+				</span>
+				</div>
+			
+			</div>
+			
+			
+			
+			<div class="container py-3 text-center">
+				
+				<a href="#ordering" class="btn btn-danger w-100 text-uppercase mb-3"
+						title="К оформлению заказа"
+						aria-label="К оформлению заказа">
+					Оформить заказ
+				</a>
+				
+				<a href="{{ path('core:user.homepage') }}" class="small w-100 text-muted p-3">
+					Продолжить покупки
+				</a>
+			</div>
+		
+		
+		{% else %}
+			
+			<div class='container'>
+				<div class="alert alert-warning" role="alert">
+					
+					<div class='d-flex justify-content-between align-items-center'>
+						<div>
+							<h3>Ваша корзина пуста.</h3>
+							
+							Начните с главной страницы или воспользуйтесь поиском.
+						</div>
+					
+					</div>
+				
+				</div>
+				
+				<a href='{{ path('core:user.homepage') }}' class="btn btn-lg btn-primary text-nowrap btn w-100">
+					<span class="h6 text-uppercase px-3 basket-text">Продолжить покупки</span><span class="spinner-border spinner-border-sm vertical-middle d-none"></span>
+				</a>
+			</div>
+		
+		{% endif %}
+	
+	
+	</section>
+	
+	{# TODO: ПРОСМОТРЕННЫЕ #}
+	{# <section id="viewed" class="mt-4 bg-light">
+		<div class="container p-4">
+			<h2 class="text-uppercase me-4 h5 fw-bolder">Просмотренные</h2>
+		</div>
+
+		<div class="d-flex flex-nowrap gap-4 overflow-auto w-100 px-4 pb-3">
+			{% for i in 0..5 %}
+				{{ include(_self|replace({ "content.html.twig": "viewed.html.twig" })) }}
+			{% endfor %}
+		</div>
+	</section> #}
+
+
+	{% if isProducts %}
+
+
+
+	{# оформление заказа #}
+	<section id="ordering" class="container bg-white pb-3">
+		
+		<div class="container d-flex flex-column py-4 small">
+			<h2 class="text-uppercase me-4 h4 fw-bolder m-0">Оформление заказа</h2>
+			
+			
+			{% if app.user is null %}
+				
+				<a href="{{ path('auth-email:user.login') }}"
+						class="btn btn-link lh-1 text-decoration-none modal-link text-start"
+						data-bs-toggle="modal"
+						data-bs-target="#modal"
+						
+						title="{{ 'user.link.breadcrumb.page'|trans({}, 'user.login') }}"
+						aria-label="{{ 'user.link.breadcrumb.page'|trans({}, 'user.login') }}"
+				>
+					{{ 'user.page'|trans({}, 'user.login') }}
+				</a>
+			
+			{% endif %}
+		
+		</div>
+
+
+
+
+		<div class="px-2 py-1">
+			{{ include(_self|replace({ "content.html.twig": "ordering.html.twig" })) }}
+		</div>
+
+		<div class="alert alert-secondary lh-1 rounded-4 p-2 text-center" role="alert">
+			
+			<div class='mb-1'>
+				<span>Товаров на сумму:
+					{% set discount = user_profile_discount(total_summ_product) %}
+					<span id='total_product_sum'>{{ discount ?  money(discount) : money(total_summ_product) }}</span>
+				</span>
+			</div>
+			
+			<div>
+				<span class=" me-3 pt-1">
+					Итого:
+				</span>
+				<span id='total_all_sum' class="fw-bolder mb-0 h3">
+					{{ discount ?  money(discount) : money(total_summ_product) }}
+				</span>
+			</div>
+		</div>
+
+
+		{# {{ form_row(form.order, {
+								label: 'Оформить заказ',
+								attr: { class: 'btn-danger', title : "Оформить заказ", 'aria-label' : "Оформить заказ" }
+							}) }} #}
+		
+		{{ form_widget(form.order, { label: '
+								<span>'~ 'Оформить заказ'|trans({}, 'core.btn') ~'</span>
+								<span class="spinner-border spinner-border-sm vertical-middle d-none"></span>
+							',
+			attr: {
+				class: 'btn-danger w-100 mb-3',
+				title : "Оформить заказ",
+				'aria-label' : "Оформить заказ"
+			}
+		}) }}
+		
+		
+		<div class="text-center">
+			<p class="small">Нажимая «Оформить заказ», Вы соглашаетесь на обработку персональных данных и
+							 подтверждаете
+							 ознакомление с
+				<a href="#">пользовательским соглашением</a>,
+				<a href="#">условиями продажи товаров</a> и
+				<a href="#">политикой о конфиденциальности</a>.</p>
+		</div>
+	
+	
+	</section>
+
+	{% endif %}
+	
+	{{ form_end(form) }}
+</main>
+
+
+
+

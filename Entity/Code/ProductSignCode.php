@@ -35,6 +35,7 @@ use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductM
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use InvalidArgumentException;
@@ -43,6 +44,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'product_sign_code')]
+#[ORM\Index(columns: ['code'])]
+#[ORM\Index(columns: ['product', 'offer', 'variation', 'modification'])]
 class ProductSignCode extends EntityReadonly
 {
     public const TABLE = 'product_sign_code';
@@ -61,16 +64,21 @@ class ProductSignCode extends EntityReadonly
     #[ORM\JoinColumn(name: 'event', referencedColumnName: 'id')]
     private ProductSignEvent $event;
 
+    /** Пользователь */
+    #[ORM\Column(type: UserUid::TYPE)]
+    private UserUid $usr;
+
+
     /** Честный знак */
-    #[ORM\Column(type: Types::STRING, nullable: true)]
-    private ?string $code = null;
+    #[ORM\Column(type: Types::STRING)]
+    private string $code;
 
     /** QR знака */
-    #[ORM\Column(type: Types::STRING)]
+    #[ORM\Column(type: Types::TEXT)]
     private string $qr;
 
     /** ID продукта */
-    #[ORM\Column(type: ProductUid::TYPE)]
+    #[ORM\Column(type: ProductUid::TYPE, nullable: true)]
     private ProductUid $product;
 
     /** Постоянный уникальный идентификатор ТП */

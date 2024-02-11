@@ -1,0 +1,47 @@
+{% trans_default_domain('orders-order.admin') %}
+
+{# ---- ШАБЛОН ------------------------------------------------------------ #}
+{% extends Template('/admin/base.html.twig') %}
+
+{% block title %}{{ 'page.new'|trans }}{% endblock %}
+
+{# ---- CSS ------------------------------------------------------------ #}
+ {% block stylesheets %}
+     <link rel="preconnect" href="https://api-maps.yandex.ru"/>
+     {# <link rel="preconnect" href="https://yastatic.net" /> #}
+     <link rel="preload"
+           href="https://api-maps.yandex.ru/2.1/?apikey={{ MAPS_YANDEX_API }}&lang={{ app.request.locale|lower }}"/>
+ {% endblock %}
+
+{# ---- HEADER-БЛОК ------------------------------------------------------------ #}
+{# {% block header %}
+    {{ include(_self|replace({ "template.html.twig": "header.html.twig" })) }}
+{% endblock %} #}
+
+
+{# ---- LEFT-БЛОК ------------------------------------------------------------ #}
+{# {% block left %} #}
+{#   {% include '@Template/flowers/left.html.twig' %} #}
+{# {% endblock %} #}
+
+{% set isProducts = baks_basket.counter > 0 ? true : false %}
+
+{# ---- КОНТЕНТ-БЛОК ------------------------------------------------------------ #}
+{% block content %}
+
+    {{ include(_self|replace({ "template.html.twig":baks_settings.device~"/content.html.twig" })) }}
+
+    {# {{ dump(form.vars.data) }} #}
+
+{% endblock %}
+
+
+{# ---- FOOTER-БЛОК ------------------------------------------------------------ #}
+{# {% block footer %}
+    {{ include(_self|replace({ "template.html.twig": "footer.html.twig" })) }}
+{% endblock %} #}
+
+ {% block javascript %}
+ <script async nonce="{{ csp_nonce() }}" data-src="/assets/js/radio.input.min.js?v={{ version }}" class="lazy"></script>
+<script async nonce="{{ csp_nonce() }}" data-src="/assets/products-sign/pdf.js?v={{ version }}" class="lazy"></script>
+{% endblock %}

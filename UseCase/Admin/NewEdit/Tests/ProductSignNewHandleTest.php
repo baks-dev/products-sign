@@ -38,6 +38,8 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\Code\ProductSignCodeDTO;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignDTO;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignHandler;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
@@ -87,13 +89,17 @@ final class ProductSignNewHandleTest extends KernelTestCase
     {
         /** @see ProductSignDTO */
 
-        $ProductSignDTO = new ProductSignDTO();
+        $ProductSignDTO = new ProductSignDTO($UserProfileUid = new UserProfileUid());
+        self::assertSame($UserProfileUid, $ProductSignDTO->getProfile());
         self::assertTrue($ProductSignDTO->getStatus()->equals(ProductSignStatusNew::class));
 
 
         /** @see ProductSignCodeDTO */
 
         $ProductSignCodeDTO = $ProductSignDTO->getCode();
+
+        $ProductSignCodeDTO->setUsr($UserUid = new UserUid());
+        self::assertSame($UserUid, $ProductSignCodeDTO->getUsr());
 
         $ProductSignCodeDTO->setCode('code');
         self::assertEquals('code', $ProductSignCodeDTO->getCode());

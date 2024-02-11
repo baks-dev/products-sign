@@ -25,9 +25,12 @@ namespace BaksDev\Products\Sign\Repository\AllProductSign;
 
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Services\Paginator\PaginatorInterface;
+use BaksDev\Users\User\Type\Id\UserUid;
 
 interface AllProductSignInterface
 {
     /** Метод возвращает пагинатор ProductSign */
-    public function fetchAllProductSignAssociative(SearchDTO $search): PaginatorInterface;
+    public function fetchAllProductSignAssociative(UserUid $user): PaginatorInterface;
+
+    public function search(SearchDTO $search): self;
 }
