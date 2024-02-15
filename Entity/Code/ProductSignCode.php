@@ -25,6 +25,8 @@ namespace BaksDev\Products\Sign\Entity\Code;
 
 use BaksDev\Core\Entity\EntityEvent;
 use BaksDev\Core\Entity\EntityReadonly;
+use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Orders\Order\Type\Product\OrderProductUid;
 use BaksDev\Products\Product\Entity\Event\ProductEvent;
 use BaksDev\Products\Product\Entity\Product;
 use BaksDev\Products\Product\Type\Barcode\ProductBarcode;
@@ -78,7 +80,7 @@ class ProductSignCode extends EntityReadonly
     private string $qr;
 
     /** ID продукта */
-    #[ORM\Column(type: ProductUid::TYPE, nullable: true)]
+    #[ORM\Column(type: ProductUid::TYPE)]
     private ProductUid $product;
 
     /** Постоянный уникальный идентификатор ТП */
@@ -92,7 +94,6 @@ class ProductSignCode extends EntityReadonly
     /** Постоянный уникальный идентификатор модификации */
     #[ORM\Column(type: ProductModificationConst::TYPE, nullable: true)]
     private ?ProductModificationConst $modification = null;
-
 
     public function __construct(ProductSignEvent $event)
     {

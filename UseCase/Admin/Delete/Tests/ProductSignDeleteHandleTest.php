@@ -34,8 +34,8 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignSt
 use BaksDev\Products\Sign\UseCase\Admin\Delete\ProductSignDeleteDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Delete\ProductSignDeleteHandler;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignDTO;
-use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusDTO;
-use BaksDev\Products\Sign\UseCase\Admin\Status\Tests\ProductSignStatusHandleTest;
+use BaksDev\Products\Sign\UseCase\Admin\Cancel\ProductSignCancelDTO;
+use BaksDev\Products\Sign\UseCase\Admin\Cancel\Tests\ProductSignCancelHandleTest;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -44,7 +44,7 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 /**
  * @group @group products-sign
  *
- * @depends BaksDev\Products\Sign\UseCase\Admin\Status\Tests\ProductSignStatusHandleTest::class
+ * @depends BaksDev\Products\Sign\UseCase\Admin\Cancel\Tests\ProductSignCancelHandleTest::class
  * @depends BaksDev\Products\Sign\Controller\Admin\Tests\DeleteControllerTest::class
  *
  */

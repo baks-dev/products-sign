@@ -51,7 +51,7 @@ final class DeleteController extends AbstractController
     ): Response
     {
 
-        $ProductSignDeleteDTO = new ProductSignDeleteDTO();
+        $ProductSignDeleteDTO = new ProductSignDeleteDTO($this->getProfileUid());
         $ProductSignEvent->getDto($ProductSignDeleteDTO);
         $form = $this->createForm(ProductSignDeleteForm::class, $ProductSignDeleteDTO, [
             'action' => $this->generateUrl('products-sign:admin.delete', ['id' => $ProductSignDeleteDTO->getEvent()]),

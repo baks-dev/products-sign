@@ -44,7 +44,7 @@ final class ProductSignPdfDTO
     private ArrayCollection $files;
 
     /** Добавить лист закупки */
-    private bool $purchase = false;
+    private bool $purchase = true;
 
     public function __construct(UserUid $usr, UserProfileUid $profile)
     {

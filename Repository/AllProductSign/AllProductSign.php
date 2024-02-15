@@ -49,6 +49,7 @@ use BaksDev\Products\Product\Entity\Product;
 use BaksDev\Products\Product\Entity\Trans\ProductTrans;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Users\Profile\UserProfile\Entity\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
@@ -113,6 +114,15 @@ final class AllProductSign implements AllProductSignInterface
                 'event.id = code.event'
             );
 
+        $dbal
+            ->addSelect('modify.mod_date AS sign_date')
+
+            ->leftJoin(
+                'code',
+                ProductSignModify::class,
+                'modify',
+                'modify.event = code.event'
+            );
 
         // Product
         $dbal->addSelect('product.id as product_id'); //->addGroupBy('product.id');
@@ -417,6 +427,8 @@ final class AllProductSign implements AllProductSignInterface
                 ->addSearchLike('code.code')
             ;
         }
+
+        $dbal->orderBy('modify.mod_date', 'DESC');
 
 
         //dd(current($dbal->fetchAllAssociative()));

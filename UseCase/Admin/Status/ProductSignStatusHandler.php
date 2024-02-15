@@ -27,16 +27,15 @@ namespace BaksDev\Products\Sign\UseCase\Admin\Status;
 
 use BaksDev\Core\Entity\AbstractHandler;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Messenger\ProductSignMessage;
 use DomainException;
 
 final class ProductSignStatusHandler extends AbstractHandler
 {
-
-    public function handle(ProductSignStatusDTO $command): string|ProductSign
+    public function handle(ProductSignCancelDTO|ProductSignProcessDTO|ProductSignDoneDTO $command): string|ProductSign
     {
-
         /** Валидация DTO  */
         $this->validatorCollection->add($command);
 

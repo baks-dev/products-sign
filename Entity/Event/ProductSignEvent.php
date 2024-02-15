@@ -27,6 +27,9 @@ namespace BaksDev\Products\Sign\Entity\Event;
 
 use BaksDev\Core\Type\Locale\Locale;
 use BaksDev\Core\Type\Modify\ModifyAction;
+use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Orders\Order\Type\Product\OrderProductUid;
+use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
@@ -95,6 +98,13 @@ class ProductSignEvent extends EntityEvent
     #[ORM\Column(type: UserProfileUid::TYPE)]
     private UserProfileUid $profile;
 
+    /**
+     * ID продукции в заказе
+     */
+    #[ORM\Column(type: OrderUid::TYPE, nullable: true)]
+    private ?OrderUid $ord = null;
+
+
     /** Комментарий */
     #[ORM\Column(type: Types::STRING, nullable: true)]
     private string $comment;
@@ -149,6 +159,14 @@ class ProductSignEvent extends EntityEvent
     public function getProfile(): UserProfileUid
     {
         return $this->profile;
+    }
+
+    /**
+     * Status
+     */
+    public function getStatus(): ProductSignStatus
+    {
+        return $this->status;
     }
 
 

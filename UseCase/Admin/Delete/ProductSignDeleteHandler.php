@@ -28,7 +28,7 @@ namespace BaksDev\Products\Sign\UseCase\Admin\Delete;
 use BaksDev\Core\Entity\AbstractHandler;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Products\Sign\Messenger\Sign\ProductSignMessage;
+use BaksDev\Products\Sign\Messenger\ProductSignMessage;
 use DomainException;
 
 

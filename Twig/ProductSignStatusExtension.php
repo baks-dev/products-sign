@@ -24,6 +24,7 @@
 namespace BaksDev\Products\Sign\Twig;
 
 use BaksDev\Orders\Order\Type\Status\OrderStatus;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
@@ -43,7 +44,7 @@ final class ProductSignStatusExtension extends AbstractExtension
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('product_sign__status', [$this, 'status'], ['needs_environment' => true, 'is_safe' => ['html']]),
+            new TwigFunction('product_sign_status', [$this, 'status'], ['needs_environment' => true, 'is_safe' => ['html']]),
         ];
     }
 
@@ -51,14 +52,14 @@ final class ProductSignStatusExtension extends AbstractExtension
     {
         if($status)
         {
-            $orderStatus = new OrderStatus($status);
+            $orderStatus = new ProductSignStatus($status);
 
             if(file_exists($this->project_dir.'/templates/products-sign/twig/status/status.html.twig'))
             {
                 return $twig->render('@Template/products-sign/twig/status/status.html.twig', ['status' => $status]);
             }
 
-            return $twig->render('@products-sign/twig/status/status.html.twig', ['status' => $status, 'color' => $orderStatus->getColor()]);
+            return $twig->render('@products-sign/twig/status/status.html.twig', ['status' => $status]);
         }
 
         return '';
