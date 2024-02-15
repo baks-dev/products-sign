@@ -30,6 +30,7 @@ use BaksDev\Products\Sign\Repository\CurrentEvent\ProductSignCurrentEventInterfa
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusCollection;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusCancel;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignCancelDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
@@ -67,7 +68,8 @@ final class ProductSignCancelHandleTest extends KernelTestCase
         $ProductSignEvent->getDto($ProductSignDTO);
         self::assertSame($UserProfileUid, $ProductSignDTO->getProfile());
 
-        self::assertTrue($ProductSignDTO->getStatus()->equals(ProductSignStatusCancel::class));
+        /** При отмене присваивается статус New «Новый» */
+        self::assertTrue($ProductSignDTO->getStatus()->equals(ProductSignStatusNew::class));
         self::assertNull($ProductSignDTO->getOrd());
 
 

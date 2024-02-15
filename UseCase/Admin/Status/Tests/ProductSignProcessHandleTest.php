@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\UseCase\Admin\Status\Tests;
 
+use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Orders\Order\Type\Product\OrderProductUid;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Repository\CurrentEvent\ProductSignCurrentEventInterface;
@@ -62,14 +63,11 @@ final class ProductSignProcessHandleTest extends KernelTestCase
 
         /** @see ProductSignCancelDTO */
 
-        $ProductSignDTO = new ProductSignProcessDTO($UserProfileUid = clone new UserProfileUid(), $OrderProductUid = new OrderProductUid());
+        $ProductSignDTO = new ProductSignProcessDTO($UserProfileUid = clone new UserProfileUid(), $OrderUid = new OrderUid());
         $ProductSignEvent->getDto($ProductSignDTO);
         self::assertSame($UserProfileUid, $ProductSignDTO->getProfile());
-        self::assertSame($OrderProductUid, $ProductSignDTO->getOrd());
-
+        self::assertSame($OrderUid, $ProductSignDTO->getOrd());
         self::assertTrue($ProductSignDTO->getStatus()->equals(ProductSignStatusProcess::class));
-        self::assertNull($ProductSignDTO->getOrd());
-
 
 
         /** @var ProductSignStatusHandler $ProductSignStatusHandler */
