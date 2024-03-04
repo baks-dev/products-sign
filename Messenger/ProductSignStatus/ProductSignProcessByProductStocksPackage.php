@@ -76,8 +76,6 @@ final class ProductSignProcessByProductStocksPackage
     {
         $ProductStockEvent = $this->currentProductStocks->getCurrentEvent($message->getId());
 
-
-
         if(!$ProductStockEvent)
         {
             return;

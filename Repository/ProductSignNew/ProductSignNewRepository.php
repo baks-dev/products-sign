@@ -33,6 +33,7 @@ use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
@@ -90,13 +91,22 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 'WITH',
                 'event.id = main.event AND event.status = :status'
             )
-
             ->setParameter(
                 'status',
                 new ProductSignStatus(ProductSignStatusNew::class),
                 ProductSignStatus::TYPE
             );
 
+
+        $orm
+            ->join(
+                ProductSignModify::class,
+                'modify',
+                'WITH',
+                'modify.event = main.event'
+            );
+
+        $orm->orderBy('modify.modDate');
 
         return $orm->getOneOrNullResult();
     }
