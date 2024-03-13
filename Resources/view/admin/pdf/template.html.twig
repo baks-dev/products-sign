@@ -7,10 +7,10 @@
 
 {# ---- CSS ------------------------------------------------------------ #}
  {% block stylesheets %}
-     <link rel="preconnect" href="https://api-maps.yandex.ru"/>
+     <link rel="preconnect" href="https://api-maps.yandex.ru">
      {# <link rel="preconnect" href="https://yastatic.net" /> #}
      <link rel="preload"
-           href="https://api-maps.yandex.ru/2.1/?apikey={{ MAPS_YANDEX_API }}&lang={{ app.request.locale|lower }}"/>
+           href="https://api-maps.yandex.ru/2.1/?apikey={{ MAPS_YANDEX_API }}&lang={{ app.request.locale|lower }}">
  {% endblock %}
 
 
@@ -23,6 +23,6 @@
 
 
 {% block javascript %}
- <script async nonce="{{ csp_nonce() }}" data-src="/assets/js/radio.input.min.js?v={{ version }}" class="lazy"></script>
- <script async nonce="{{ csp_nonce() }}" data-src="/assets/products-sign/pdf.js?v={{ version }}" class="lazy"></script>
+ <script nonce='{{ csp_nonce() }}' async  data-src="/assets/js/radio.input.min.js?v={{ version }}" class="lazy"></script>
+ <script nonce='{{ csp_nonce() }}' async  data-src="/assets/products-sign/pdf.js?v={{ version }}" class="lazy"></script>
 {% endblock %}
