@@ -1,0 +1,28 @@
+
+# Роль
+ROLE_PRODUCT_SIGN:
+  name: 'Честный знак'
+  desc: 'Список QR кодов "Честный знак" продукции'
+
+# Правила
+ROLE_PRODUCT_SIGN_INDEX:
+  name: 'Просмотр'
+  desc: ''
+
+ROLE_PRODUCT_SIGN_NEW:
+  name: 'Добавить'
+  desc: ''
+
+ROLE_PRODUCT_SIGN_EDIT:
+  name: 'Редактировать'
+  desc: ''
+
+ROLE_PRODUCT_SIGN_DELETE:
+  name: 'Удалить'
+  desc: ''
+
+ROLE_PRODUCT_SIGN_STATUS:
+  name: 'Статус'
+  desc: ''
+
+

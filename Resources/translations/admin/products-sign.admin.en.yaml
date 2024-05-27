@@ -1,0 +1,40 @@
+page:
+
+  index: 'Honest sign'
+  new: 'Add fair sign'
+  edit: 'Edit fair sign'
+  delete: 'Delete fair sign'
+  restore: 'Restore fair sign'
+  pdf: 'Download PDF files'
+  cancel: 'Cancel fair sign'
+
+
+breadcrumb:
+
+  index: 'Honest sign'
+  new: 'Add fair sign'
+  edit: 'Edit fair sign'
+  delete: 'Delete fair sign'
+  restore: 'Restore fair sign'
+  pdf: 'Download PDF files'
+  cancel: 'Cancel fair sign'
+
+success:
+  new: 'Honest sign added successfully'
+  update: 'Honest sign updated successfully'
+  delete: 'Honest sign successfully deleted to trash'
+  restore: 'The token of honor has been successfully restored'
+  pdf: 'The files have been successfully sent for processing.'
+  cancel: 'Honest sign successfully cancelled'
+
+
+danger:
+  new: '%s: Error adding fair sign'
+  update: '%s: Error updating fair sign'
+  delete: '%s: Error deleting fair sign'
+  restore: '%s: Error while restoring fair sign'
+  pdf: '%s: Error loading PDF files'
+  cancel: '%s: Error when canceling fair sign'
+
+form:
+  code: 'Code'

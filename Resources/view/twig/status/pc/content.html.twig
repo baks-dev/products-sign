@@ -1,0 +1,52 @@
+{% trans_default_domain 'products-sign.status' %}
+
+
+
+{#new: 'Новые'
+done: 'Выполнен'
+error: 'Ошибка'
+cancel: 'Отменен'
+process: 'В процессе'#}
+
+
+
+{% if status == 'new' %}
+    <h6 class="lh-normal m-0">
+		<span class="badge bg-primary shadow">
+			{{ status|trans }}
+		</span>
+    </h6>
+
+{% elseif status == 'process' %}
+    <h6 class="lh-normal m-0">
+		<span class="badge bg-secondary shadow">
+			{{ status|trans }}
+		</span>
+    </h6>
+
+
+{% elseif status == 'done' %}
+    <h6 class="lh-normal m-0">
+		<span class="badge bg-success shadow">
+			{{ status|trans }}
+		</span>
+    </h6>
+
+
+{% elseif status == 'cancel' or status == 'error' %}
+    <h6 class="lh-normal m-0">
+		<span class="badge bg-danger shadow">
+			{{ status|trans }}
+        </span>
+    </h6>
+
+{% else %}
+
+    <h6 class="lh-normal m-0">
+        <span class="badge bg-info shadow">
+            {{ status|trans }}
+        </span>
+    </h6>
+
+{% endif %}
+
