@@ -66,6 +66,8 @@ final class EditController extends AbstractController
 
         if($form->isSubmitted() && $form->isValid() && $form->has('product_sign'))
         {
+            $this->refreshTokenForm($form);
+
             $handle = $ProductSignHandler->handle($ProductSignDTO);
 
             $this->addFlash

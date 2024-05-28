@@ -64,6 +64,8 @@ final class NewController extends AbstractController
 
         if($form->isSubmitted() && $form->isValid() && $form->has('product_sign'))
         {
+            $this->refreshTokenForm($form);
+
             if($existsProductSignCode->isExists($this->getUsr()?->getId(), $ProductSignDTO->getCode()->getCode()))
             {
                 $this->addFlash

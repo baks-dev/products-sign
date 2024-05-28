@@ -1,6 +1,6 @@
 # BaksDev Product Sign
 
-[![Version](https://img.shields.io/badge/version-7.0.15-blue)](https://github.com/baks-dev/products-sign/releases)
+[![Version](https://img.shields.io/badge/version-7.0.16-blue)](https://github.com/baks-dev/products-sign/releases)
 ![php 8.2+](https://img.shields.io/badge/php-min%208.1-red.svg)
 
 Модуль Честный знак продукции
@@ -36,3 +36,4 @@ $ php bin/phpunit --group=products-sign
 ## Лицензия ![License](https://img.shields.io/badge/MIT-green)
 
 The MIT License (MIT). Обратитесь к [Файлу лицензии](LICENSE.md) за дополнительной информацией.
+

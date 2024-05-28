@@ -58,6 +58,8 @@ final class PdfController extends AbstractController
 
         if($form->isSubmitted() && $form->isValid() && $form->has('product_sign_pdf'))
         {
+            $this->refreshTokenForm($form);
+
             $handle = $ProductSignHandler->handle($ProductSignPdfDTO);
 
             $this->addFlash

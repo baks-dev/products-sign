@@ -68,6 +68,8 @@ final class CancelController extends AbstractController
 
         if($form->isSubmitted() && $form->isValid() && $form->has('product_sign_cancel'))
         {
+            $this->refreshTokenForm($form);
+
             $handle = $ProductSignStatusHandler->handle($ProductSignStatusDTO);
 
             $this->addFlash
