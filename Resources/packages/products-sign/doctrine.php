@@ -24,6 +24,7 @@
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
 use BaksDev\Products\Product\Type\Event\ProductEventUid;
+use BaksDev\Products\Sign\BaksDevProductsSignBundle;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventType;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Id\ProductSignType;
@@ -56,11 +57,9 @@ return static function(ContainerConfigurator $container, DoctrineConfig $doctrin
 
     $emDefault = $doctrine->orm()->entityManager('default')->autoMapping(true);
 
-    $MODULE = substr(__DIR__, 0, strpos(__DIR__, "Resources"));
-
     $emDefault->mapping('products-sign')
 		->type('attribute')
-		->dir($MODULE.'Entity')
+		->dir(BaksDevProductsSignBundle::PATH.'Entity')
 		->isBundle(false)
 		->prefix('BaksDev\Products\Sign\Entity')
 		->alias('products-sign ')

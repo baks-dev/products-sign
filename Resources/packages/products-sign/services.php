@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2023.  Baks.dev <admin@baks.dev>
+ *  Copyright 2024.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +23,7 @@
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;
 
+use BaksDev\Products\Sign\BaksDevProductsSignBundle;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
@@ -36,20 +37,19 @@ return static function (ContainerConfigurator $configurator): void {
         ->public()
     ;
 
-    $NAMESPACE = 'BaksDev\Products\Sign\\';
+    $NAMESPACE = BaksDevProductsSignBundle::NAMESPACE;
+    $PATH = BaksDevProductsSignBundle::PATH;
 
-    $MODULE = substr(__DIR__, 0, strpos(__DIR__, "Resources"));
-
-    $services->load($NAMESPACE, $MODULE)
+    $services->load($NAMESPACE, $PATH)
         ->exclude([
-            $MODULE.'{Entity,Resources,Type}',
-            $MODULE.'**/*Message.php',
-            $MODULE.'**/*DTO.php',
+            $PATH.'{Entity,Resources,Type}',
+            $PATH.'**/*Message.php',
+            $PATH.'**/*DTO.php',
         ])
     ;
 
     /* Статусы заказов */
-    $services->load($NAMESPACE.'Type\Status\ProductSignStatus\\', $MODULE.'Type/Status/ProductSignStatus');
+    $services->load($NAMESPACE.'Type\Status\ProductSignStatus\\', $PATH.'Type/Status/ProductSignStatus');
 
     /** @see https://symfony.com/doc/current/service_container/autowiring.html#dealing-with-multiple-implementations-of-the-same-type */
     $services->alias(ProductSignStatusInterface::class.' $productSignStatusNew', ProductSignStatusNew::class);
