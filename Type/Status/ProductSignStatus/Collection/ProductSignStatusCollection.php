@@ -25,14 +25,14 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection;
 
-use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 final class ProductSignStatusCollection
 {
     private iterable $status;
 
     public function __construct(
-        #[TaggedIterator('baks.sign.status')] iterable $status)
+        #[AutowireIterator('baks.sign.status')] iterable $status)
     {
         $this->status = $status;
     }

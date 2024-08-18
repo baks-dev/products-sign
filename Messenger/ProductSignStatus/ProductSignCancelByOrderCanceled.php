@@ -85,7 +85,7 @@ final class ProductSignCancelByOrderCanceled
             return;
         }
 
-        $this->logger->info('Делаем поиск и отмену всех знаков при отмене заказа', [__FILE__.':'.__LINE__]);
+        $this->logger->info('Делаем поиск и отмену всех знаков при отмене заказа', [self::class.':'.__LINE__]);
 
         $ProductSignEvents = $this->productSignProcessByOrder->findByOrder($message->getId());
 
@@ -97,7 +97,7 @@ final class ProductSignCancelByOrderCanceled
 
             $this->logger->warning('Отменили Честный знак (возвращаем статус New «Новый»)',
                 [
-                    __FILE__.':'.__LINE__,
+                    self::class.':'.__LINE__,
                     'ProductSignUid' => $event->getMain()
                 ]
             );

@@ -157,7 +157,7 @@ final class ProductSignPdfHandler
                         $isRemovePDF = false;
 
                         $log = sprintf('Найдено больше одного результата продукции %s', $product);
-                        $this->logger->critical($log, [__FILE__.':'.__LINE__]);
+                        $this->logger->critical($log, [self::class.':'.__LINE__]);
 
                         continue;
                     }
@@ -230,7 +230,7 @@ final class ProductSignPdfHandler
 
                     $isRemovePDF = false;
                     $log = sprintf('Продукции %s не найдено', $product);
-                    $this->logger->critical($log, [__FILE__.':'.__LINE__]);
+                    $this->logger->critical($log, [self::class.':'.__LINE__]);
                 }
             }
 

@@ -131,7 +131,7 @@ final class ProductSignDoneByOrderCompleted
                         $this->logger->critical(
                             sprintf('%s: Ошибка при обновлении статуса честного знака', $handle),
                             [
-                                __FILE__.':'.__LINE__,
+                                self::class.':'.__LINE__,
                                 'ProductSignEventUid' => $ProductSignDoneDTO->getEvent()
                             ]
                         );
@@ -141,7 +141,7 @@ final class ProductSignDoneByOrderCompleted
 
                     $this->logger->info('Отметили Честный знак Done «Выполнен»',
                         [
-                            __FILE__.':'.__LINE__,
+                            self::class.':'.__LINE__,
                             'ProductSignUid' => $ProductSignEvent->getMain()
                         ]
                     );
@@ -164,7 +164,7 @@ final class ProductSignDoneByOrderCompleted
 
             $this->logger->warning('Отменили Честный знак (возвращаем статус New «Новый»)',
                 [
-                    __FILE__.':'.__LINE__,
+                    self::class.':'.__LINE__,
                     'ProductSignUid' => $event->getMain()
                 ]
             );

@@ -85,7 +85,7 @@ final class ProductSignProcessByProductStocksPackage
         {
             $this->logger
                 ->notice('Не резервируем честный знак: Складская заявка не является Package «Упаковка»',
-                    [__FILE__.':'.__LINE__, [$message->getId(), $message->getEvent(), $message->getLast()]]);
+                    [self::class.':'.__LINE__, [$message->getId(), $message->getEvent(), $message->getLast()]]);
             return;
         }
 
@@ -93,7 +93,7 @@ final class ProductSignProcessByProductStocksPackage
         {
             $this->logger
                 ->notice('Не резервируем честный знак: упаковка без идентификатора заказа',
-                    [__FILE__.':'.__LINE__, [$message->getId(), $message->getEvent(), $message->getLast()]]);
+                    [self::class.':'.__LINE__, [$message->getId(), $message->getEvent(), $message->getLast()]]);
             return;
         }
 
@@ -106,7 +106,7 @@ final class ProductSignProcessByProductStocksPackage
             {
                 $this->logger
                     ->notice('Не резервируем честный знак: Складская заявка при поступлении на склад по заказу (резерв уже имеется)',
-                        [__FILE__.':'.__LINE__, [$message->getId(), $message->getEvent(), $message->getLast()]]);
+                        [self::class.':'.__LINE__, [$message->getId(), $message->getEvent(), $message->getLast()]]);
 
                 return;
             }
@@ -119,14 +119,14 @@ final class ProductSignProcessByProductStocksPackage
         {
             $this->logger
                 ->warning('Заявка на упаковку не имеет продукции в коллекции',
-                    [__FILE__.':'.__LINE__]);
+                    [self::class.':'.__LINE__]);
             return;
         }
 
 
         $this->logger
             ->info('Добавляем резерв кода Честный знак статус Process «В процессе»',
-                [__FILE__.':'.__LINE__, 'ProductStockUid' => $message->getId()]);
+                [self::class.':'.__LINE__, 'ProductStockUid' => $message->getId()]);
 
 
         /**
@@ -151,7 +151,7 @@ final class ProductSignProcessByProductStocksPackage
                 {
                     $this->logger->info('Честный знак на продукцию не найден',
                         [
-                            __FILE__.':'.__LINE__,
+                            self::class.':'.__LINE__,
                             'ProductUid' => $product->getProduct(),
                             'ProductOfferConst' => $product->getOffer(),
                             'ProductVariationConst' => $product->getVariation(),
@@ -172,7 +172,7 @@ final class ProductSignProcessByProductStocksPackage
                     $this->logger->critical(
                         sprintf('%s: Ошибка при обновлении статуса честного знака', $handle),
                         [
-                            __FILE__.':'.__LINE__,
+                            self::class.':'.__LINE__,
                             'ProductSignEventUid' => $ProductSignProcessDTO->getEvent()
                         ]
                     );
@@ -182,7 +182,7 @@ final class ProductSignProcessByProductStocksPackage
 
                 $this->logger->info('Отметили Честный знак Process «В процессе»',
                     [
-                        __FILE__.':'.__LINE__,
+                        self::class.':'.__LINE__,
                         'ProductSignUid' => $ProductSignEvent->getMain()
                     ]
                 );

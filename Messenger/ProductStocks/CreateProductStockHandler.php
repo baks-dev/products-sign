@@ -92,7 +92,7 @@ final class CreateProductStockHandler
         if($handle instanceof ProductStock)
         {
             $this->logger->info('Создали лист закупки продукции', [
-                __FILE__.':'.__LINE__,
+                self::class.':'.__LINE__,
                 'ProductSignUid' => $message->getId()
             ]);
 
@@ -100,7 +100,7 @@ final class CreateProductStockHandler
         }
 
         $this->logger->critical('Ошибка при создании листа закупки продукции', [
-            __FILE__.':'.__LINE__,
+            self::class.':'.__LINE__,
             'ProductSignUid' => $message->getId()
         ]);
 
