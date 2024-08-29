@@ -58,7 +58,7 @@ final class ProductSignCancelHandleTest extends KernelTestCase
 
         /** @var ProductSignCurrentEventInterface $ProductSignCurrentEvent */
         $ProductSignCurrentEvent = self::getContainer()->get(ProductSignCurrentEventInterface::class);
-        $ProductSignEvent = $ProductSignCurrentEvent->findProductSignEvent(ProductSignUid::TEST);
+        $ProductSignEvent = $ProductSignCurrentEvent->findByProductSign(ProductSignUid::TEST);
         self::assertNotNull($ProductSignEvent);
 
 

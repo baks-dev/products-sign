@@ -25,24 +25,61 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignPdf;
 
-use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
-use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
 
 final class ProductSignPdfMessage
 {
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
     private UserUid $usr;
 
-    private UserProfileUid $profile;
+    #[Assert\Uuid]
+    private ?UserProfileUid $profile;
+
+    /** ID продукта */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private readonly ProductUid $product;
+
+    /** Постоянный уникальный идентификатор ТП */
+    #[Assert\Uuid]
+    private readonly ?ProductOfferConst $offer;
+
+    /** Постоянный уникальный идентификатор варианта */
+    #[Assert\Uuid]
+    private readonly ?ProductVariationConst $variation;
+
+    /** Постоянный уникальный идентификатор модификации */
+    #[Assert\Uuid]
+    private readonly ?ProductModificationConst $modification;
 
     /** Добавить лист закупки */
     private bool $purchase;
 
-    public function __construct(UserUid $usr, UserProfileUid $profile, bool $purchase) {
+
+    public function __construct(
+        UserUid $usr,
+        ?UserProfileUid $profile,
+        ProductUid $product,
+        ?ProductOfferConst $offer,
+        ?ProductVariationConst $variation,
+        ?ProductModificationConst $modification,
+        bool $purchase
+    ) {
         $this->usr = $usr;
         $this->profile = $profile;
+        $this->product = $product;
+        $this->offer = $offer;
+        $this->variation = $variation;
+        $this->modification = $modification;
+
         $this->purchase = $purchase;
     }
 
@@ -55,18 +92,50 @@ final class ProductSignPdfMessage
     }
 
     /**
-     * Profile
-     */
-    public function getProfile(): UserProfileUid
-    {
-        return $this->profile;
-    }
-
-    /**
      * Purchase
      */
     public function isPurchase(): bool
     {
         return $this->purchase;
+    }
+
+    /**
+     * Profile
+     */
+    public function getProfile(): ?UserProfileUid
+    {
+        return $this->profile;
+    }
+
+    /**
+     * Product
+     */
+    public function getProduct(): ProductUid
+    {
+        return $this->product;
+    }
+
+    /**
+     * Offer
+     */
+    public function getOffer(): ?ProductOfferConst
+    {
+        return $this->offer;
+    }
+
+    /**
+     * Variation
+     */
+    public function getVariation(): ?ProductVariationConst
+    {
+        return $this->variation;
+    }
+
+    /**
+     * Modification
+     */
+    public function getModification(): ?ProductModificationConst
+    {
+        return $this->modification;
     }
 }

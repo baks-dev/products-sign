@@ -31,6 +31,7 @@ use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Orders\Order\Type\Product\OrderProductUid;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
+use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
@@ -45,12 +46,11 @@ use BaksDev\Core\Entity\EntityState;
 use InvalidArgumentException;
 use Symfony\Component\Validator\Constraints as Assert;
 
-
 /* ProductSignEvent */
 
 #[ORM\Entity]
 #[ORM\Table(name: 'product_sign_event')]
-#[ORM\Index(columns: ['status'])]
+#[ORM\Index(columns: ['ord', 'status'])]
 class ProductSignEvent extends EntityEvent
 {
     public const TABLE = 'product_sign_event';
@@ -79,6 +79,12 @@ class ProductSignEvent extends EntityEvent
     private ?ProductSignCode $code = null;
 
     /**
+     * Постоянная величина
+     */
+    #[ORM\OneToOne(targetEntity: ProductSignInvariable::class, mappedBy: 'event', cascade: ['all'])]
+    private ?ProductSignInvariable $invariable = null;
+
+    /**
      * Модификатор
      */
     #[ORM\OneToOne(targetEntity: ProductSignModify::class, mappedBy: 'event', cascade: ['all'])]
@@ -91,15 +97,13 @@ class ProductSignEvent extends EntityEvent
     private ProductSignStatus $status;
 
     /**
-     * Профиль пользователя
+     * Профиль пользователя (null - общий)
      */
-    #[Assert\NotBlank]
-    #[Assert\Uuid]
-    #[ORM\Column(type: UserProfileUid::TYPE)]
-    private UserProfileUid $profile;
+    #[ORM\Column(type: UserProfileUid::TYPE, nullable: true)]
+    private ?UserProfileUid $profile = null;
 
     /**
-     * ID продукции в заказе
+     * ID заказа
      */
     #[ORM\Column(type: OrderUid::TYPE, nullable: true)]
     private ?OrderUid $ord = null;

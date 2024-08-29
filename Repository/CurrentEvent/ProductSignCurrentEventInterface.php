@@ -32,5 +32,5 @@ interface ProductSignCurrentEventInterface
     /**
      * Возвращает активное событие
      */
-    public function findProductSignEvent(ProductSign|ProductSignUid|string $sign): ?ProductSignEvent;
+    public function findByProductSign(ProductSign|ProductSignUid|string $sign): ?ProductSignEvent;
 }

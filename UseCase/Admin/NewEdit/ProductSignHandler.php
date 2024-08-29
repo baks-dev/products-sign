@@ -26,18 +26,49 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\UseCase\Admin\NewEdit;
 
 use BaksDev\Core\Entity\AbstractHandler;
+use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Core\Validator\ValidatorCollectionInterface;
+use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
+use BaksDev\Files\Resources\Upload\File\FileUploadInterface;
+use BaksDev\Files\Resources\Upload\Image\ImageUploadInterface;
+use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Messenger\ProductSignMessage;
+use BaksDev\Products\Sign\Repository\ExistsProductSignCode\ExistsProductSignCodeInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use DomainException;
 use Imagick;
 
-
 final class ProductSignHandler extends AbstractHandler
 {
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        MessageDispatchInterface $messageDispatch,
+        ValidatorCollectionInterface $validatorCollection,
+        ImageUploadInterface $imageUpload,
+        FileUploadInterface $fileUpload,
+        private readonly ExistsProductSignCodeInterface $existsProductSignCode
+    ) {
+        parent::__construct($entityManager, $messageDispatch, $validatorCollection, $imageUpload, $fileUpload);
+    }
 
-    public function handle(ProductSignDTO $command): string|ProductSign
+
+    public function handle(ProductSignDTO $command): ProductSign|string|false
     {
+        /** Делаем проверку на дубли */
+        $Invariable = $command->getInvariable();
+        $Barcode = $command->getCode();
+
+        $isExistsBarcode = $this->existsProductSignCode->isExists(
+            $Invariable->getUsr(),
+            $Barcode->getCode()
+        );
+
+        if($isExistsBarcode === true)
+        {
+            return false;
+        }
 
         /** Валидация DTO  */
         $this->validatorCollection->add($command);
@@ -54,23 +85,6 @@ final class ProductSignHandler extends AbstractHandler
             return $errorUniqid->getMessage();
         }
 
-        /**
-         * Присваиваем QR при загрузки файла
-         */
-
-        $ProductSignCodeDTO = $command->getCode();
-
-        if($ProductSignCodeDTO->file !== null)
-        {
-            $Imagick = new Imagick();
-            $Imagick->setResolution(200, 200);
-            $Imagick->readImage($command->getCode()->file->getRealPath());
-            $Imagick->setImageFormat('png');
-            $imageString = $Imagick->getImageBlob();
-            $base64Image = 'data:image/png;base64,'.base64_encode($imageString);
-            $ProductSignCodeDTO->setQr($base64Image);
-        }
-
         /** Валидация всех объектов */
         if($this->validatorCollection->isInvalid())
         {
@@ -83,6 +97,13 @@ final class ProductSignHandler extends AbstractHandler
         $this->messageDispatch->dispatch(
             message: new ProductSignMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()),
             transport: 'products-sign'
+        );
+
+
+        /* Загружаем файл обложки раздела на CDN */
+        $this->messageDispatch->dispatch(
+            message: new CDNUploadImageMessage($this->main->getId(), ProductSignCode::class, $Barcode->getName()),
+            transport: 'files-res'
         );
 
         return $this->main;

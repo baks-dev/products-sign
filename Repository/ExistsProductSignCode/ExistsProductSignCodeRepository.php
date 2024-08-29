@@ -28,6 +28,8 @@ namespace BaksDev\Products\Sign\Repository\ExistsProductSignCode;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
+use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Users\User\Type\Id\UserUid;
@@ -38,8 +40,7 @@ final class ExistsProductSignCodeRepository implements ExistsProductSignCodeInte
 
     public function __construct(
         DBALQueryBuilder $DBALQueryBuilder,
-    )
-    {
+    ) {
         $this->DBALQueryBuilder = $DBALQueryBuilder;
     }
 
@@ -49,11 +50,31 @@ final class ExistsProductSignCodeRepository implements ExistsProductSignCodeInte
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
 
         $dbal
-            ->from(ProductSignCode::TABLE, 'sign')
-            ->where('sign.code = :code')
-            ->setParameter('code', $code)
-            ->andWhere('sign.usr = :usr')
-            ->setParameter('usr', $user, UserUid::TYPE);
+            ->from(ProductSignCode::class, 'sign_code')
+            ->where('sign_code.code = :code')
+            ->setParameter('code', $code);
+
+        $dbal
+            ->join(
+                'sign_code',
+                ProductSign::class,
+                'sign',
+                'sign.id = sign_code.main'
+            );
+
+        $dbal
+            ->join(
+                'sign_code',
+                ProductSignInvariable::class,
+                'invariable',
+                'invariable.main = sign_code.main AND invariable.usr = :usr'
+            )
+            ->setParameter(
+                'usr',
+                $user,
+                UserUid::TYPE
+            );
+
 
         $dbal
             ->join(
@@ -64,7 +85,7 @@ final class ExistsProductSignCodeRepository implements ExistsProductSignCodeInte
             )
             ->setParameter(
                 'status',
-                new ProductSignStatus(ProductSignStatusError::class),
+                ProductSignStatusError::class,
                 ProductSignStatus::TYPE
             );
 

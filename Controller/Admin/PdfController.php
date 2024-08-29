@@ -55,10 +55,12 @@ final class PdfController extends AbstractController
         ]);
 
         $form->handleRequest($request);
+        $view = $form->createView();
 
         if($form->isSubmitted() && $form->isValid() && $form->has('product_sign_pdf'))
         {
-            $this->refreshTokenForm($form);
+
+            //dd($ProductSignPdfDTO);
 
             $handle = $ProductSignHandler->handle($ProductSignPdfDTO);
 
@@ -72,6 +74,6 @@ final class PdfController extends AbstractController
             return $this->redirectToReferer();
         }
 
-        return $this->render(['form' => $form->createView()]);
+        return $this->render(['form' => $view]);
     }
 }

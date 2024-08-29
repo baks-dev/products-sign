@@ -25,14 +25,16 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Controller\Admin;
 
-
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Form\Search\SearchForm;
+use BaksDev\Products\Product\Forms\ProductFilter\Admin\ProductFilterDTO;
+use BaksDev\Products\Product\Forms\ProductFilter\Admin\ProductFilterForm;
 use BaksDev\Products\Sign\Repository\AllProductSign\AllProductSignInterface;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use BaksDev\Core\Controller\AbstractController;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -46,30 +48,43 @@ final class IndexController extends AbstractController
         Request $request,
         AllProductSignInterface $allProductSign,
         int $page = 0,
-    ): Response
-    {
+    ): Response {
+
+
         // Поиск
         $search = new SearchDTO();
-        $searchForm = $this->createForm(SearchForm::class, $search,
+        $searchForm = $this->createForm(
+            SearchForm::class,
+            $search,
             ['action' => $this->generateUrl('products-sign:admin.index')]
         );
         $searchForm->handleRequest($request);
 
 
-        // Фильтр
-        // $filter = new ProductsStocksFilterDTO($request, $ROLE_ADMIN ? null : $this->getProfileUid());
-        // $filterForm = $this->createForm(ProductsStocksFilterForm::class, $filter);
-        // $filterForm->handleRequest($request);
+        /**
+         * Фильтр продукции по ТП
+         */
+        $filter = new ProductFilterDTO($request);
+        $filter->allVisible();
+
+        $filterForm = $this->createForm(ProductFilterForm::class, $filter, [
+            'action' => $this->generateUrl('products-sign:admin.index'),
+        ]);
+        $filterForm->handleRequest($request);
+        !$filterForm->isSubmitted() ?: $this->redirectToReferer();
+
 
         // Получаем список
         $ProductSign = $allProductSign
             ->search($search)
-            ->fetchAllProductSignAssociative($this->getUsr()?->getId());
+            ->filter($filter)
+            ->findPaginator($this->getUsr()?->getId(), $this->getProfileUid());
 
         return $this->render(
             [
                 'query' => $ProductSign,
                 'search' => $searchForm->createView(),
+                'filter' => $filterForm->createView(),
             ]
         );
     }

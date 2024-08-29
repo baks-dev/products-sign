@@ -42,7 +42,7 @@ final class ProductSignCurrentEventRepository implements ProductSignCurrentEvent
     /**
      * Возвращает активное событие
      */
-    public function findProductSignEvent(ProductSign|ProductSignUid|string $sign): ?ProductSignEvent
+    public function findByProductSign(ProductSign|ProductSignUid|string $sign): ?ProductSignEvent
     {
         $sign = is_string($sign) ? new ProductSignUid($sign) : $sign;
         $sign = $sign instanceof ProductSign ? $sign->getId() : $sign;

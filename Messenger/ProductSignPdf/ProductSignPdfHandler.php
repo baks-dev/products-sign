@@ -25,16 +25,22 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignPdf;
 
+use BaksDev\Barcode\Reader\BarcodeRead;
 use BaksDev\Core\Doctrine\ORMQueryBuilder;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Core\Validator\ValidatorCollectionInterface;
 use BaksDev\Elastic\Api\Index\ElasticGetIndex;
+use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
+use BaksDev\Files\Resources\Upload\Image\ImageUploadInterface;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
 use BaksDev\Products\Product\Repository\ProductByModification\ProductByModificationInterface;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\Id\ProductModificationUid;
+use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Repository\CurrentEvent\ProductSignCurrentEventInterface;
 use BaksDev\Products\Sign\Repository\ExistsProductSignCode\ExistsProductSignCodeInterface;
+use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignDTO;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignHandler;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\Products\ProductStockDTO;
@@ -43,56 +49,91 @@ use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockHandler;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use DirectoryIterator;
+use Doctrine\ORM\Mapping\Table;
 use Imagick;
 use Psr\Log\LoggerInterface;
+use ReflectionAttribute;
+use ReflectionClass;
 use RuntimeException;
 use Smalot\PdfParser\Parser;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\Process\Process;
 
 #[AsMessageHandler]
 final class ProductSignPdfHandler
 {
-    private string $upload;
     private LoggerInterface $logger;
-    private Parser $PDFParser;
-    private Imagick $Imagick;
-    private ExistsProductSignCodeInterface $existsProductSignCode;
-    private ProductSignHandler $productSignHandler;
-    private ElasticGetIndex $elasticGetIndex;
-    private ProductByModificationInterface $productByModification;
-    private PurchaseProductStockHandler $purchaseProductStockHandler;
 
     public function __construct(
-        #[Autowire('%kernel.project_dir%/public/upload/products-sign/')] string $upload,
-        ExistsProductSignCodeInterface $existsProductSignCode,
-        ProductSignHandler $productSignHandler,
-        ElasticGetIndex $elasticGetIndex,
-        ProductByModificationInterface $productByModification,
-        PurchaseProductStockHandler $purchaseProductStockHandler,
+        #[Autowire('%kernel.project_dir%')] private readonly string $upload,
+        private readonly ProductSignHandler $productSignHandler,
+        private readonly PurchaseProductStockHandler $purchaseProductStockHandler,
+        private readonly Filesystem $filesystem,
+        private readonly BarcodeRead $barcodeRead,
+        private readonly MessageDispatchInterface $messageDispatch,
         LoggerInterface $productsSignLogger
-    )
-    {
-        $this->upload = $upload;
+    ) {
+
         $this->logger = $productsSignLogger;
-        $this->existsProductSignCode = $existsProductSignCode;
-        $this->productSignHandler = $productSignHandler;
-        $this->elasticGetIndex = $elasticGetIndex;
-        $this->productByModification = $productByModification;
-        $this->purchaseProductStockHandler = $purchaseProductStockHandler;
 
-        $this->PDFParser = new Parser();
 
-        $this->Imagick = new Imagick;
-        $this->Imagick->setResolution(200, 200);
+        //        $this->existsProductSignCode = $existsProductSignCode;
+        //        $this->productSignHandler = $productSignHandler;
+        //        $this->elasticGetIndex = $elasticGetIndex;
+        //        $this->productByModification = $productByModification;
+        //        $this->purchaseProductStockHandler = $purchaseProductStockHandler;
+        //
+        //        $this->PDFParser = new Parser();
+        //
+        //        $this->Imagick = new Imagick();
+        //        $this->Imagick->setResolution(200, 200);
     }
 
     public function __invoke(ProductSignPdfMessage $message): void
     {
-        $ProductSignDir = $this->upload.$message->getUsr();
+        // public/upload/products-sign/
 
-        foreach(new DirectoryIterator($ProductSignDir) as $SignFile)
+        $upload[] = $this->upload;
+        $upload[] = 'public';
+        $upload[] = 'upload';
+        $upload[] = 'barcode';
+
+        $upload[] = (string) $message->getUsr();
+
+        if($message->getProfile())
+        {
+            $upload[] = (string) $message->getProfile();
+        }
+
+        $upload[] = (string) $message->getProduct();
+
+        if($message->getOffer())
+        {
+            $upload[] = (string) $message->getOffer();
+        }
+
+        if($message->getVariation())
+        {
+            $upload[] = (string) $message->getVariation();
+        }
+
+        if($message->getModification())
+        {
+            $upload[] = (string) $message->getModification();
+        }
+
+        $upload[] = '';
+
+        // Директория загрузки файла PDF
+        $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
+
+        $Imagick = new Imagick();
+
+        $counter = 0;
+
+        foreach(new DirectoryIterator($uploadDir) as $SignFile)
         {
             if($SignFile->getExtension() !== 'pdf')
             {
@@ -100,155 +141,194 @@ final class ProductSignPdfHandler
             }
 
             $pdfPath = $SignFile->getPathname();
-            $pdf = $this->PDFParser->parseFile($pdfPath);
+
+
+            $PDFParser = new Parser();
+            $pdf = $PDFParser->parseFile($pdfPath);
             $pages = $pdf->getPages();
 
-            $this->Imagick->readImage($pdfPath);
 
-            $isRemovePDF = true;
+            $Imagick->setResolution(400, 400);
+            $Imagick->readImage($pdfPath);
 
-            $PurchaseProductStockDTO = new PurchaseProductStockDTO($message->getProfile());
-            $PurchaseNumber = number_format(microtime(true) * 100, 0, '.', '.');
-            $PurchaseProductStockDTO->setNumber($PurchaseNumber);
+
+            /** Создаем предварительно закупку для заполнения продукции */
+            if($message->isPurchase() && $message->getProfile())
+            {
+                $PurchaseProductStockDTO = new PurchaseProductStockDTO($message->getProfile());
+                $PurchaseNumber = number_format(microtime(true) * 100, 0, '.', '.');
+                $PurchaseProductStockDTO->setNumber($PurchaseNumber);
+            }
+
+
+            /** Директория загрузки файла с кодом */
+
+            $ref = new ReflectionClass(ProductSignCode::class);
+            /** @var ReflectionAttribute $current */
+            $current = current($ref->getAttributes(Table::class));
+
+            if(!isset($current->getArguments()['name']))
+            {
+                $this->logger->critical(
+                    sprintf('Невозможно определить название таблицы из класса сущности %s ', ProductSignCode::class),
+                    [self::class.':'.__LINE__]
+                );
+            }
+
+            /** Создаем полный путь для сохранения файла с кодом относительно директории сущности */
+            $pathCode[] = $this->upload;
+            $pathCode[] = 'public';
+            $pathCode[] = 'upload';
+            $pathCode[] = $current->getArguments()['name'];
+            $pathCode[] = '';
+
+            $dirCode = implode(DIRECTORY_SEPARATOR, $pathCode);
+
+            /** Если директория загрузки не найдена - создаем с правами 0700 */
+            $this->filesystem->exists($dirCode) ?: $this->filesystem->mkdir($dirCode);
+
+
+            /** Генерируем идентификатор группы для отмены */
+            $part = new ProductSignUid();
 
             foreach($pages as $number => $page)
             {
+                $fileTemp = $dirCode.uniqid('', true).'.png';
 
-                $arrData = explode(PHP_EOL, $page->getText());
-                $filterData = array_filter($arrData, function($value) {
-                    return !empty(trim($value));
-                });
+                /** Преобразуем PDF страницу в PNG и сохраняем временно для расчета  */
+                $Imagick->setIteratorIndex($number);
+                $Imagick->setImageFormat('png');
+                $Imagick->writeImage($fileTemp);
 
-                $filterData = array_values($filterData);
+                /** Рассчитываем дайджест файла для перемещения */
+                $md5 = md5_file($fileTemp);
+                $dirMove = $dirCode.$md5.DIRECTORY_SEPARATOR;
+                $fileMove = $dirMove.'image.png';
 
-                $code = $filterData[0].$filterData[1];
 
-                if($this->existsProductSignCode->isExists($message->getUsr(), $code))
+                /** Если директория не найдена - создаем  */
+                $this->filesystem->exists($dirMove) ?: $this->filesystem->mkdir($dirMove);
+
+
+                /**
+                 * Перемещаем в указанную директорию если файла не существует
+                 * Если в перемещаемой директории файл существует - удаляем временный файл
+                 */
+                $this->filesystem->exists($fileMove) === true ? $this->filesystem->remove($fileTemp) : $this->filesystem->rename($fileTemp, $fileMove);
+
+                /** Считываем честный знак */
+                $decode = $this->barcodeRead->decode($fileMove);
+                $code = $decode->getText();
+
+                /** Сохраняем чистый знак */
+                $ProductSignDTO = new ProductSignDTO();
+                $ProductSignDTO->setProfile($message->getProfile());
+
+                if($decode->isError())
                 {
-                    continue;
+                    $code = uniqid('error_', true);
+                    $ProductSignDTO->setStatus(ProductSignStatusError::class);
                 }
 
-                $product = end($filterData);
+                $ProductSignCodeDTO = $ProductSignDTO->getCode();
+                $ProductSignCodeDTO->setCode($code);
+                $ProductSignCodeDTO->setName($md5);
+                $ProductSignCodeDTO->setExt('png');
 
-                // Замена спецсимволов в искомом словосочетании на пробелы
-                $product = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $product);
-                $product = preg_replace('/\s+/', ' ', $product);
-                $product = str_replace('R', ' ', $product);
+                $ProductSignInvariableDTO = $ProductSignDTO->getInvariable();
+                $ProductSignInvariableDTO->setPart($part);
+                $ProductSignInvariableDTO->setUsr($message->getUsr());
+                $ProductSignInvariableDTO->setProduct($message->getProduct());
+                $ProductSignInvariableDTO->setOffer($message->getOffer());
+                $ProductSignInvariableDTO->setVariation($message->getVariation());
+                $ProductSignInvariableDTO->setModification($message->getModification());
 
-                /** Поиск по модификации */
+                $handle = $this->productSignHandler->handle($ProductSignDTO);
 
-                //$result = $this->elasticGetIndex->handle(ProductModification::class, '205 50 17 TH202 93Y', 0);
-                $result = $this->elasticGetIndex->handle(ProductModification::class, $product, 0);
-
-                if(false === $result)
+                if(!$handle instanceof ProductSign)
                 {
-                    throw new RuntimeException('Ошибка ElasticSearch');
-                }
-
-                /** Количество результатов */
-                $counter = $result['hits']['total']['value'];
-
-                if($counter)
-                {
-                    /* Всегда ищем точное совпадение */
-                    if($counter > 1)
+                    if($handle !== false)
                     {
-                        /** Создаем честный знак с ошибкой */
-                        $isRemovePDF = false;
-
-                        $log = sprintf('Найдено больше одного результата продукции %s', $product);
-                        $this->logger->critical($log, [self::class.':'.__LINE__]);
-
                         continue;
                     }
 
-                    $data = array_column($result['hits']['hits'], "_source");
-                    $keys = array_column($data, "id");
-
-                    $ProductModificationUid = new ProductModificationUid(current($keys));
-                    $ProductModification = $this->productByModification->findModification($ProductModificationUid);
-
-
-                    /** Преобразуем PDF страницу в PNG base64 */
-                    $this->Imagick->setIteratorIndex($number);
-                    $this->Imagick->setImageFormat('png');
-                    $imageString = $this->Imagick->getImageBlob();
-                    $base64Image = 'data:image/png;base64,'.base64_encode($imageString);
-
-
-                    /** Сохраняем чистый знак */
-                    $ProductSignDTO = new ProductSignDTO($message->getProfile());
-                    $ProductSignCodeDTO = $ProductSignDTO->getCode();
-                    $ProductSignCodeDTO->setUsr($message->getUsr());
-                    $ProductSignCodeDTO->setCode($code);
-                    $ProductSignCodeDTO->setQr($base64Image);
-                    $ProductSignCodeDTO->setProduct($ProductModification->getProduct());
-                    $ProductSignCodeDTO->setOffer($ProductModification->getOfferConst());
-                    $ProductSignCodeDTO->setVariation($ProductModification->getVariationConst());
-                    $ProductSignCodeDTO->setModification($ProductModification->getModificationConst());
-
-                    $handle = $this->productSignHandler->handle($ProductSignDTO);
-
-                    if(!$handle instanceof ProductSign)
-                    {
-                        $isRemovePDF = false;
-                    }
-
-                    /** Создаем закупку */
-                    if($message->isPurchase())
-                    {
-
-                        /** Ищем в массиве такой продукт */
-                        $getPurchaseProduct = $PurchaseProductStockDTO->getProduct()->filter(function(
-                            ProductStockDTO $element
-                        ) use ($ProductModification) {
-                            return $ProductModification->getModificationConst()?->equals($element->getModification());
-                        });
-
-                        $ProductStockDTO = $getPurchaseProduct->current();
-
-                        /* если продукта еще нет - добавляем */
-                        if(!$ProductStockDTO)
-                        {
-                            $ProductStockDTO = new ProductStockDTO();
-                            $ProductStockDTO->setProduct($ProductModification->getProduct());
-                            $ProductStockDTO->setOffer($ProductModification->getOfferConst());
-                            $ProductStockDTO->setVariation($ProductModification->getVariationConst());
-                            $ProductStockDTO->setModification($ProductModification->getModificationConst());
-                            $ProductStockDTO->setTotal(0);
-
-                            $PurchaseProductStockDTO->addProduct($ProductStockDTO);
-                        }
-
-                        $ProductStockTotal = $ProductStockDTO->getTotal() + 1;
-                        $ProductStockDTO->setTotal($ProductStockTotal);
-                    }
-
+                    $this->logger->critical(sprintf('products-sign: Ошибка %s при сканировании PDF лист %s: ', $handle, $number));
                 }
                 else
                 {
+                    $this->logger->info(
+                        sprintf('%s: %s', $handle->getId(), $code),
+                        [self::class.':'.__LINE__]
+                    );
 
-                    $isRemovePDF = false;
-                    $log = sprintf('Продукции %s не найдено', $product);
-                    $this->logger->critical($log, [self::class.':'.__LINE__]);
+                    /** Создаем комманду для отправки файла CDN */
+                    $this->messageDispatch->dispatch(
+                        new CDNUploadImageMessage($handle->getId(), ProductSignCode::class, $md5),
+                        transport: 'files-res'
+                    );
+
+                    $counter++;
+                }
+
+                /** Создаем закупку */
+                if($message->isPurchase() && $message->getProfile())
+                {
+                    /** Ищем в массиве такой продукт */
+                    $getPurchaseProduct = $PurchaseProductStockDTO->getProduct()->filter(function (
+                        ProductStockDTO $element
+                    ) use ($message) {
+                        return
+                            $message->getProduct()->equals($element->getProduct()) &&
+                            (
+                                ($message->getOffer() === null && $element->getOffer() === null) ||
+                                $message->getOffer()->equals($element->getOffer())
+                            ) &&
+
+                            (
+                                ($message->getVariation() === null && $element->getVariation() === null) ||
+                                $message->getVariation()->equals($element->getVariation())
+                            ) &&
+
+                            (
+                                ($message->getModification() === null && $element->getModification() === null) ||
+                                $message->getModification()->equals($element->getModification())
+                            );
+
+                    });
+
+                    $ProductStockDTO = $getPurchaseProduct->current();
+
+                    /* если продукта еще нет - добавляем */
+                    if(!$ProductStockDTO)
+                    {
+                        $ProductStockDTO = new ProductStockDTO();
+                        $ProductStockDTO->setProduct($message->getProduct());
+                        $ProductStockDTO->setOffer($message->getOffer());
+                        $ProductStockDTO->setVariation($message->getVariation());
+                        $ProductStockDTO->setModification($message->getModification());
+                        $ProductStockDTO->setTotal(0);
+
+                        $PurchaseProductStockDTO->addProduct($ProductStockDTO);
+                    }
+
+                    $ProductStockTotal = $ProductStockDTO->getTotal() + 1;
+                    $ProductStockDTO->setTotal($ProductStockTotal);
                 }
             }
 
-            $this->Imagick->clear();
-            $this->Imagick->destroy();
+            $Imagick->clear();
+            $Imagick->destroy();
+
+            /** Удаляем после обработки файл PDF */
+            $this->filesystem->remove($pdfPath);
 
             /** Сохраняем закупку */
-            if($message->isPurchase() && !$PurchaseProductStockDTO->getProduct()->isEmpty())
+            if($message->isPurchase() && $message->getProfile() && !$PurchaseProductStockDTO->getProduct()->isEmpty())
             {
                 $this->purchaseProductStockHandler->handle($PurchaseProductStockDTO);
             }
-
-            if($isRemovePDF)
-            {
-                $Filesystem = new Filesystem();
-                $Filesystem->remove($pdfPath);
-            }
-
         }
+
+        $this->logger->info(sprintf('products-sign: Всего добавлено %s честных знаков', $counter));
     }
 }

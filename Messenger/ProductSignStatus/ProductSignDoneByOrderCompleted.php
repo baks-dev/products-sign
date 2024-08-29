@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignStatus;
 
+use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Messenger\OrderMessage;
 use BaksDev\Orders\Order\Repository\OrderEvent\OrderEventInterface;
@@ -35,6 +36,8 @@ use BaksDev\Products\Product\Repository\ProductVariationConst\ProductVariationCo
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Repository\ProductSignProcessByOrder\ProductSignProcessByOrderInterface;
 use BaksDev\Products\Sign\Repository\ProductSignProcessByOrderProduct\ProductSignProcessByOrderProductInterface;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignCancelDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignDoneDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
@@ -46,34 +49,19 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class ProductSignDoneByOrderCompleted
 {
     private LoggerInterface $logger;
-    private OrderEventInterface $orderEventRepository;
-    private ProductSignProcessByOrderProductInterface $productSignProcessByOrderProduct;
-    private ProductOfferConstInterface $productOfferConst;
-    private ProductVariationConstInterface $productVariationConst;
-    private ProductModificationConstInterface $productModificationConst;
-    private ProductSignStatusHandler $productSignStatusHandler;
-    private ProductSignProcessByOrderInterface $productSignProcessByOrder;
-
 
     public function __construct(
-        ProductOfferConstInterface $productOfferConst,
-        ProductVariationConstInterface $productVariationConst,
-        ProductModificationConstInterface $productModificationConst,
-        ProductSignStatusHandler $productSignStatusHandler,
-        OrderEventInterface $orderEventRepository,
+        private readonly ProductOfferConstInterface $productOfferConst,
+        private readonly ProductVariationConstInterface $productVariationConst,
+        private readonly ProductModificationConstInterface $productModificationConst,
+        private readonly ProductSignStatusHandler $productSignStatusHandler,
+        private readonly OrderEventInterface $orderEventRepository,
+        private readonly ProductSignProcessByOrderProductInterface $productSignProcessByOrderProduct,
+        private readonly ProductSignProcessByOrderInterface $productSignProcessByOrder,
+        private readonly DeduplicatorInterface $deduplicator,
         LoggerInterface $productsSignLogger,
-        ProductSignProcessByOrderProductInterface $productSignProcessByOrderProduct,
-        ProductSignProcessByOrderInterface $productSignProcessByOrder
-    )
-    {
+    ) {
         $this->logger = $productsSignLogger;
-        $this->orderEventRepository = $orderEventRepository;
-        $this->productSignProcessByOrderProduct = $productSignProcessByOrderProduct;
-        $this->productOfferConst = $productOfferConst;
-        $this->productVariationConst = $productVariationConst;
-        $this->productModificationConst = $productModificationConst;
-        $this->productSignStatusHandler = $productSignStatusHandler;
-        $this->productSignProcessByOrder = $productSignProcessByOrder;
     }
 
 
@@ -82,24 +70,50 @@ final class ProductSignDoneByOrderCompleted
      */
     public function __invoke(OrderMessage $message): void
     {
+        /** Log Data */
+        $dataLogs['OrderUid'] = (string) $message->getId();
+        $dataLogs['OrderEventUid'] = (string) $message->getEvent();
+        $dataLogs['LastOrderEventUid'] = (string) $message->getLast();
 
-        $OrderEvent = $this->orderEventRepository->findByEventId($message->getEvent());
+        /** Получаем событие заказа */
+        $OrderEvent = $this->orderEventRepository->find($message->getEvent());
+
+        if(false === $OrderEvent)
+        {
+            $dataLogs[0] = self::class.':'.__LINE__;
+            $this->logger->critical('products-sign: Не найдено событие Order', $dataLogs);
+
+            return;
+        }
 
         /**
          * Если статус не Completed «Выполнен» - завершаем обработчик
          */
-        if(!$OrderEvent || !$OrderEvent->isStatusEquals(OrderStatusCompleted::class))
+        if(false === $OrderEvent->isStatusEquals(OrderStatusCompleted::class))
         {
             return;
         }
 
-        $this->logger->info('Делаем отметку Честный знак Done «Выполнен»');
+        $Deduplicator = $this->deduplicator
+            ->namespace('products-sign')
+            ->deduplication([
+                (string) $message->getId(),
+                ProductSignStatusDone::STATUS,
+                md5(self::class)
+            ]);
+
+        if($Deduplicator->isExecuted())
+        {
+            return;
+        }
+
+        $this->logger->info('Делаем отметку «Честный знак» Done «Выполнен»');
 
         /** @var OrderProduct $product */
         foreach($OrderEvent->getProduct() as $product)
         {
             /**
-             * Получаем константы продукции
+             * Получаем константы продукции по идентификаторам
              */
             $ProductOfferUid = $product->getOffer() ? $this->productOfferConst->getConst($product->getOffer()) : null;
             $ProductVariationUid = $product->getVariation() ? $this->productVariationConst->getConst($product->getVariation()) : null;
@@ -112,12 +126,12 @@ final class ProductSignDoneByOrderCompleted
 
             for($i = 1; $i <= $total; $i++)
             {
-                $ProductSignEvent = $this->productSignProcessByOrderProduct->getProductSign(
-                    $message->getId(),
-                    $ProductOfferUid,
-                    $ProductVariationUid,
-                    $ProductModificationUid
-                );
+                $ProductSignEvent = $this->productSignProcessByOrderProduct
+                    ->forOrder($message->getId())
+                    ->forOfferConst($ProductOfferUid)
+                    ->forVariationConst($ProductVariationUid)
+                    ->forModificationConst($ProductModificationUid)
+                    ->find();
 
                 if($ProductSignEvent)
                 {
@@ -139,7 +153,8 @@ final class ProductSignDoneByOrderCompleted
                         throw new InvalidArgumentException('Ошибка при обновлении статуса честного знака');
                     }
 
-                    $this->logger->info('Отметили Честный знак Done «Выполнен»',
+                    $this->logger->info(
+                        'Отметили Честный знак Done «Выполнен»',
                         [
                             self::class.':'.__LINE__,
                             'ProductSignUid' => $ProductSignEvent->getMain()
@@ -162,12 +177,14 @@ final class ProductSignDoneByOrderCompleted
             $event->getDto($ProductSignCancelDTO);
             $this->productSignStatusHandler->handle($ProductSignCancelDTO);
 
-            $this->logger->warning('Отменили Честный знак (возвращаем статус New «Новый»)',
+            $this->logger->warning(
+                'Отменили Честный знак (возвращаем статус New «Новый»)',
                 [
                     self::class.':'.__LINE__,
                     'ProductSignUid' => $event->getMain()
                 ]
             );
         }
+
     }
 }

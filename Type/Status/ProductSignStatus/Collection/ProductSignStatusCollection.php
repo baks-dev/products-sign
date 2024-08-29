@@ -32,8 +32,8 @@ final class ProductSignStatusCollection
     private iterable $status;
 
     public function __construct(
-        #[AutowireIterator('baks.sign.status')] iterable $status)
-    {
+        #[AutowireIterator('baks.sign.status')] iterable $status
+    ) {
         $this->status = $status;
     }
 
@@ -41,7 +41,8 @@ final class ProductSignStatusCollection
     {
         $case = null;
 
-        foreach ($this->status as $status) {
+        foreach($this->status as $status)
+        {
             $case[] = new $status();
         }
 

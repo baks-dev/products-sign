@@ -25,6 +25,11 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\UseCase\Admin\Pdf;
 
+use BaksDev\Products\Category\Type\Id\CategoryProductUid;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -36,17 +41,42 @@ final class ProductSignPdfDTO
     #[Assert\Uuid]
     private UserUid $usr;
 
-    #[Assert\NotBlank]
+    /**
+     * Профиль пользователя (null - общий)
+     */
     #[Assert\Uuid]
-    private UserProfileUid $profile;
+    private ?UserProfileUid $profile = null;
 
     #[Assert\Valid]
     private ArrayCollection $files;
 
-    /** Добавить лист закупки */
-    private bool $purchase = true;
+    /** Категория */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private ?CategoryProductUid $category = null;
 
-    public function __construct(UserUid $usr, UserProfileUid $profile)
+    /** ID продукта */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private ?ProductUid $product = null;
+
+    /** Постоянный уникальный идентификатор ТП */
+    #[Assert\Uuid]
+    private ?ProductOfferConst $offer = null;
+
+    /** Постоянный уникальный идентификатор варианта */
+    #[Assert\Uuid]
+    private ?ProductVariationConst $variation = null;
+
+    /** Постоянный уникальный идентификатор модификации */
+    #[Assert\Uuid]
+    private ?ProductModificationConst $modification = null;
+
+
+    /** Добавить лист закупки */
+    private bool $purchase = false;
+
+    public function __construct(UserUid $usr)
     {
         $this->files = new ArrayCollection();
 
@@ -54,10 +84,7 @@ final class ProductSignPdfDTO
         $this->addFiles($ProductSignFileDTO);
 
         $this->usr = $usr;
-        $this->profile = $profile;
     }
-
-
 
     /**
      * Files
@@ -88,14 +115,6 @@ final class ProductSignPdfDTO
     }
 
     /**
-     * Profile
-     */
-    public function getProfile(): UserProfileUid
-    {
-        return $this->profile;
-    }
-
-    /**
      * Purchase
      */
     public function isPurchase(): bool
@@ -109,5 +128,89 @@ final class ProductSignPdfDTO
         return $this;
     }
 
+    /**
+     * Category
+     */
+    public function getCategory(): ?CategoryProductUid
+    {
+        return $this->category;
+    }
+
+    public function setCategory(?CategoryProductUid $category): self
+    {
+        $this->category = $category;
+        return $this;
+    }
+
+
+    /**
+     * Product
+     */
+    public function getProduct(): ?ProductUid
+    {
+        return $this->product;
+    }
+
+    public function setProduct(ProductUid $product): self
+    {
+        $this->product = $product;
+        return $this;
+    }
+
+    /**
+     * Offer
+     */
+    public function getOffer(): ?ProductOfferConst
+    {
+        return $this->offer;
+    }
+
+    public function setOffer(?ProductOfferConst $offer): self
+    {
+        $this->offer = $offer;
+        return $this;
+    }
+
+    /**
+     * Variation
+     */
+    public function getVariation(): ?ProductVariationConst
+    {
+        return $this->variation;
+    }
+
+    public function setVariation(?ProductVariationConst $variation): self
+    {
+        $this->variation = $variation;
+        return $this;
+    }
+
+    /**
+     * Modification
+     */
+    public function getModification(): ?ProductModificationConst
+    {
+        return $this->modification;
+    }
+
+    public function setModification(?ProductModificationConst $modification): self
+    {
+        $this->modification = $modification;
+        return $this;
+    }
+
+    /**
+     * Profile
+     */
+    public function getProfile(): ?UserProfileUid
+    {
+        return $this->profile;
+    }
+
+    public function setProfile(?UserProfileUid $profile): self
+    {
+        $this->profile = $profile;
+        return $this;
+    }
 
 }

@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Type\Status;
 
-
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use InvalidArgumentException;
@@ -70,7 +69,7 @@ final class ProductSignStatus
 
             if($instance->getProductSignStatusValue() === $status)
             {
-                $this->status = new $declare;
+                $this->status = new $declare();
                 return;
             }
         }
@@ -102,7 +101,7 @@ final class ProductSignStatus
         foreach(self::getDeclared() as $declared)
         {
             /** @var ProductSignStatusInterface $declared */
-            $class = new $declared;
+            $class = new $declared();
 
             $case[] = new self($class);
         }
@@ -114,7 +113,7 @@ final class ProductSignStatus
     {
         return array_filter(
             get_declared_classes(),
-            static function($className) {
+            static function ($className) {
                 return in_array(ProductSignStatusInterface::class, class_implements($className), true);
             }
         );

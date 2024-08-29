@@ -1,17 +1,17 @@
 <?php
 /*
  *  Copyright 2023.  Baks.dev <admin@baks.dev>
- *  
+ *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *  
+ *
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *  
+ *
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,7 +24,6 @@
 namespace BaksDev\Products\Sign\Listeners\Entity;
 
 use BaksDev\Core\Type\Ip\IpAddress;
-use BaksDev\Products\Category\Entity\Modify\CategoryProductModify;
 use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Users\User\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Attribute\AsEntityListener;
@@ -37,23 +36,23 @@ use Symfony\Component\Security\Core\Authentication\Token\SwitchUserToken;
 #[AsEntityListener(event: Events::prePersist, method: 'prePersist', entity: ProductSignModify::class)]
 final class ProductSignModifyListener
 {
-	private RequestStack $request;
-	private TokenStorageInterface $token;
-	
-	public function __construct(
-		RequestStack $request,
-		TokenStorageInterface $token,
-	)
-	{
-		$this->request = $request;
-		$this->token = $token;
-	}
-	
-	public function prePersist(ProductSignModify $data, LifecycleEventArgs $event) : void
-	{
-		$token = $this->token->getToken();
+    private RequestStack $request;
+    private TokenStorageInterface $token;
 
-        if ($token) {
+    public function __construct(
+        RequestStack $request,
+        TokenStorageInterface $token,
+    ) {
+        $this->request = $request;
+        $this->token = $token;
+    }
+
+    public function prePersist(ProductSignModify $data, LifecycleEventArgs $event): void
+    {
+        $token = $this->token->getToken();
+
+        if($token)
+        {
 
             $data->setUsr($token->getUser());
 
@@ -64,14 +63,14 @@ final class ProductSignModifyListener
                 $data->setUsr($originalUser);
             }
         }
-		
-		/* Если пользователь не из консоли */
-		if($this->request->getCurrentRequest())
-		{
-			$data->upModifyAgent(
-				new IpAddress($this->request->getCurrentRequest()->getClientIp()), /* Ip */
-				$this->request->getCurrentRequest()->headers->get('User-Agent') /* User-Agent */
-			);
-		}
-	}
+
+        /* Если пользователь не из консоли */
+        if($this->request->getCurrentRequest())
+        {
+            $data->upModifyAgent(
+                new IpAddress($this->request->getCurrentRequest()->getClientIp()), /* Ip */
+                $this->request->getCurrentRequest()->headers->get('User-Agent') /* User-Agent */
+            );
+        }
+    }
 }

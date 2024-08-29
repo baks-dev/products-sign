@@ -1,6 +1,6 @@
 # BaksDev Product Sign
 
-[![Version](https://img.shields.io/badge/version-7.1.7-blue)](https://github.com/baks-dev/products-sign/releases)
+[![Version](https://img.shields.io/badge/version-7.1.8-blue)](https://github.com/baks-dev/products-sign/releases)
 ![php 8.3+](https://img.shields.io/badge/php-min%208.3-red.svg)
 
 Модуль Честный знак продукции
@@ -9,6 +9,19 @@
 
 ``` bash
 $ composer require baks-dev/products-sign
+```
+
+Добавить директорию и установить права для загрузки файлов:
+
+``` bash
+$ sudo mkdir <path_to_project>/public/upload/product_sign_code
+$ sudo chown -R unit:unit <path_to_project>/public/upload/product_sign_code
+```
+
+Установка приложения для обрезки из PDF пустые области:
+
+```bash
+sudo apt install pdftk texlive-extra-utils
 ```
 
 ## Дополнительно

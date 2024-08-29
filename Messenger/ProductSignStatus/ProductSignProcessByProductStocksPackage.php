@@ -25,8 +25,10 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignStatus;
 
+use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Repository\ProductSignNew\ProductSignNewInterface;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignProcessDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
 use BaksDev\Products\Stocks\Entity\Event\ProductStockEvent;
@@ -36,6 +38,7 @@ use BaksDev\Products\Stocks\Repository\CurrentProductStocks\CurrentProductStocks
 use BaksDev\Products\Stocks\Repository\ProductStocksById\ProductStocksByIdInterface;
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusIncoming;
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusPackage;
+use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
@@ -44,69 +47,89 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 final class ProductSignProcessByProductStocksPackage
 {
-    private ProductStocksByIdInterface $productStocks;
-    private EntityManagerInterface $entityManager;
     private LoggerInterface $logger;
-    private CurrentProductStocksInterface $currentProductStocks;
-    private ProductSignStatusHandler $productSignStatusHandler;
-    private ProductSignNewInterface $productSignNew;
 
     public function __construct(
-
-        ProductStocksByIdInterface $productStocks,
-        EntityManagerInterface $entityManager,
+        private readonly ProductStocksByIdInterface $productStocks,
+        private readonly EntityManagerInterface $entityManager,
+        private readonly CurrentProductStocksInterface $currentProductStocks,
+        private readonly ProductSignStatusHandler $productSignStatusHandler,
+        private readonly ProductSignNewInterface $productSignNew,
+        private readonly UserByUserProfileInterface $userByUserProfile,
+        private readonly DeduplicatorInterface $deduplicator,
         LoggerInterface $productsSignLogger,
-        CurrentProductStocksInterface $currentProductStocks,
-        ProductSignStatusHandler $productSignStatusHandler,
-        ProductSignNewInterface $productSignNew
-    )
-    {
-        $this->productStocks = $productStocks;
-        $this->entityManager = $entityManager;
+    ) {
+
         $this->logger = $productsSignLogger;
-        $this->currentProductStocks = $currentProductStocks;
-        $this->productSignStatusHandler = $productSignStatusHandler;
-        $this->productSignNew = $productSignNew;
     }
 
     /**
-     * При статусе складской заявки Package «Упаковка» резервируем честный знак в статус Process «В процессе»
+     * При статусе складской заявки Package «Упаковка» - резервируем честный знак в статус Process «В процессе»
      */
     public function __invoke(ProductStockMessage $message): void
     {
+
+        /** Log Data */
+        $dataLogs['ProductStockUid'] = (string) $message->getId();
+        $dataLogs['ProductStockEventUid'] = (string) $message->getEvent();
+        $dataLogs['LastProductStockEventUid'] = (string) $message->getLast();
+
         $ProductStockEvent = $this->currentProductStocks->getCurrentEvent($message->getId());
 
         if(!$ProductStockEvent)
         {
+            $dataLogs[0] = self::class.':'.__LINE__;
+            $this->logger->critical('products-sign: Не найдено событие ProductStock', $dataLogs);
+
             return;
         }
 
-        if($ProductStockEvent->getStatus()->equals(ProductStockStatusPackage::class) === false)
+        if(false === $ProductStockEvent->getStatus()->equals(ProductStockStatusPackage::class))
         {
-            $this->logger
-                ->notice('Не резервируем честный знак: Складская заявка не является Package «Упаковка»',
-                    [self::class.':'.__LINE__, [$message->getId(), $message->getEvent(), $message->getLast()]]);
+            $dataLogs[0] = self::class.':'.__LINE__;
+            $this->logger->notice('Не резервируем честный знак: Складская заявка не является Package «Упаковка»', $dataLogs);
+
             return;
         }
 
         if(!$ProductStockEvent->getOrder())
         {
-            $this->logger
-                ->notice('Не резервируем честный знак: упаковка без идентификатора заказа',
-                    [self::class.':'.__LINE__, [$message->getId(), $message->getEvent(), $message->getLast()]]);
+            $dataLogs[0] = self::class.':'.__LINE__;
+            $this->logger->notice('Не резервируем честный знак: упаковка без идентификатора заказа', $dataLogs);
+
             return;
         }
 
+        /** Определяем пользователя профилю в заявке */
+        $User = $this
+            ->userByUserProfile
+            ->forProfile($ProductStockEvent->getProfile())
+            ->findUser();
+
+        if(false === $User)
+        {
+            $dataLogs[0] = self::class.':'.__LINE__;
+            $this->logger
+                ->critical(
+                    sprintf('products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ', $ProductStockEvent->getProfile()),
+                    $dataLogs
+                );
+
+            return;
+        }
 
         if($message->getLast())
         {
-            $lastProductStockEvent = $this->entityManager->getRepository(ProductStockEvent::class)->find($message->getLast());
+            $lastProductStockEvent = $this
+                ->entityManager
+                ->getRepository(ProductStockEvent::class)
+                ->find($message->getLast());
 
+            /** Если предыдущая заявка на перемещение и совершается поступление по этой заявке - резерв уже был */
             if($lastProductStockEvent === null || $lastProductStockEvent->getStatus()->equals(new ProductStockStatusIncoming()) === true)
             {
-                $this->logger
-                    ->notice('Не резервируем честный знак: Складская заявка при поступлении на склад по заказу (резерв уже имеется)',
-                        [self::class.':'.__LINE__, [$message->getId(), $message->getEvent(), $message->getLast()]]);
+                $dataLogs[0] = self::class.':'.__LINE__;
+                $this->logger->notice('Не резервируем честный знак: Складская заявка при поступлении на склад по заказу (резерв уже имеется)', $dataLogs);
 
                 return;
             }
@@ -117,17 +140,26 @@ final class ProductSignProcessByProductStocksPackage
 
         if(empty($products))
         {
-            $this->logger
-                ->warning('Заявка на упаковку не имеет продукции в коллекции',
-                    [self::class.':'.__LINE__]);
+            $dataLogs[0] = self::class.':'.__LINE__;
+            $this->logger->warning('Заявка на упаковку не имеет продукции в коллекции', $dataLogs);
+
             return;
         }
 
+        $Deduplicator = $this->deduplicator
+            ->namespace('products-sign')
+            ->deduplication([
+                (string) $message->getId(),
+                ProductSignStatusProcess::STATUS,
+                md5(self::class)
+            ]);
 
-        $this->logger
-            ->info('Добавляем резерв кода Честный знак статус Process «В процессе»',
-                [self::class.':'.__LINE__, 'ProductStockUid' => $message->getId()]);
+        if($Deduplicator->isExecuted())
+        {
+            return;
+        }
 
+        $this->logger->info('Добавляем резерв кода Честный знак статус Process «В процессе»:');
 
         /**
          * Резервируем честный знак Process «В процессе»
@@ -140,24 +172,25 @@ final class ProductSignProcessByProductStocksPackage
 
             for($i = 1; $i <= $total; $i++)
             {
-                $ProductSignEvent = $this->productSignNew->getOneProductSign(
-                    $product->getProduct(),
-                    $product->getOffer(),
-                    $product->getVariation(),
-                    $product->getModification()
-                );
+                $ProductSignEvent = $this->productSignNew
+                    ->forUser($User)
+                    ->forProfile($ProductStockEvent->getProfile())
+                    ->forProduct($product->getProduct())
+                    ->forOfferConst($product->getOffer())
+                    ->forVariationConst($product->getVariation())
+                    ->forModificationConst($product->getModification())
+                    ->getOneProductSign();
 
                 if(!$ProductSignEvent)
                 {
-                    $this->logger->info('Честный знак на продукцию не найден',
-                        [
-                            self::class.':'.__LINE__,
-                            'ProductUid' => $product->getProduct(),
-                            'ProductOfferConst' => $product->getOffer(),
-                            'ProductVariationConst' => $product->getVariation(),
-                            'ProductModificationConst', $product->getModification()
-                        ]
-                    );
+
+                    $dataLogs[0] = self::class.':'.__LINE__;
+                    $dataLogs['ProductUid'] = (string) $product->getProduct();
+                    $dataLogs['ProductOfferConst'] = (string) $product->getOffer();
+                    $dataLogs['ProductVariationConst'] = (string) $product->getVariation();
+                    $dataLogs['ProductModificationConst'] = (string) $product->getModification();
+
+                    $this->logger->warning('Честный знак на продукцию не найден', $dataLogs);
 
                     continue;
                 }
@@ -169,26 +202,26 @@ final class ProductSignProcessByProductStocksPackage
 
                 if(!$handle instanceof ProductSign)
                 {
+                    $dataLogs[0] = self::class.':'.__LINE__;
+                    $dataLogs['ProductSignEventUid'] = (string) $ProductSignProcessDTO->getEvent();
+
                     $this->logger->critical(
                         sprintf('%s: Ошибка при обновлении статуса честного знака', $handle),
-                        [
-                            self::class.':'.__LINE__,
-                            'ProductSignEventUid' => $ProductSignProcessDTO->getEvent()
-                        ]
+                        $dataLogs
                     );
 
                     throw new InvalidArgumentException('Ошибка при обновлении статуса честного знака');
                 }
 
-                $this->logger->info('Отметили Честный знак Process «В процессе»',
-                    [
-                        self::class.':'.__LINE__,
-                        'ProductSignUid' => $ProductSignEvent->getMain()
-                    ]
-                );
+
+                $dataLogs[0] = self::class.':'.__LINE__;
+                $dataLogs['ProductSignUid'] = (string) $ProductSignEvent->getMain();
+
+                $this->logger->info('Отметили Честный знак Process «В процессе»', $dataLogs);
+
             }
         }
 
-        $this->entityManager->flush();
+        $Deduplicator->save();
     }
 }

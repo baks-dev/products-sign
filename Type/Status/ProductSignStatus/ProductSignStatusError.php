@@ -25,11 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 
-use BaksDev\Orders\Order\Security\RoleOrderStatus;
-use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusInterface;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
-use BaksDev\Users\Profile\Group\Security\RoleInterface;
-use BaksDev\Users\Profile\Group\Security\VoterInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 /**

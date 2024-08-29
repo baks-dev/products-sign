@@ -32,7 +32,6 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Validator\Constraints as Assert;
 
-
 /* ProductSign */
 
 #[ORM\Entity]

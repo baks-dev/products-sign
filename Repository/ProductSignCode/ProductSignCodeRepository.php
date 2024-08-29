@@ -52,7 +52,7 @@ final class ProductSignCodeRepository implements ProductSignCodeInterface
             ->addSelect('code.code AS sign_code')
             ->addSelect('code.qr AS sign_qr')
             ->from(ProductSignCode::class, 'code')
-            ->where('code.sign = :sign')
+            ->where('code.main = :sign')
             ->setParameter('sign', $sign, ProductSignUid::TYPE)
         ;
 

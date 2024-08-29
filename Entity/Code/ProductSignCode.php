@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2023.  Baks.dev <admin@baks.dev>
+ *  Copyright 2024.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -21,107 +21,78 @@
  *  THE SOFTWARE.
  */
 
+declare(strict_types=1);
+
 namespace BaksDev\Products\Sign\Entity\Code;
 
 use BaksDev\Core\Entity\EntityEvent;
 use BaksDev\Core\Entity\EntityReadonly;
-use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Orders\Order\Type\Product\OrderProductUid;
-use BaksDev\Products\Product\Entity\Event\ProductEvent;
-use BaksDev\Products\Product\Entity\Product;
-use BaksDev\Products\Product\Type\Barcode\ProductBarcode;
-use BaksDev\Products\Product\Type\Id\ProductUid;
-use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
-use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
-use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
+use BaksDev\Core\Entity\EntityState;
+use BaksDev\Files\Resources\Upload\UploadEntityInterface;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use InvalidArgumentException;
 use Symfony\Component\Validator\Constraints as Assert;
 
+/* ProductSignCode */
 
 #[ORM\Entity]
 #[ORM\Table(name: 'product_sign_code')]
-#[ORM\Index(columns: ['code'])]
-#[ORM\Index(columns: ['product', 'offer', 'variation', 'modification'])]
-class ProductSignCode extends EntityReadonly
+class ProductSignCode extends EntityReadonly implements UploadEntityInterface
 {
-    public const TABLE = 'product_sign_code';
-
     /** ID Product */
     #[Assert\NotBlank]
     #[Assert\Uuid]
     #[ORM\Id]
     #[ORM\Column(type: ProductSignUid::TYPE)]
-    private ProductSignUid $sign;
+    private readonly ProductSignUid $main;
 
     /** ID события */
     #[Assert\NotBlank]
     #[Assert\Uuid]
-    #[ORM\OneToOne(inversedBy: 'code', targetEntity: ProductSignEvent::class)]
+    #[ORM\OneToOne(targetEntity: ProductSignEvent::class, inversedBy: 'code')]
     #[ORM\JoinColumn(name: 'event', referencedColumnName: 'id')]
     private ProductSignEvent $event;
 
-    /** Пользователь */
-    #[ORM\Column(type: UserUid::TYPE)]
-    private UserUid $usr;
-
-
     /** Честный знак */
-    #[ORM\Column(type: Types::STRING)]
+    #[ORM\Column(type: Types::STRING, unique: true)]
     private string $code;
 
-    /** QR знака */
-    #[ORM\Column(type: Types::TEXT)]
-    private string $qr;
+    /** Название файла */
+    #[Assert\NotBlank]
+    #[ORM\Column(type: Types::STRING, length: 100)]
+    private string $name;
 
-    /** ID продукта */
-    #[ORM\Column(type: ProductUid::TYPE)]
-    private ProductUid $product;
+    /** Расширение файла */
+    #[Assert\NotBlank]
+    #[ORM\Column(type: Types::STRING, length: 64)]
+    private string $ext;
 
-    /** Постоянный уникальный идентификатор ТП */
-    #[ORM\Column(type: ProductOfferConst::TYPE, nullable: true)]
-    private ?ProductOfferConst $offer = null;
-
-    /** Постоянный уникальный идентификатор варианта */
-    #[ORM\Column(type: ProductVariationConst::TYPE, nullable: true)]
-    private ?ProductVariationConst $variation = null;
-
-    /** Постоянный уникальный идентификатор модификации */
-    #[ORM\Column(type: ProductModificationConst::TYPE, nullable: true)]
-    private ?ProductModificationConst $modification = null;
+    /** Файл загружен на CDN */
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $cdn = false;
 
     public function __construct(ProductSignEvent $event)
     {
         $this->event = $event;
-        $this->sign = $event->getMain();
+        $this->main = $event->getMain();
     }
 
     public function __toString(): string
     {
-        return (string) $this->product;
+        return (string) $this->event;
     }
 
-    public function getSign(): ProductSignUid
+    public function getId(): ProductSignUid
     {
-        return $this->sign;
-    }
-
-    public function setEvent(ProductSignEvent $event): self
-    {
-        $this->event = $event;
-        return $this;
+        return $this->main;
     }
 
     public function getDto($dto): mixed
     {
-        $dto = is_string($dto) && class_exists($dto) ? new $dto() : $dto;
-
-        if ($dto instanceof ProductSignCodeInterface)
+        if($dto instanceof ProductSignCodeInterface)
         {
             return parent::getDto($dto);
         }
@@ -129,13 +100,46 @@ class ProductSignCode extends EntityReadonly
         throw new InvalidArgumentException(sprintf('Class %s interface error', $dto::class));
     }
 
+
     public function setEntity($dto): mixed
     {
-        if ($dto instanceof ProductSignCodeInterface || $dto instanceof self) {
+        /* Если размер файла нулевой - не заполняем сущность */
+        //        if(empty($dto->file) && empty($dto->getName()))
+        //        {
+        //            return false;
+        //        }
+
+        if($dto instanceof ProductSignCodeInterface || $dto instanceof self)
+        {
             return parent::setEntity($dto);
         }
 
         throw new InvalidArgumentException(sprintf('Class %s interface error', $dto::class));
+    }
+
+
+    public function updFile(string $name, string $ext, int $size): void
+    {
+        $this->name = $name;
+        $this->ext = $ext;
+        $this->cdn = false;
+    }
+
+    public function updCdn(?string $ext = null): void
+    {
+        if($ext)
+        {
+            $this->ext = $ext;
+            $this->cdn = true;
+            return;
+        }
+
+        $this->cdn = false;
+    }
+
+    public function getExt(): string
+    {
+        return $this->ext;
     }
 
 }

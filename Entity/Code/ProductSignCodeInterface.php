@@ -25,5 +25,9 @@ namespace BaksDev\Products\Sign\Entity\Code;
 
 interface ProductSignCodeInterface
 {
+    public function getName(): ?string;
 
+    public function getExt(): ?string;
+
+    public function getCdn(): bool;
 }

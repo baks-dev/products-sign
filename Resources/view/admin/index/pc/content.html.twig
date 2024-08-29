@@ -19,7 +19,7 @@
 
             {# Добавить #}
             {% if is_granted(ROLE~'_NEW') or is_granted('ROLE_ADMIN') %}
-                <a
+                {# <a
                         href="{{ path('products-sign:admin.newedit.new') }}"
                         class='btn btn-primary fw-bolder modal-link'
                         data-bs-toggle="modal"
@@ -27,15 +27,17 @@
                         title='Добавить честный знак'
                 >
                     {{ 'btn.new'|trans({}, 'core.btn') }}
-                </a>
+                </a> #}
 
                 <a
                         href="{{ path('products-sign:admin.pdf') }}"
-                        class='btn btn-light fw-bolder modal-link'
+                        class='btn btn-primary d-flex gap-3'
                         data-bs-toggle="modal"
                         data-bs-target="#modal"
                         title='Добавить честный знак'
                 >
+                    {{ 'btn.new'|trans({}, 'core.btn') }}
+
                     <svg xmlns="http://www.w3.org/2000/svg"
                          width="22" height="22"
                          fill="currentColor" class="bi bi-filetype-pdf" viewBox="0 0 16 16">
@@ -49,25 +51,37 @@
 
         <div class="border border-light rounded-4 p-3 p-3">
 
-            {# Форма поиска по разделу #}
-            {% include Template('/_includes/'~baks_settings.device~'/search.html.twig') %}
+            <div class="d-flex gap-3 justify-content-between mb-3">
+                {# Форма поиска по разделу #}
+                {% include Template('/_includes/'~baks_settings.device~'/search.html.twig') %}
+
+                {# Фильтр по продукции #}
+                <div class="w-100 d-flex gap-3 p-0">
+                    {% include Template('@products-product/filter/'~baks_settings.device~'/filter.html.twig') %}
+                </div>
+            </div>
+
+            {# Текстовый результат фильтра #}
+            {% include Template('@products-product/filter/'~baks_settings.device~'/filter_text.html.twig') %}
 
             <table class="table table-striped table-borderless mt-3"
                    style='--bs-table-striped-bg: rgba(249,249,249,0.7);'>
                 <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Код</th>
-                        <th>Статус</th>
-                        <th class="text-center">Профиль</th>
-                        <th class="text-center">Дата</th>
-                    </tr>
+                <tr>
+                    <th>#</th>
+                    <th>Код</th>
+                    <th>Статус</th>
+                    <th>Продукция</th>
+                    <th>Заказ</th>
+                    <th class="text-center">Профиль</th>
+                    <th class="text-center text-nowrap">Дата обновления</th>
+                </tr>
                 </thead>
 
                 <tbody>
-                    {% for item in query.data %}
-                        {{ include(_self|replace({ "content.html.twig": "card.html.twig" })) }}
-                    {% endfor %}
+                {% for item in query.data %}
+                    {{ include(_self|replace({ "content.html.twig": "card.html.twig" })) }}
+                {% endfor %}
                 </tbody>
             </table>
 
@@ -78,3 +92,9 @@
     </section>
 
 </main>
+
+<div class="offcanvas offcanvas-start"
+     tabindex="-1"
+     id="offcanvas"
+     style="--bs-offcanvas-width: 800px;">
+</div>

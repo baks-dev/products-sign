@@ -26,6 +26,7 @@ success:
   restore: 'The token of honor has been successfully restored'
   pdf: 'The files have been successfully sent for processing.'
   cancel: 'Honest sign successfully cancelled'
+  pickup: 'Order completed successfully'
 
 
 danger:

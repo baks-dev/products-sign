@@ -36,139 +36,78 @@ use Doctrine\DBAL\Types\Types;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/** @see ProductSignCodeRepository */
+/** @see ProductSignCode */
 final class ProductSignCodeDTO implements ProductSignCodeInterface
 {
-    /** QR-код */
-    public ?File $file = null;
-
     /** Честный знак */
     #[Assert\NotBlank]
-    private ?string $code = null;
+    private string $code;
 
-    /** QR знака */
+    /** Название директории хранения */
     #[Assert\NotBlank]
-    private string $qr;
+    private string $name;
 
-    /** Пользователь */
+    /** Расширений файла */
     #[Assert\NotBlank]
-    #[Assert\Uuid]
-    private UserUid $usr;
+    private string $ext;
 
-    /** ID продукта */
-    #[Assert\NotBlank]
-    #[Assert\Uuid]
-    private ProductUid $product;
-
-    /** Постоянный уникальный идентификатор ТП */
-    #[Assert\Uuid]
-    private ?ProductOfferConst $offer = null;
-
-    /** Постоянный уникальный идентификатор варианта */
-    #[Assert\Uuid]
-    private ?ProductVariationConst $variation = null;
-
-    /** Постоянный уникальный идентификатор модификации */
-    #[Assert\Uuid]
-    private ?ProductModificationConst $modification = null;
+    /** Флаг загрузки файла CDN */
+    private bool $cdn = false;
 
     /**
      * Code
      */
-    public function getCode(): ?string
+    public function getCode(): string
     {
         return $this->code;
     }
 
-    public function setCode(?string $code): self
+    public function setCode(string $code): self
     {
-        $this->code = trim($code);
-        $this->qr = (new QRCode())->render($this->code);
-
+        $this->code = $code;
         return $this;
     }
 
     /**
-     * Qr
+     * Name
      */
-    public function getQr(): string
+    public function getName(): string
     {
-        return $this->qr;
+        return $this->name;
     }
 
-    public function setQr(string $qr): self
+    public function setName(string $name): self
     {
-        $this->qr = $qr;
+        $this->name = $name;
         return $this;
     }
 
     /**
-     * Product
+     * Ext
      */
-    public function getProduct(): ProductUid
+    public function getExt(): string
     {
-        return $this->product;
+        return $this->ext;
     }
 
-    public function setProduct(ProductUid $product): self
+    public function setExt(string $ext): self
     {
-        $this->product = $product;
+        $this->ext = $ext;
         return $this;
     }
 
     /**
-     * Offer
+     * Cdn
      */
-    public function getOffer(): ?ProductOfferConst
+    public function getCdn(): bool
     {
-        return $this->offer;
+        return $this->cdn;
     }
 
-    public function setOffer(?ProductOfferConst $offer): self
+    public function setCdn(bool $cdn): self
     {
-        $this->offer = $offer;
+        $this->cdn = $cdn;
         return $this;
     }
 
-    /**
-     * Variation
-     */
-    public function getVariation(): ?ProductVariationConst
-    {
-        return $this->variation;
-    }
-
-    public function setVariation(?ProductVariationConst $variation): self
-    {
-        $this->variation = $variation;
-        return $this;
-    }
-
-    /**
-     * Modification
-     */
-    public function getModification(): ?ProductModificationConst
-    {
-        return $this->modification;
-    }
-
-    public function setModification(?ProductModificationConst $modification): self
-    {
-        $this->modification = $modification;
-        return $this;
-    }
-
-    /**
-     * Usr
-     */
-    public function getUsr(): UserUid
-    {
-        return $this->usr;
-    }
-
-    public function setUsr(UserUid $usr): self
-    {
-        $this->usr = $usr;
-        return $this;
-    }
 }

@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignStatus;
 
+use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Messenger\OrderMessage;
 use BaksDev\Orders\Order\Repository\OrderEvent\OrderEventInterface;
@@ -35,6 +36,8 @@ use BaksDev\Products\Product\Repository\ProductVariationConst\ProductVariationCo
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Repository\ProductSignProcessByOrder\ProductSignProcessByOrderInterface;
 use BaksDev\Products\Sign\Repository\ProductSignProcessByOrderProduct\ProductSignProcessByOrderProductInterface;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusCancel;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignCancelDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignDoneDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
@@ -44,23 +47,16 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 #[AsMessageHandler]
 final class ProductSignCancelByOrderCanceled
 {
-    private LoggerInterface $logger;
-    private OrderEventInterface $orderEventRepository;
-    private ProductSignStatusHandler $productSignStatusHandler;
-    private ProductSignProcessByOrderInterface $productSignProcessByOrder;
-
+    private readonly LoggerInterface $logger;
 
     public function __construct(
-        ProductSignStatusHandler $productSignStatusHandler,
-        OrderEventInterface $orderEventRepository,
+        private readonly ProductSignStatusHandler $productSignStatusHandler,
+        private readonly OrderEventInterface $orderEventRepository,
+        private readonly ProductSignProcessByOrderInterface $productSignProcessByOrder,
+        private readonly DeduplicatorInterface $deduplicator,
         LoggerInterface $productsSignLogger,
-        ProductSignProcessByOrderInterface $productSignProcessByOrder
-    )
-    {
+    ) {
         $this->logger = $productsSignLogger;
-        $this->orderEventRepository = $orderEventRepository;
-        $this->productSignStatusHandler = $productSignStatusHandler;
-        $this->productSignProcessByOrder = $productSignProcessByOrder;
     }
 
 
@@ -70,10 +66,19 @@ final class ProductSignCancelByOrderCanceled
     public function __invoke(OrderMessage $message): void
     {
 
-        $OrderEvent = $this->orderEventRepository->findByEventId($message->getEvent());
 
-        if(!$OrderEvent)
+        /** Log Data */
+        $dataLogs['OrderUid'] = (string) $message->getId();
+        $dataLogs['OrderEventUid'] = (string) $message->getEvent();
+        $dataLogs['LastOrderEventUid'] = (string) $message->getLast();
+
+        $OrderEvent = $this->orderEventRepository->find($message->getEvent());
+
+        if(false === $OrderEvent)
         {
+            $dataLogs[0] = self::class.':'.__LINE__;
+            $this->logger->critical('products-sign: Не найдено событие Order', $dataLogs);
+
             return;
         }
 
@@ -85,7 +90,20 @@ final class ProductSignCancelByOrderCanceled
             return;
         }
 
-        $this->logger->info('Делаем поиск и отмену всех знаков при отмене заказа', [self::class.':'.__LINE__]);
+        $Deduplicator = $this->deduplicator
+            ->namespace('products-sign')
+            ->deduplication([
+                (string) $message->getId(),
+                ProductSignStatusCancel::STATUS,
+                md5(self::class)
+            ]);
+
+        if($Deduplicator->isExecuted())
+        {
+            return;
+        }
+
+        $this->logger->info('Делаем поиск и отмену всех «Честных знаков» при отмене заказа:');
 
         $ProductSignEvents = $this->productSignProcessByOrder->findByOrder($message->getId());
 
@@ -95,7 +113,8 @@ final class ProductSignCancelByOrderCanceled
             $event->getDto($ProductSignCancelDTO);
             $this->productSignStatusHandler->handle($ProductSignCancelDTO);
 
-            $this->logger->warning('Отменили Честный знак (возвращаем статус New «Новый»)',
+            $this->logger->warning(
+                'Отменили «Честный знак» (возвращаем статус New «Новый»)',
                 [
                     self::class.':'.__LINE__,
                     'ProductSignUid' => $event->getMain()
@@ -103,5 +122,6 @@ final class ProductSignCancelByOrderCanceled
             );
         }
 
+        $Deduplicator->save();
     }
 }

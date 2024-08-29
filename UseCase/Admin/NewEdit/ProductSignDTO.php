@@ -51,6 +51,13 @@ final class ProductSignDTO implements ProductSignEventInterface
     private Code\ProductSignCodeDTO $code;
 
     /**
+     * Код честного знака
+     */
+    #[Assert\Valid]
+    private Invariable\ProductSignInvariableDTO $invariable;
+
+
+    /**
      * Статус
      */
     #[Assert\NotBlank]
@@ -60,20 +67,19 @@ final class ProductSignDTO implements ProductSignEventInterface
     /**
      * Профиль пользователя
      */
-    #[Assert\NotBlank]
     #[Assert\Uuid]
-    private readonly UserProfileUid $profile;
+    private ?UserProfileUid $profile = null;
 
 
-    /** Добавить лист закупки */
-    private bool $purchase = false;
+//    /** Добавить лист закупки */
+//    private bool $purchase = false;
 
 
-    public function __construct(UserProfileUid $profile)
+    public function __construct()
     {
         $this->status = new ProductSignStatus(ProductSignStatusNew::class);
         $this->code = new Code\ProductSignCodeDTO();
-        $this->profile = $profile;
+        $this->invariable = new Invariable\ProductSignInvariableDTO();
     }
 
     /**
@@ -124,25 +130,31 @@ final class ProductSignDTO implements ProductSignEventInterface
     }
 
     /**
-     * Profile
+     * Invariable
      */
-    public function getProfile(): UserProfileUid
+    public function getInvariable(): Invariable\ProductSignInvariableDTO
     {
-        return $this->profile;
+        return $this->invariable;
     }
 
-    /**
-     * Purchase
-     */
-    public function isPurchase(): bool
+    public function setInvariable(Invariable\ProductSignInvariableDTO $invariable): self
     {
-        return $this->purchase;
-    }
-
-    public function setPurchase(bool $purchase): self
-    {
-        $this->purchase = $purchase;
+        $this->invariable = $invariable;
         return $this;
     }
 
+
+    /**
+     * Profile
+     */
+    public function setProfile(?UserProfileUid $profile): self
+    {
+        $this->profile = $profile;
+        return $this;
+    }
+
+    public function getProfile(): ?UserProfileUid
+    {
+        return $this->profile;
+    }
 }

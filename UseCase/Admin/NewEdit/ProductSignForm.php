@@ -39,7 +39,7 @@ final class ProductSignForm extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-        $builder->add('code', ProductSignCodeForm::class);
+       //$builder->add('code', ProductSignCodeForm::class);
 
         $builder->add('purchase', CheckboxType::class, ['required' => false]);
 

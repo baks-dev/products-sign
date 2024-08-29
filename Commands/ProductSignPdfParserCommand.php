@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Commands;
 
-
 use BaksDev\Core\Doctrine\ORMQueryBuilder;
 use BaksDev\Elastic\Api\Index\ElasticGetIndex;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
@@ -77,8 +76,7 @@ class ProductSignPdfParserCommand extends Command
         ProductByModificationInterface $productByModification,
         PurchaseProductStockHandler $purchaseProductStockHandler,
         LoggerInterface $productsSignLogger
-    )
-    {
+    ) {
         parent::__construct();
         $this->existsProductSignCode = $existsProductSignCode;
         $this->productSignHandler = $productSignHandler;
@@ -98,8 +96,7 @@ class ProductSignPdfParserCommand extends Command
                 'u',
                 InputOption::VALUE_REQUIRED,
                 'Идентификатор пользователя (--u=... || -u ...)'
-            )
-        ;
+            );
 
         $this
             ->addOption(
@@ -107,8 +104,7 @@ class ProductSignPdfParserCommand extends Command
                 'p',
                 InputOption::VALUE_REQUIRED,
                 'Идентификатор профиля (--p=... || -p ...)'
-            )
-        ;
+            );
 
         $this
             ->addOption(
@@ -117,8 +113,7 @@ class ProductSignPdfParserCommand extends Command
                 InputOption::VALUE_OPTIONAL,
                 'Идентификатор профиля (--p=... || -p ...)',
                 true
-            )
-        ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -197,7 +192,7 @@ class ProductSignPdfParserCommand extends Command
             {
 
                 $arrData = explode(PHP_EOL, $page->getText());
-                $filterData = array_filter($arrData, function($value) {
+                $filterData = array_filter($arrData, function ($value) {
                     return !empty(trim($value));
                 });
 
@@ -279,10 +274,13 @@ class ProductSignPdfParserCommand extends Command
 
                     $progressBar->advance();
 
-                    if($isPurchase === false) { continue; }
+                    if($isPurchase === false)
+                    {
+                        continue;
+                    }
 
                     /** Ищем в массиве такой продукт */
-                    $getPurchaseProduct = $PurchaseProductStockDTO->getProduct()->filter(function(
+                    $getPurchaseProduct = $PurchaseProductStockDTO->getProduct()->filter(function (
                         ProductStockDTO $element
                     ) use ($ProductModification) {
                         return $ProductModification->getModificationConst()?->equals($element->getModification());
@@ -338,7 +336,7 @@ class ProductSignPdfParserCommand extends Command
     }
 
 
-    function randString($length = 10)
+    public function randString($length = 10)
     {
         $characters = 'abcdefghijklmnopqrstuvwxyz';
         $charLength = strlen($characters);

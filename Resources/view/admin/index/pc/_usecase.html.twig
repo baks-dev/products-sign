@@ -18,29 +18,29 @@
 
 
 {# Чекбокс #}
-<label>
+{#<label>
     <input class="form-check-input ms-3 p-2" type="checkbox"
-            {# onchange=checkedItem(); #}
+            #}{# onchange=checkedItem(); #}{#
            value="{{ item.sign_event }}">
-</label>
+</label>#}
 
 
 <div id="usecase-{{ item.sign_event }}-content" class="d-none">
     <ul class="leader list-group list-group-flush ">
 
-        {# Редактировать #}
+        {# Отмена #}
         {% if item.sign_status == 'process' and is_granted(ROLE~'_STATUS') or is_granted('ROLE_ADMIN') %}
             <li class="list-group-item d-flex justify-content-between bg-transparent border-0 text-truncate rounded-5">
                 <a href="{{ path('products-sign:admin.cancel', { id: item.sign_event }) }}"
                    class="text-decoration-none text-dark w-100 modal-link disabled"
                    data-bs-toggle="modal"
                    data-bs-target="#modal"
-                   title="{{ 'btn.edit'|trans({}, 'core.btn') }}">
+                   title="{{ 'btn.cancel'|trans({}, 'core.btn') }}">
                     {{ 'btn.cancel'|trans({}, 'core.btn') }}
                 </a>
             </li>
-
         {% endif %}
+
 
         {# Удалить #}
         {% if  is_granted(ROLE~'_DELETE') or is_granted('ROLE_ADMIN') %}

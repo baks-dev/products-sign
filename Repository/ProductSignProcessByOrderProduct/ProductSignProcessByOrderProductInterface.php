@@ -23,6 +23,7 @@
 
 namespace BaksDev\Products\Sign\Repository\ProductSignProcessByOrderProduct;
 
+use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
@@ -31,13 +32,16 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 
 interface ProductSignProcessByOrderProductInterface
 {
+    public function forOrder(Order|OrderUid|string $order): self;
+
+    public function forOfferConst(ProductOfferConst|string|null $offer): self;
+
+    public function forVariationConst(ProductVariationConst|string|null $variation): self;
+
+    public function forModificationConst(ProductModificationConst|string|null $modification): self;
+
     /**
      * Метод возвращает Честный знак на продукцию по заказу со статусом Process «В процессе»
      */
-    public function getProductSign(
-        OrderUid $order,
-        ?ProductOfferConst $offer,
-        ?ProductVariationConst $variation,
-        ?ProductModificationConst $modification
-    ): ?ProductSignEvent;
+    public function find(): ProductSignEvent|false;
 }

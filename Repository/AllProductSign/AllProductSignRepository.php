@@ -25,10 +25,10 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Repository\AllProductSign;
 
-
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Services\Paginator\PaginatorInterface;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
+use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Products\Category\Entity\CategoryProduct;
 use BaksDev\Products\Category\Entity\Info\CategoryProductInfo;
 use BaksDev\Products\Category\Entity\Offers\CategoryProductOffers;
@@ -47,13 +47,19 @@ use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModific
 use BaksDev\Products\Product\Entity\Offers\Variation\ProductVariation;
 use BaksDev\Products\Product\Entity\Photo\ProductPhoto;
 use BaksDev\Products\Product\Entity\Product;
+use BaksDev\Products\Product\Entity\Property\ProductProperty;
 use BaksDev\Products\Product\Entity\Trans\ProductTrans;
+use BaksDev\Products\Product\Forms\ProductFilter\Admin\ProductFilterDTO;
+use BaksDev\Products\Product\Forms\ProductFilter\Admin\Property\ProductFilterPropertyDTO;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Users\Profile\UserProfile\Entity\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
 
 final class AllProductSignRepository implements AllProductSignInterface
@@ -64,11 +70,12 @@ final class AllProductSignRepository implements AllProductSignInterface
 
     private ?SearchDTO $search = null;
 
+    private ?ProductFilterDTO $filter = null;
+
     public function __construct(
         DBALQueryBuilder $DBALQueryBuilder,
         PaginatorInterface $paginator,
-    )
-    {
+    ) {
         $this->paginator = $paginator;
         $this->DBALQueryBuilder = $DBALQueryBuilder;
     }
@@ -79,19 +86,40 @@ final class AllProductSignRepository implements AllProductSignInterface
         return $this;
     }
 
-    /** Метод возвращает пагинатор ProductSign */
-    public function fetchAllProductSignAssociative(UserUid $user): PaginatorInterface
+    public function filter(ProductFilterDTO $filter): static
     {
+        $this->filter = $filter;
+        return $this;
+    }
+
+    /** Метод возвращает пагинатор ProductSign */
+    public function findPaginator(
+        User|UserUid $user,
+        UserProfileUid $profile
+    ): PaginatorInterface {
+
+        $user = $user instanceof User ? $user->getId() : $user;
+
         $dbal = $this->DBALQueryBuilder
             ->createQueryBuilder(self::class)
             ->bindLocal();
 
+        //        $dbal
+        //            ->addSelect('code.code AS sign_code')
+        //            ->from(
+        //                ProductSignCode::class,
+        //                'code'
+        //            )
+        //            ->andWhere('code.usr = :usr')
+        //            ->setParameter('usr', $user, UserUid::TYPE);
+
+
         $dbal
-            ->addSelect('code.code AS sign_code')
             ->from(
-                ProductSignCode::class, 'code'
+                ProductSignInvariable::class,
+                'invariable'
             )
-            ->andWhere('code.usr = :usr')
+            ->andWhere('invariable.usr = :usr')
             ->setParameter('usr', $user, UserUid::TYPE);
 
 
@@ -99,42 +127,73 @@ final class AllProductSignRepository implements AllProductSignInterface
             ->addSelect('main.id AS sign_id')
             ->addSelect('main.event AS sign_event')
             ->join(
-                'code',
+                'invariable',
                 ProductSign::class,
                 'main',
-                'main.event = code.event'
+                'main.id = invariable.main'
             );
 
         $dbal
+            ->addSelect('code.code AS sign_code')
+            ->addSelect("CONCAT('/upload/".$dbal->table(ProductSignCode::class)."' , '/', code.name) AS sign_code_name")
+            ->addSelect('code.ext AS sign_code_ext')
+            ->addSelect('code.cdn AS sign_code_cdn')
+
+            ->leftJoin(
+                'invariable',
+                ProductSignCode::class,
+                'code',
+                'code.main = invariable.main'
+            );
+
+
+        $dbal
+            ->addSelect('event.ord AS order_id')
             ->addSelect('event.status AS sign_status')
             ->addSelect('event.comment AS sign_comment')
             ->leftJoin(
                 'code',
                 ProductSignEvent::class,
                 'event',
-                'event.id = code.event'
+                'event.id = main.event'
             );
+
+
+        if($this->filter->getAll() === false)
+        {
+            $dbal->andWhere('(event.profile IS NULL OR event.profile = :profile)')
+                ->setParameter('profile', $profile, UserProfileUid::TYPE);
+        }
+
 
         $dbal
             ->addSelect('modify.mod_date AS sign_date')
-
             ->leftJoin(
                 'code',
                 ProductSignModify::class,
                 'modify',
-                'modify.event = code.event'
+                'modify.event = main.event'
+            );
+
+
+        $dbal
+            ->addSelect('orders.number AS order_number')
+            ->leftJoin(
+                'event',
+                Order::class,
+                'orders',
+                'orders.id = event.ord'
             );
 
         // Product
         $dbal->addSelect('product.id as product_id'); //->addGroupBy('product.id');
         $dbal->addSelect('product.event as product_event'); //->addGroupBy('product.event');
         $dbal->join(
-            'code',
+            'invariable',
             Product::class,
             'product',
-            'product.id = code.product'
+            'product.id = invariable.product'
         );
-
 
         $dbal->join(
             'product',
@@ -146,7 +205,7 @@ final class AllProductSignRepository implements AllProductSignInterface
         $dbal
             ->addSelect('product_info.url AS product_url')
             ->leftJoin(
-                'product_event',
+                'product',
                 ProductInfo::class,
                 'product_info',
                 'product_info.product = product.id'
@@ -156,10 +215,10 @@ final class AllProductSignRepository implements AllProductSignInterface
         $dbal
             ->addSelect('product_trans.name as product_name')
             ->join(
-                'product_event',
+                'product',
                 ProductTrans::class,
                 'product_trans',
-                'product_trans.event = product_event.id AND product_trans.local = :local'
+                'product_trans.event = product.event AND product_trans.local = :local'
             );
 
 
@@ -172,17 +231,18 @@ final class AllProductSignRepository implements AllProductSignInterface
             ->addSelect('product_offer.value as product_offer_value')
             ->addSelect('product_offer.postfix as product_offer_postfix')
             ->leftJoin(
-                'product_event',
+                'product',
                 ProductOffer::class,
                 'product_offer',
-                'product_offer.event = product_event.id AND product_offer.const = code.offer'
+                'product_offer.event = product.event AND product_offer.const = invariable.offer'
             );
 
-        //        if($this->filter?->getOffer())
-        //        {
-        //            $dbal->andWhere('product_offer.value = :offer');
-        //            $dbal->setParameter('offer', $this->filter->getOffer());
-        //        }
+
+        if($this->filter?->getOffer())
+        {
+            $dbal->andWhere('product_offer.value = :offer');
+            $dbal->setParameter('offer', $this->filter->getOffer());
+        }
 
 
         // Получаем тип торгового предложения
@@ -204,14 +264,14 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'product_offer',
                 ProductVariation::class,
                 'product_variation',
-                'product_variation.offer = product_offer.id AND product_variation.const = code.variation'
+                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation'
             );
 
-        //        if($this->filter?->getVariation())
-        //        {
-        //            $dbal->andWhere('product_variation.value = :variation');
-        //            $dbal->setParameter('variation', $this->filter->getVariation());
-        //        }
+        if($this->filter?->getVariation())
+        {
+            $dbal->andWhere('product_variation.value = :variation');
+            $dbal->setParameter('variation', $this->filter->getVariation());
+        }
 
         // Получаем тип множественного варианта
         $dbal
@@ -223,6 +283,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'category_variation.id = product_variation.category_variation'
             );
 
+
         // Модификация множественного варианта торгового предложения
 
         $dbal
@@ -233,14 +294,14 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'product_variation',
                 ProductModification::class,
                 'product_modification',
-                'product_modification.variation = product_variation.id AND product_modification.const = code.modification'
+                'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification'
             );
 
-        //        if($this->filter?->getModification())
-        //        {
-        //            $dbal->andWhere('product_modification.value = :modification');
-        //            $dbal->setParameter('modification', $this->filter->getModification());
-        //        }
+        if($this->filter?->getModification())
+        {
+            $dbal->andWhere('product_modification.value = :modification');
+            $dbal->setParameter('modification', $this->filter->getModification());
+        }
 
         // Получаем тип модификации множественного варианта
         $dbal
@@ -253,18 +314,16 @@ final class AllProductSignRepository implements AllProductSignInterface
             );
 
         // Артикул продукта
-
         $dbal->addSelect(
             '
-			CASE
-			   WHEN product_modification.article IS NOT NULL THEN product_modification.article
-			   WHEN product_variation.article IS NOT NULL THEN product_variation.article
-			   WHEN product_offer.article IS NOT NULL THEN product_offer.article
-			   WHEN product_info.article IS NOT NULL THEN product_info.article
-			   ELSE NULL
-			END AS product_article
-		'
+            COALESCE(
+                product_modification.article,
+                product_variation.article,
+                product_offer.article,
+                product_info.article
+            ) AS product_article'
         );
+
 
         // Фото продукта
 
@@ -305,57 +364,52 @@ final class AllProductSignRepository implements AllProductSignInterface
             'product_photo',
             '
                 product_offer_images.name IS NULL AND
-                product_photo.event = product_event.id AND
+                product_photo.event = product.event AND
                 product_photo.root = true
 			'
         );
 
+
         $dbal->addSelect(
             "
 			CASE
-			 
+
 			 WHEN product_modification_image.name IS NOT NULL THEN
-					CONCAT ( '/upload/".ProductModificationImage::TABLE."' , '/', product_modification_image.name)
+					CONCAT ( '/upload/".$dbal->table(ProductModificationImage::class)."' , '/', product_modification_image.name)
 			   WHEN product_variation_image.name IS NOT NULL THEN
-					CONCAT ( '/upload/".ProductVariationImage::TABLE."' , '/', product_variation_image.name)
+					CONCAT ( '/upload/".$dbal->table(ProductVariationImage::class)."' , '/', product_variation_image.name)
 			   WHEN product_offer_images.name IS NOT NULL THEN
-					CONCAT ( '/upload/".ProductOfferImage::TABLE."' , '/', product_offer_images.name)
+					CONCAT ( '/upload/".$dbal->table(ProductOfferImage::class)."' , '/', product_offer_images.name)
 			   WHEN product_photo.name IS NOT NULL THEN
-					CONCAT ( '/upload/".ProductPhoto::TABLE."' , '/', product_photo.name)
+					CONCAT ( '/upload/".$dbal->table(ProductPhoto::class)."' , '/', product_photo.name)
 			   ELSE NULL
 			END AS product_image
 		"
         );
 
+
         // Расширение файла
         $dbal->addSelect(
-            "
-			CASE
-			
-			   WHEN product_modification_image.name IS NOT NULL THEN  product_modification_image.ext
-			   WHEN product_variation_image.name IS NOT NULL THEN product_variation_image.ext
-			   WHEN product_offer_images.name IS NOT NULL THEN product_offer_images.ext
-			   WHEN product_photo.name IS NOT NULL THEN product_photo.ext
-			   ELSE NULL
-			   
-			END AS product_image_ext
-		"
+            '
+            COALESCE(
+                product_modification_image.ext,
+                product_variation_image.ext,
+                product_offer_images.ext,
+                product_photo.ext
+            ) AS product_image_ext'
         );
 
-        // Флаг загрузки файла CDN
+
         $dbal->addSelect(
             '
-			CASE
-			   WHEN product_variation_image.name IS NOT NULL THEN
-					product_variation_image.cdn
-			   WHEN product_offer_images.name IS NOT NULL THEN
-					product_offer_images.cdn
-			   WHEN product_photo.name IS NOT NULL THEN
-					product_photo.cdn
-			   ELSE NULL
-			END AS product_image_cdn
-		'
+            COALESCE(
+                product_modification_image.cdn,
+                product_variation_image.cdn,
+                product_offer_images.cdn,
+                product_photo.cdn
+            ) AS product_image_cdn'
         );
+
 
         // Категория
         $dbal->leftJoin(
@@ -365,6 +419,11 @@ final class AllProductSignRepository implements AllProductSignInterface
             'product_event_category.event = product_event.id AND product_event_category.root = true'
         );
 
+        if($this->filter?->getCategory())
+        {
+            $dbal->andWhere('product_event_category.category = :category');
+            $dbal->setParameter('category', $this->filter->getCategory(), CategoryProductUid::TYPE);
+        }
 
         $dbal->leftJoin(
             'product_event_category',
@@ -395,7 +454,7 @@ final class AllProductSignRepository implements AllProductSignInterface
         /** Ответственное лицо */
 
         $dbal
-            ->join(
+            ->leftJoin(
                 'event',
                 UserProfile::TABLE,
                 'users_profile',
@@ -406,22 +465,49 @@ final class AllProductSignRepository implements AllProductSignInterface
         $dbal
             ->addSelect('users_profile_personal.username AS users_profile_username')
             ->addSelect('users_profile_personal.location AS users_profile_location')
-            ->join(
+            ->leftJoin(
                 'users_profile',
                 UserProfilePersonal::TABLE,
                 'users_profile_personal',
                 'users_profile_personal.event = users_profile.event'
             );
 
+
+
+
+
+
+        /**
+         * Фильтр по свойства продукта
+         */
+        if($this->filter->getProperty())
+        {
+            /** @var ProductFilterPropertyDTO $property */
+            foreach($this->filter->getProperty() as $property)
+            {
+                if($property->getValue())
+                {
+                    $dbal->join(
+                        'product',
+                        ProductProperty::class,
+                        'product_property_'.$property->getType(),
+                        'product_property_'.$property->getType().'.event = product.event AND 
+                        product_property_'.$property->getType().'.field = :'.$property->getType().'_const AND 
+                        product_property_'.$property->getType().'.value = :'.$property->getType().'_value'
+                    );
+
+                    $dbal->setParameter($property->getType().'_const', $property->getConst());
+                    $dbal->setParameter($property->getType().'_value', $property->getValue());
+                }
+            }
+        }
+
         /* Поиск */
         if($this->search?->getQuery())
         {
             $dbal
                 ->createSearchQueryBuilder($this->search)
-                //->addSearchEqualUid('account.id')
-
-                ->addSearchLike('code.code')
-            ;
+                ->addSearchLike('code.code');
         }
 
         $dbal->orderBy('modify.mod_date', 'DESC');

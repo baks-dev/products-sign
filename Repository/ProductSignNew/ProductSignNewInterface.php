@@ -23,21 +23,33 @@
 
 namespace BaksDev\Products\Sign\Repository\ProductSignNew;
 
+use BaksDev\Products\Product\Entity\Product;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Entity\User;
+use BaksDev\Users\User\Type\Id\UserUid;
 
 interface ProductSignNewInterface
 {
+    public function forUser(User|UserUid|string $user): self;
+
+    public function forProfile(UserProfile|UserProfileUid|string $profile): self;
+
+    public function forProduct(Product|ProductUid|string $product): self;
+
+    public function forOfferConst(ProductOfferConst|string|null $offer): self;
+
+    public function forVariationConst(ProductVariationConst|string|null $variation): self;
+
+    public function forModificationConst(ProductModificationConst|string|null $modification): self;
+
     /**
      * Метод возвращает один Честный знак на указанную продукцию со статусом New «Новый»
      */
-    public function getOneProductSign(
-        ProductUid $product,
-        ?ProductOfferConst $offer,
-        ?ProductVariationConst $variation,
-        ?ProductModificationConst $modification
-    ): ?ProductSignEvent;
+    public function getOneProductSign(): ProductSignEvent|false;
 }

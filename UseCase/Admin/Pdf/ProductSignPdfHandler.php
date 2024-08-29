@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\UseCase\Admin\Pdf;
 
-
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Core\Validator\ValidatorCollectionInterface;
 use BaksDev\Products\Sign\Entity\ProductSign;
@@ -35,24 +34,19 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Process\Process;
 
 final class ProductSignPdfHandler
 {
-    private MessageDispatchInterface $messageDispatch;
-    private ValidatorCollectionInterface $validatorCollection;
-    private string $upload;
     private LoggerInterface $logger;
 
     public function __construct(
-        #[Autowire('%kernel.project_dir%/public/upload/products-sign/')] string $upload,
-        MessageDispatchInterface $messageDispatch,
-        ValidatorCollectionInterface $validatorCollection,
+        #[Autowire('%kernel.project_dir%')] private readonly string $upload,
+        private readonly MessageDispatchInterface $messageDispatch,
+        private readonly ValidatorCollectionInterface $validatorCollection,
         LoggerInterface $productsSignLogger
-    )
-    {
-        $this->messageDispatch = $messageDispatch;
-        $this->validatorCollection = $validatorCollection;
-        $this->upload = $upload;
+    ) {
+
         $this->logger = $productsSignLogger;
     }
 
@@ -60,32 +54,48 @@ final class ProductSignPdfHandler
     /** @see ProductSign */
     public function handle(
         ProductSignPdfDTO $command
-    ): string|bool
-    {
-        $Filesystem = new Filesystem();
+    ): string|bool {
 
-        if(!$Filesystem->exists($this->upload))
+        $upload[] = $this->upload;
+        $upload[] = 'public';
+        $upload[] = 'upload';
+        $upload[] = 'barcode';
+
+        $upload[] = (string) $command->getUsr();
+
+
+        if($command->getProfile())
         {
-            try
-            {
-                $Filesystem->mkdir($this->upload);
-            }
-            catch(IOExceptionInterface $exception)
-            {
-                $this->logger->critical('Ошибка при создании директории. Попробуйте применить комманду ',
-                    [
-                        'mkdir $this->upload && chown -R unit:unit '.$this->upload
-                    ]);
+            $upload[] = (string) $command->getProfile();
+        }
 
-                return 'Ошибка при создании директории.';
-            }
+        $upload[] = (string) $command->getProduct();
+
+        if($command->getOffer())
+        {
+            $upload[] = (string) $command->getOffer();
+        }
+
+        if($command->getVariation())
+        {
+            $upload[] = (string) $command->getVariation();
+        }
+
+        if($command->getModification())
+        {
+            $upload[] = (string) $command->getModification();
         }
 
 
-        // Директория загрузки файла
-        $uploadDir = $this->upload.$command->getUsr();
+        $upload[] = '';
 
-        // проверяем наличие папки, если нет - создаем
+        // Директория загрузки файла
+        $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
+
+
+        $Filesystem = new Filesystem();
+
+        /** Если директория загрузки не найдена - создаем  */
         if(!$Filesystem->exists($uploadDir))
         {
             try
@@ -94,14 +104,17 @@ final class ProductSignPdfHandler
             }
             catch(IOExceptionInterface $exception)
             {
-                $this->logger->critical('Ошибка при создании директории. Попробуйте применить комманду ',
+                $this->logger->critical(
+                    'Ошибка при создании директории. Попробуйте применить комманду ',
                     [
-                        'chown -R unit:unit '.$this->upload
-                    ]);
+                        'chown -R unit:unit '.$uploadDir
+                    ]
+                );
 
                 return 'Ошибка при создании директории.';
             }
         }
+
 
         $filename = [];
 
@@ -115,7 +128,6 @@ final class ProductSignPdfHandler
 
             /** Валидация файла  */
             $this->validatorCollection->add($file->pdf);
-
         }
 
         /** Валидация всех объектов */
@@ -128,10 +140,19 @@ final class ProductSignPdfHandler
 
             return $this->validatorCollection->getErrorUniqid();
         }
+        /** @var ProductSignPdfMessage $message */
 
         /* Отправляем сообщение в шину для обработки файлов */
         $this->messageDispatch->dispatch(
-            message: new ProductSignPdfMessage($command->getUsr(), $command->getProfile(), $command->isPurchase()),
+            message: new ProductSignPdfMessage(
+                $command->getUsr(),
+                $command->getProfile(),
+                $command->getProduct(),
+                $command->getOffer(),
+                $command->getVariation(),
+                $command->getModification(),
+                $command->isPurchase()
+            ),
             transport: 'product-sign'
         );
 
