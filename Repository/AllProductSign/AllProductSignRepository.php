@@ -507,7 +507,13 @@ final class AllProductSignRepository implements AllProductSignInterface
         {
             $dbal
                 ->createSearchQueryBuilder($this->search)
-                ->addSearchLike('code.code');
+                ->addSearchLike('code.code')
+                ->addSearchLike('orders.number')
+                ->addSearchLike('product_modification.article')
+                ->addSearchLike('product_variation.article')
+                ->addSearchLike('product_offer.article')
+                ->addSearchLike('product_info.article')
+            ;
         }
 
         $dbal->orderBy('modify.mod_date', 'DESC');

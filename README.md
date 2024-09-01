@@ -1,6 +1,6 @@
 # BaksDev Product Sign
 
-[![Version](https://img.shields.io/badge/version-7.1.8-blue)](https://github.com/baks-dev/products-sign/releases)
+[![Version](https://img.shields.io/badge/version-7.1.9-blue)](https://github.com/baks-dev/products-sign/releases)
 ![php 8.3+](https://img.shields.io/badge/php-min%208.3-red.svg)
 
 Модуль Честный знак продукции
@@ -23,6 +23,19 @@ $ sudo chown -R unit:unit <path_to_project>/public/upload/product_sign_code
 ```bash
 sudo apt install pdftk texlive-extra-utils
 ```
+
+разрешить работу с PDF, изменив в файле /etc/ImageMagick-6/policy.xml и перезапустить web-сервер
+
+```html
+<policy domain="coder" rights="none" pattern="PDF"/>
+```
+на
+```html
+<policy domain="coder" rights="read|write" pattern="PDF" />
+```
+
+
+
 
 ## Дополнительно
 
