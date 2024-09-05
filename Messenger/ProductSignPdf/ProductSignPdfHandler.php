@@ -26,6 +26,9 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Messenger\ProductSignPdf;
 
 use BaksDev\Barcode\Reader\BarcodeRead;
+use BaksDev\Barcode\Writer\BarcodeFormat;
+use BaksDev\Barcode\Writer\BarcodeType;
+use BaksDev\Barcode\Writer\BarcodeWrite;
 use BaksDev\Core\Doctrine\ORMQueryBuilder;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Core\Validator\ValidatorCollectionInterface;
@@ -77,18 +80,6 @@ final class ProductSignPdfHandler
     ) {
 
         $this->logger = $productsSignLogger;
-
-
-        //        $this->existsProductSignCode = $existsProductSignCode;
-        //        $this->productSignHandler = $productSignHandler;
-        //        $this->elasticGetIndex = $elasticGetIndex;
-        //        $this->productByModification = $productByModification;
-        //        $this->purchaseProductStockHandler = $purchaseProductStockHandler;
-        //
-        //        $this->PDFParser = new Parser();
-        //
-        //        $this->Imagick = new Imagick();
-        //        $this->Imagick->setResolution(200, 200);
     }
 
     public function __invoke(ProductSignPdfMessage $message): void
@@ -129,9 +120,6 @@ final class ProductSignPdfHandler
         // Директория загрузки файла PDF
         $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
 
-        $Imagick = new Imagick();
-
-        $counter = 0;
 
         foreach(new DirectoryIterator($uploadDir) as $SignFile)
         {
@@ -140,17 +128,8 @@ final class ProductSignPdfHandler
                 continue;
             }
 
-            $pdfPath = $SignFile->getPathname();
-
-
-            $PDFParser = new Parser();
-            $pdf = $PDFParser->parseFile($pdfPath);
-            $pages = $pdf->getPages();
-
-
-            $Imagick->setResolution(400, 400);
-            $Imagick->readImage($pdfPath);
-
+            $counter = 0;
+            $errors = 0;
 
             /** Создаем предварительно закупку для заполнения продукции */
             if($message->isPurchase() && $message->getProfile())
@@ -159,7 +138,6 @@ final class ProductSignPdfHandler
                 $PurchaseNumber = number_format(microtime(true) * 100, 0, '.', '.');
                 $PurchaseProductStockDTO->setNumber($PurchaseNumber);
             }
-
 
             /** Директория загрузки файла с кодом */
 
@@ -187,15 +165,26 @@ final class ProductSignPdfHandler
             /** Если директория загрузки не найдена - создаем с правами 0700 */
             $this->filesystem->exists($dirCode) ?: $this->filesystem->mkdir($dirCode);
 
-
             /** Генерируем идентификатор группы для отмены */
             $part = new ProductSignUid();
 
-            foreach($pages as $number => $page)
+            /**
+             * Открываем PDF для подсчета страниц
+             */
+            $pdfPath = $SignFile->getPathname();
+            $Imagick = new Imagick();
+            $Imagick->setResolution(500, 500);
+            $Imagick->readImage($pdfPath);
+            $pages = $Imagick->getNumberImages(); // количество страниц в файле
+
+            /** Удаляем после обработки файл PDF */
+            $this->filesystem->remove($pdfPath);
+
+            for($number = 0; $number < $pages; $number++)
             {
                 $fileTemp = $dirCode.uniqid('', true).'.png';
 
-                /** Преобразуем PDF страницу в PNG и сохраняем временно для расчета  */
+                /** Преобразуем PDF страницу в PNG и сохраняем временно для расчета дайджеста md5 */
                 $Imagick->setIteratorIndex($number);
                 $Imagick->setImageFormat('png');
                 $Imagick->writeImage($fileTemp);
@@ -206,9 +195,8 @@ final class ProductSignPdfHandler
                 $fileMove = $dirMove.'image.png';
 
 
-                /** Если директория не найдена - создаем  */
+                /** Если директория для перемещения не найдена - создаем  */
                 $this->filesystem->exists($dirMove) ?: $this->filesystem->mkdir($dirMove);
-
 
                 /**
                  * Перемещаем в указанную директорию если файла не существует
@@ -216,19 +204,48 @@ final class ProductSignPdfHandler
                  */
                 $this->filesystem->exists($fileMove) === true ? $this->filesystem->remove($fileTemp) : $this->filesystem->rename($fileTemp, $fileMove);
 
-                /** Считываем честный знак */
-                $decode = $this->barcodeRead->decode($fileMove);
-                $code = $decode->getText();
-
-                /** Сохраняем чистый знак */
+                /**
+                 * Создаем для сохранения честный знак
+                 * в случае ошибки сканирования - присваивается статус с ошибкой
+                 */
                 $ProductSignDTO = new ProductSignDTO();
                 $ProductSignDTO->setProfile($message->getProfile());
 
+
+                /** Сканируем честный знак */
+                $decode = $this->barcodeRead->decode($fileMove);
+                $code = $decode->getText();
+
                 if($decode->isError())
                 {
-                    $code = uniqid('error_', true);
-                    $ProductSignDTO->setStatus(ProductSignStatusError::class);
+                    /** Пробуем обрезать изображение по углу и просканировать повторно */
+                    $cropWidth = 450;
+                    $cropHeight = 500;
+
+                    $x = 55; // Позиция по оси X
+                    $y = 200; // Позиция по оси Y
+
+                    // Обрезаем изображение
+                    $Imagick->cropImage($cropWidth, $cropHeight, $x, $y);
+                    $Imagick->writeImage($fileMove);
+
+                    /** Пробуем считать честный знак с обрезанного файла */
+                    $decode = $this->barcodeRead->decode($fileMove);
+                    $code = $decode->getText();
+
+                    if($decode->isError())
+                    {
+                        $code = uniqid('error_', true);
+                        $ProductSignDTO->setStatus(ProductSignStatusError::class);
+                    }
                 }
+
+                $decode->isError() ? ++$errors : ++$counter;
+
+
+                //$cleanedString = preg_replace('/\((\d+)\)/', '$1', $code);
+
+                /** Присваиваем результат сканера */
 
                 $ProductSignCodeDTO = $ProductSignDTO->getCode();
                 $ProductSignCodeDTO->setCode($code);
@@ -247,7 +264,7 @@ final class ProductSignPdfHandler
 
                 if(!$handle instanceof ProductSign)
                 {
-                    if($handle !== false)
+                    if($handle === false)
                     {
                         continue;
                     }
@@ -266,8 +283,6 @@ final class ProductSignPdfHandler
                         new CDNUploadImageMessage($handle->getId(), ProductSignCode::class, $md5),
                         transport: 'files-res'
                     );
-
-                    $counter++;
                 }
 
                 /** Создаем закупку */
@@ -316,19 +331,29 @@ final class ProductSignPdfHandler
                 }
             }
 
-            $Imagick->clear();
-            $Imagick->destroy();
-
-            /** Удаляем после обработки файл PDF */
-            $this->filesystem->remove($pdfPath);
-
             /** Сохраняем закупку */
             if($message->isPurchase() && $message->getProfile() && !$PurchaseProductStockDTO->getProduct()->isEmpty())
             {
                 $this->purchaseProductStockHandler->handle($PurchaseProductStockDTO);
             }
-        }
 
-        $this->logger->info(sprintf('products-sign: Всего добавлено %s честных знаков', $counter));
+            $Imagick->clear();
+            $Imagick->destroy();
+
+            if($errors > 0)
+            {
+                $this->logger->critical(sprintf(
+                    'products-sign: Всего добавлено %s из %s честных знаков, c ошибками %s',
+                    $counter,
+                    $pages,
+                    $errors
+                ));
+            }
+            else
+            {
+                $this->logger->info(sprintf('Всего добавлено %s из %s честных знаков', $counter, $pages));
+            }
+
+        }
     }
 }

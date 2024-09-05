@@ -153,7 +153,7 @@ final class ProductSignPdfHandler
                 $command->getModification(),
                 $command->isPurchase()
             ),
-            transport: 'product-sign'
+            transport: 'products-sign'
         );
 
         return true;
