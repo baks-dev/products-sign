@@ -44,9 +44,10 @@ final class PdfController extends AbstractController
     public function news(
         Request $request,
         ProductSignPdfHandler $ProductSignHandler,
-    ): Response
-    {
-        $ProductSignPdfDTO = new ProductSignPdfDTO($this->getUsr()?->getId(), $this->getProfileUid());
+    ): Response {
+
+        $ProductSignPdfDTO = new ProductSignPdfDTO($this->getUsr()?->getId());
+        $ProductSignPdfDTO->setProfile($this->getProfileUid());
 
 
         // Форма
@@ -64,8 +65,7 @@ final class PdfController extends AbstractController
 
             $handle = $ProductSignHandler->handle($ProductSignPdfDTO);
 
-            $this->addFlash
-            (
+            $this->addFlash(
                 'page.pdf',
                 $handle === true ? 'success.pdf' : 'danger.pdf',
                 'products-sign.admin'
