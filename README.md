@@ -1,6 +1,6 @@
 # BaksDev Product Sign
 
-[![Version](https://img.shields.io/badge/version-7.1.11K-blue)](https://github.com/baks-dev/products-sign/releases)
+[![Version](https://img.shields.io/badge/version-7.1.11-blue)](https://github.com/baks-dev/products-sign/releases)
 ![php 8.3+](https://img.shields.io/badge/php-min%208.3-red.svg)
 
 Модуль Честный знак продукции
