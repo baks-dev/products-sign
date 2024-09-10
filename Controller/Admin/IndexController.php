@@ -71,14 +71,13 @@ final class IndexController extends AbstractController
             'action' => $this->generateUrl('products-sign:admin.index'),
         ]);
         $filterForm->handleRequest($request);
-        !$filterForm->isSubmitted() ?: $this->redirectToReferer();
 
 
         // Получаем список
         $ProductSign = $allProductSign
             ->search($search)
             ->filter($filter)
-            ->findPaginator($this->getUsr()?->getId(), $this->getProfileUid());
+            ->findPaginator();
 
         return $this->render(
             [

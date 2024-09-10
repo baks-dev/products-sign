@@ -58,27 +58,22 @@ use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Users\Profile\UserProfile\Entity\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
+use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
 
 final class AllProductSignRepository implements AllProductSignInterface
 {
-    private PaginatorInterface $paginator;
-
-    private DBALQueryBuilder $DBALQueryBuilder;
-
     private ?SearchDTO $search = null;
 
     private ?ProductFilterDTO $filter = null;
 
     public function __construct(
-        DBALQueryBuilder $DBALQueryBuilder,
-        PaginatorInterface $paginator,
-    ) {
-        $this->paginator = $paginator;
-        $this->DBALQueryBuilder = $DBALQueryBuilder;
-    }
+        private readonly DBALQueryBuilder $DBALQueryBuilder,
+        private readonly PaginatorInterface $paginator,
+        private readonly UserProfileTokenStorageInterface $userProfileTokenStorage,
+    ) {}
 
     public function search(SearchDTO $search): self
     {
@@ -93,26 +88,15 @@ final class AllProductSignRepository implements AllProductSignInterface
     }
 
     /** Метод возвращает пагинатор ProductSign */
-    public function findPaginator(
-        User|UserUid $user,
-        UserProfileUid $profile
-    ): PaginatorInterface {
+    public function findPaginator(): PaginatorInterface
+    {
+        $user = $this->userProfileTokenStorage->getUser();
 
-        $user = $user instanceof User ? $user->getId() : $user;
+        $profile = $this->userProfileTokenStorage->getProfile();
 
         $dbal = $this->DBALQueryBuilder
             ->createQueryBuilder(self::class)
             ->bindLocal();
-
-        //        $dbal
-        //            ->addSelect('code.code AS sign_code')
-        //            ->from(
-        //                ProductSignCode::class,
-        //                'code'
-        //            )
-        //            ->andWhere('code.usr = :usr')
-        //            ->setParameter('usr', $user, UserUid::TYPE);
-
 
         $dbal
             ->from(
@@ -138,7 +122,6 @@ final class AllProductSignRepository implements AllProductSignInterface
             ->addSelect("CONCAT('/upload/".$dbal->table(ProductSignCode::class)."' , '/', code.name) AS sign_code_name")
             ->addSelect('code.ext AS sign_code_ext')
             ->addSelect('code.cdn AS sign_code_cdn')
-
             ->leftJoin(
                 'invariable',
                 ProductSignCode::class,
@@ -473,10 +456,6 @@ final class AllProductSignRepository implements AllProductSignInterface
             );
 
 
-
-
-
-
         /**
          * Фильтр по свойства продукта
          */
@@ -512,8 +491,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 ->addSearchLike('product_modification.article')
                 ->addSearchLike('product_variation.article')
                 ->addSearchLike('product_offer.article')
-                ->addSearchLike('product_info.article')
-            ;
+                ->addSearchLike('product_info.article');
         }
 
         $dbal->orderBy('modify.mod_date', 'DESC');

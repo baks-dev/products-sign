@@ -123,7 +123,9 @@
                         attr: { 'data-select' : 'select2' } }) }}
                 </div>
 
-                <div class="w-100 d-none" id="product">
+
+
+                <div class="w-100 {{ form.product.vars.data ?: 'd-none' }}" id="product">
                     {{ form_row(form.product, {
                         label: 'Продукт',
                         placeholder: 'Выберите продукцию из списка...',
@@ -131,15 +133,15 @@
                     }) }}
                 </div>
 
-                <div id="offer" class="w-100 d-none">
+                <div id="offer" class="w-100 {{ form.offer.vars.data ?: 'd-none' }}">
                     {{ form_row(form.offer) }}
                 </div>
 
-                <div id="variation" class="w-100 d-none">
+                <div id="variation" class="w-100 {{ form.variation.vars.data ?: 'd-none' }}">
                     {{ form_row(form.variation) }}
                 </div>
 
-                <div id="modification" class="w-100 d-none">
+                <div id="modification" class="w-100 {{ form.modification.vars.data ?: 'd-none' }}">
                     <div>{{ form_row(form.modification) }}</div>
                 </div>
 

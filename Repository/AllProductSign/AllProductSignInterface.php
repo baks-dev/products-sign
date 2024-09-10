@@ -33,7 +33,7 @@ use BaksDev\Users\User\Type\Id\UserUid;
 interface AllProductSignInterface
 {
     /** Метод возвращает пагинатор ProductSign */
-    public function findPaginator(User|UserUid $user, UserProfileUid $profile): PaginatorInterface;
+    public function findPaginator(): PaginatorInterface;
 
     public function search(SearchDTO $search): self;
 

@@ -124,7 +124,17 @@ final class ProductSignPdfHandler
             $name = uniqid('', true).'.pdf';
             $filename[] = $name;
 
-            $file->pdf->move($uploadDir, $name);
+
+            /**
+             * Для запуска pdfcrop от пользователя sudo:
+             * sudo visudo
+             * unit ALL=(ALL) NOPASSWD: /usr/bin/pdfcrop
+             * Ctrl+X -> Y
+             */
+
+            $process = new Process(['sudo', 'pdfcrop', $file->pdf->getRealPath(), $uploadDir.$name]);
+            $process->mustRun();
+
 
             /** Валидация файла  */
             $this->validatorCollection->add($file->pdf);

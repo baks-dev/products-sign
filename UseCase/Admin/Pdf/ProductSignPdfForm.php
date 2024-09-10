@@ -36,7 +36,9 @@ use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileChoice\UserProfileChoiceInterface;
+use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Repository\UserTokenStorage\UserTokenStorageInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
@@ -62,6 +64,7 @@ final class ProductSignPdfForm extends AbstractType
         private readonly ProductVariationChoiceInterface $productVariationChoice,
         private readonly ProductModificationChoiceInterface $modificationChoice,
         private readonly UserProfileChoiceInterface $userProfileChoice,
+        private readonly UserProfileTokenStorageInterface $userProfileTokenStorage,
     ) {}
 
 
@@ -113,13 +116,13 @@ final class ProductSignPdfForm extends AbstractType
                 $data = $event->getData();
                 $form = $event->getForm();
 
+                $user = $this->userProfileTokenStorage->getUser();
+                $data->setUsr($user);
+
+                $profile = $this->userProfileTokenStorage->getProfile();
+                $data->setProfile($profile);
 
                 $profiles = $this->userProfileChoice->getActiveUserProfile($data->getUsr());
-
-                if(count($profiles) === 1)
-                {
-                    $data->setProfile(current($profiles));
-                }
 
                 $form
                     ->add('profile', ChoiceType::class, [
@@ -134,6 +137,27 @@ final class ProductSignPdfForm extends AbstractType
                         'label' => false,
                         'required' => false,
                     ]);
+
+
+                if($data->getCategory())
+                {
+                    $this->formProductModifier($event->getForm(), $data->getCategory());
+
+                    if($data->getProduct())
+                    {
+                        $this->formOfferModifier($event->getForm(), $data->getProduct());
+
+                        if($data->getOffer())
+                        {
+                            $this->formVariationModifier($event->getForm(), $data->getOffer());
+
+                            if($data->getVariation())
+                            {
+                                $this->formModificationModifier($event->getForm(), $data->getVariation());
+                            }
+                        }
+                    }
+                }
             }
         );
 
@@ -169,7 +193,6 @@ final class ProductSignPdfForm extends AbstractType
                 }
             )
         );
-
 
         /**
          * Торговые предложения

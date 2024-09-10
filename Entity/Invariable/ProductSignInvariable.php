@@ -45,7 +45,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'product_sign_invariable')]
-#[ORM\Index(columns: ['product', 'offer', 'variation', 'modification'])]
+#[ORM\Index(columns: ['usr', 'product', 'offer', 'variation', 'modification'])]
 class ProductSignInvariable extends EntityReadonly
 {
     /** ID Product */

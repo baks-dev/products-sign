@@ -58,6 +58,7 @@ use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
 use ReflectionClass;
 use RuntimeException;
+use setasign\Fpdi\Fpdi;
 use Smalot\PdfParser\Parser;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
@@ -167,6 +168,7 @@ final class ProductSignPdfHandler
 
             /** Генерируем идентификатор группы для отмены */
             $part = new ProductSignUid();
+
 
             /**
              * Открываем PDF для подсчета страниц

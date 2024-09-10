@@ -76,14 +76,12 @@ final class ProductSignPdfDTO
     /** Добавить лист закупки */
     private bool $purchase = false;
 
-    public function __construct(UserUid $usr)
+    public function __construct()
     {
         $this->files = new ArrayCollection();
 
         $ProductSignFileDTO = new ProductSignFile\ProductSignFileDTO();
         $this->addFiles($ProductSignFileDTO);
-
-        $this->usr = $usr;
     }
 
     /**
@@ -113,6 +111,14 @@ final class ProductSignPdfDTO
     {
         return $this->usr;
     }
+
+    public function setUsr(UserUid $usr): self
+    {
+        $this->usr = $usr;
+        return $this;
+    }
+
+
 
     /**
      * Purchase
@@ -151,7 +157,7 @@ final class ProductSignPdfDTO
         return $this->product;
     }
 
-    public function setProduct(ProductUid $product): self
+    public function setProduct(?ProductUid $product): self
     {
         $this->product = $product;
         return $this;
