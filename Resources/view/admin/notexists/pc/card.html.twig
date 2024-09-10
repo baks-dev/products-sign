@@ -52,7 +52,7 @@
                 </div>
             </div>
 
-            <div class="card-body d-flex flex-column p-2">
+            <div class="card-body d-flex flex-column p-2 small">
 
                 <div class="text-truncate bg-contain"
                      role="tooltip"
@@ -114,44 +114,44 @@
 
                             {% if item.product_reserve %}
                                 <div class="text-muted">
-                                <span class="small fw-bolder text-primary pointer"
+                                <strong class="text-primary pointer"
                                       style="cursor: default;"
                                       data-bs-toggle="tooltip"
                                       data-bs-placement="bottom"
                                       data-bs-delay='{"show":100,"hide":300}'
                                       title="Наличие"
                                 >{{ item.product_quantity }}
-                                </span>
+                                </strong>
 
                                     &nbsp;|&nbsp;
 
-                                    <span class="small fw-bolder text-danger"
+                                    <strong class="text-danger pointer"
                                           style="cursor: default;"
                                           data-bs-toggle="tooltip"
                                           data-bs-placement="bottom"
                                           data-bs-delay='{"show":100,"hide":300}'
                                           title="Резерв"
-                                    >{{ item.product_reserve }}</span>
+                                    >{{ item.product_reserve }}</strong>
 
                                     &nbsp;|&nbsp;
 
-                                    <span class="small fw-bolder text-success"
+                                    <strong class="text-success pointer"
                                           style="cursor: default;"
                                           data-bs-toggle="tooltip"
                                           data-bs-placement="bottom"
                                           data-bs-delay='{"show":100,"hide":300}'
                                           title="Доступно"
-                                    >{{ item.product_quantity - item.product_reserve }}</span>
+                                    >{{ item.product_quantity - item.product_reserve }}</strong>
                                 </div>
                             {% else %}
 
-                                <span class="small fw-bolder text-success"
+                                <strong class="text-success pointer"
                                       style="cursor: default;"
                                       data-bs-toggle="tooltip"
                                       data-bs-placement="bottom"
                                       data-bs-delay='{"show":100,"hide":300}'
                                       title="Доступно"
-                                ><small class="text-muted">доступно </small> &nbsp; {{ item.product_quantity }}</span>
+                                ><small class="text-muted">доступно </small> &nbsp; {{ item.product_quantity }}</strong>
 
                             {% endif %}
 
@@ -183,8 +183,7 @@
 
 
                         {% else %}
-                            &nbsp; <span class="small text-danger fw-bold">
-                            <small>нет в наличии</small></span>
+                            &nbsp; <strong class="text-danger small">нет в наличии</strong>
                         {% endif %}
 
 
