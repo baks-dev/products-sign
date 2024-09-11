@@ -590,8 +590,8 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
         {
             $dbal
                 ->createSearchQueryBuilder($this->search)
-                ->addSearchLike('code.code')
-                ->addSearchLike('orders.number')
+                //->addSearchLike('code.code')
+                //->addSearchLike('orders.number')pro
                 ->addSearchLike('product_modification.article')
                 ->addSearchLike('product_variation.article')
                 ->addSearchLike('product_offer.article')

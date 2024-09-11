@@ -36,6 +36,11 @@ class ProductSignStatusProcess implements ProductSignStatusInterface
 {
     public const STATUS = 'process';
 
+    public function __toString(): string
+    {
+        return self::STATUS;
+    }
+
     public function getValue(): string
     {
         return self::STATUS;

@@ -36,6 +36,11 @@ class ProductSignStatusCancel implements ProductSignStatusInterface
 {
     public const STATUS = 'cancel';
 
+    public function __toString(): string
+    {
+        return self::STATUS;
+    }
+
     public function getValue(): string
     {
         return self::STATUS;

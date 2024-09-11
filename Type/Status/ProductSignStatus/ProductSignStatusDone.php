@@ -36,6 +36,11 @@ class ProductSignStatusDone implements ProductSignStatusInterface
 {
     public const STATUS = 'done';
 
+    public function __toString(): string
+    {
+        return self::STATUS;
+    }
+
     public function getValue(): string
     {
         return self::STATUS;

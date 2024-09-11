@@ -56,18 +56,23 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
+use BaksDev\Products\Sign\Forms\ProductSignFilter\ProductSignFilterDTO;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Users\Profile\UserProfile\Entity\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
+use Doctrine\DBAL\Types\Types;
 
 final class AllProductSignRepository implements AllProductSignInterface
 {
     private ?SearchDTO $search = null;
 
     private ?ProductFilterDTO $filter = null;
+
+    private ?ProductSignFilterDTO $status = null;
 
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder,
@@ -87,9 +92,16 @@ final class AllProductSignRepository implements AllProductSignInterface
         return $this;
     }
 
+    public function status(ProductSignFilterDTO $status): static
+    {
+        $this->status = $status;
+        return $this;
+    }
+
     /** Метод возвращает пагинатор ProductSign */
     public function findPaginator(): PaginatorInterface
     {
+
         $user = $this->userProfileTokenStorage->getUser();
 
         $profile = $this->userProfileTokenStorage->getProfile();
@@ -141,6 +153,13 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'event.id = main.event'
             );
 
+        if($this->status?->getStatus())
+        {
+            $dbal
+                ->andWhere('event.status = :status')
+                ->setParameter('status', $this->status->getStatus(), ProductSignStatus::TYPE);
+        }
+
 
         if($this->filter->getAll() === false)
         {
@@ -157,6 +176,31 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'modify',
                 'modify.event = main.event'
             );
+
+
+        if($this->status?->getFrom() && $this->status?->getTo())
+        {
+            $dbal
+                ->andWhere('DATE(modify.mod_date) BETWEEN :date_from AND :date_to')
+                ->setParameter('date_from', $this->status->getFrom(), Types::DATE_IMMUTABLE)
+                ->setParameter('date_to', $this->status->getTo(), Types::DATE_IMMUTABLE);
+        }
+        else
+        {
+            if($this->status?->getFrom())
+            {
+                $dbal
+                    ->andWhere('DATE(modify.mod_date) >= :date_from')
+                    ->setParameter('date_from', $this->status->getFrom(), Types::DATE_IMMUTABLE);
+            }
+
+            if($this->status?->getTo())
+            {
+                $dbal
+                    ->andWhere('DATE(modify.mod_date) <= :date_to')
+                    ->setParameter('date_to', $this->status->getTo(), Types::DATE_IMMUTABLE);
+            }
+        }
 
 
         $dbal
@@ -424,14 +468,14 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'category_info.event = category.event'
             );
 
-        $dbal
+        /*$dbal
             ->addSelect('category_trans.name AS category_name')
             ->leftJoin(
                 'category',
                 CategoryProductTrans::TABLE,
                 'category_trans',
                 'category_trans.event = category.event AND category_trans.local = :local'
-            );
+            );*/
 
 
         /** Ответственное лицо */

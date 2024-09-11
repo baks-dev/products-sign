@@ -29,6 +29,8 @@ use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Form\Search\SearchForm;
 use BaksDev\Products\Product\Forms\ProductFilter\Admin\ProductFilterDTO;
 use BaksDev\Products\Product\Forms\ProductFilter\Admin\ProductFilterForm;
+use BaksDev\Products\Sign\Forms\ProductSignFilter\ProductSignFilterDTO;
+use BaksDev\Products\Sign\Forms\ProductSignFilter\ProductSignFilterForm;
 use BaksDev\Products\Sign\Repository\AllProductSign\AllProductSignInterface;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Symfony\Component\HttpFoundation\Request;
@@ -72,18 +74,31 @@ final class IndexController extends AbstractController
         ]);
         $filterForm->handleRequest($request);
 
+        /**
+         * Фильтр статусам и даже
+         */
+        $filterSign = new ProductSignFilterDTO();
+        $filterSignForm = $this->createForm(ProductSignFilterForm::class, $filterSign, [
+            'action' => $this->generateUrl('products-sign:admin.index'),
+        ]);
+        $filterSignForm->handleRequest($request);
+
 
         // Получаем список
         $ProductSign = $allProductSign
             ->search($search)
             ->filter($filter)
+            ->status($filterSign)
             ->findPaginator();
+
+
 
         return $this->render(
             [
                 'query' => $ProductSign,
                 'search' => $searchForm->createView(),
                 'filter' => $filterForm->createView(),
+                'status' => $filterSignForm->createView(),
             ]
         );
     }

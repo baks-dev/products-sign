@@ -74,7 +74,7 @@ setTimeout(function init_wUgQTMHU() {
                 }
                 return false;
             });
-        
+
         return;
     }
 

@@ -71,8 +71,6 @@
             {% endif %}
 
 
-
-
             {# Обложка #}
             {% set image_path = '/assets/img/blank.svg' %}
 
@@ -83,7 +81,7 @@
                 {% set image_path = img_host ~ img_dir ~ img_file %}
             {% endif %}
 
-            <div class="icon rounded-3 lazy bg-contain p-1"
+            <div class="icon rounded-3 lazy bg-cover p-1"
                  data-bg="{{ image_path }}"
                  style="width: 45px; height: 45px;"
             ></div>
@@ -97,7 +95,7 @@
                     offer: item.product_offer_value,
                     variation: item.product_variation_value,
                     modification: item.product_modification_value
-                }) }} "
+                }) }}"
                    class="text-decoration-none mb-1 fw-bolder text-muted"
                    target="_detail"
                 >
@@ -164,6 +162,8 @@
         {# {% if item.sign_status != 'new' %} #}
         <span class="{{ item.sign_date|date('d.m.Y') == date('now')|date('d.m.Y') ? 'fw-bolder' }}">
                 {{ item.sign_date|format_datetime(pattern="d MMMM HH:mm") }}
+
+            {{ dump(item.sign_date) }}
             </span>
         {# {% endif %} #}
     </td>

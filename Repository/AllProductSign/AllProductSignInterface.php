@@ -26,6 +26,7 @@ namespace BaksDev\Products\Sign\Repository\AllProductSign;
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Services\Paginator\PaginatorInterface;
 use BaksDev\Products\Product\Forms\ProductFilter\Admin\ProductFilterDTO;
+use BaksDev\Products\Sign\Forms\ProductSignFilter\ProductSignFilterDTO;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
@@ -38,4 +39,6 @@ interface AllProductSignInterface
     public function search(SearchDTO $search): self;
 
     public function filter(ProductFilterDTO $filter): self;
+
+    public function status(ProductSignFilterDTO $status): self;
 }

@@ -36,6 +36,11 @@ class ProductSignStatusNew implements ProductSignStatusInterface
 {
     public const STATUS = 'new';
 
+    public function __toString(): string
+    {
+        return self::STATUS;
+    }
+
     public function getValue(): string
     {
         return self::STATUS;
