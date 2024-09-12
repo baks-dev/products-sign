@@ -24,7 +24,7 @@
     </td>
 
     <td class="align-middle w-50">
-        <div class="d-flex gap-3">
+        <div class="d-flex align-items-center gap-3">
 
             {# Обложка #}
             {% set code_path = '/assets/img/blank.svg' %}
@@ -66,8 +66,6 @@
                     </a>
 
                 </div>
-
-
             {% endif %}
 
 
@@ -100,7 +98,7 @@
                    target="_detail"
                 >
 
-                    {{ item.product_name }}
+                    {{ item.product_name }}<br>
 
                     {# Значение множественного варианта ТП #}
                     {{ item.product_variation_value|call_twig_func(item.product_variation_reference~'_render')
@@ -162,8 +160,6 @@
         {# {% if item.sign_status != 'new' %} #}
         <span class="{{ item.sign_date|date('d.m.Y') == date('now')|date('d.m.Y') ? 'fw-bolder' }}">
                 {{ item.sign_date|format_datetime(pattern="d MMMM HH:mm") }}
-
-            {{ dump(item.sign_date) }}
             </span>
         {# {% endif %} #}
     </td>
