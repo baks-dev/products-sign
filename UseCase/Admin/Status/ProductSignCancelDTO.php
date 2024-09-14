@@ -60,7 +60,7 @@ final readonly class ProductSignCancelDTO implements ProductSignEventInterface
      * ID продукции в заказ
      */
 
-    private ?OrderProductUid $ord;
+    private null $ord;
 
 
     public function __construct(UserProfileUid $profile)
@@ -69,6 +69,8 @@ final readonly class ProductSignCancelDTO implements ProductSignEventInterface
 
         /** В случае отмены всегда присваиваем статус New «Новый» и сбрасываем идентификтор продукции в заказе */
         $this->status = new ProductSignStatus(ProductSignStatusNew::class);
+
+        /** Всегда сбрасываем идентификатор заказа */
         $this->ord = null;
     }
 
@@ -104,7 +106,7 @@ final readonly class ProductSignCancelDTO implements ProductSignEventInterface
     /**
      * Ord
      */
-    public function getOrd(): ?OrderProductUid
+    public function getOrd(): null
     {
         return $this->ord;
     }

@@ -33,13 +33,20 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use InvalidArgumentException;
 
 final class ProductSignByOrder implements ProductSignByOrderInterface
 {
     private OrderUid|false $order = false;
 
-    public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder) {}
+    private ProductSignStatus $status;
+
+    public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder)
+    {
+        /** По умолчанию возвращаем знаки со статусом Process «В процессе» */
+        $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
+    }
 
     public function forOrder(Order|OrderUid|string $order): self
     {
@@ -59,9 +66,20 @@ final class ProductSignByOrder implements ProductSignByOrderInterface
     }
 
     /**
-     * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
+     * Возвращает знаки со статусом Done «Выполнен»
      */
-    public function findAll(): array|bool
+    public function withStatusDone(): self
+    {
+        $this->status = new ProductSignStatus(ProductSignStatusDone::class);
+        return $this;
+    }
+
+
+    /**
+     * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
+     * По умолчанию возвращает знаки со статусом Process «В процессе»
+     */
+    public function execute(): array|false
     {
         if($this->order === false)
         {
@@ -81,7 +99,7 @@ final class ProductSignByOrder implements ProductSignByOrderInterface
 
         $dbal
             ->andWhere('event.status = :status')
-            ->setParameter('status', ProductSignStatusProcess::class, ProductSignStatus::TYPE);
+            ->setParameter('status', $this->status, ProductSignStatus::TYPE);
 
         $dbal->join(
             'event',
@@ -102,6 +120,7 @@ final class ProductSignByOrder implements ProductSignByOrderInterface
             )
             ->addSelect("code.ext AS code_ext")
             ->addSelect("code.cdn AS code_cdn")
+            ->addSelect("code.event AS code_event")
             ->leftJoin(
                 'event',
                 ProductSignCode::class,
@@ -112,6 +131,6 @@ final class ProductSignByOrder implements ProductSignByOrderInterface
 
         return $dbal
             // ->enableCache('Namespace', 3600)
-            ->fetchAllAssociative();
+            ->fetchAllAssociative() ?: false;
     }
 }

@@ -31,7 +31,13 @@ interface ProductSignByOrderInterface
     public function forOrder(Order|OrderUid|string $order): self;
 
     /**
-     * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
+     * Возвращает знаки со статусом Done «Выполнен»
      */
-    public function findAll(): array|bool;
+    public function withStatusDone(): self;
+
+    /**
+     * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
+     * По умолчанию возвращает знаки со статусом Process «В процессе»
+     */
+    public function execute(): array|false;
 }

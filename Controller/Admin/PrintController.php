@@ -46,7 +46,7 @@ final class PrintController extends AbstractController
 
         $codes = $productSignByOrder
             ->forOrder($order)
-            ->findAll();
+            ->execute();
 
         return $this->render(['codes' => $codes]);
     }
