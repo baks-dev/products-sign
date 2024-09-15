@@ -28,14 +28,12 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignSt
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 
-return static function (ContainerConfigurator $configurator): void {
+return static function (ContainerConfigurator $container): void {
 
-    $services = $configurator->services()
+    $services = $container->services()
         ->defaults()
         ->autowire()
-        ->autoconfigure()
-        ->public()
-    ;
+        ->autoconfigure();
 
     $NAMESPACE = BaksDevProductsSignBundle::NAMESPACE;
     $PATH = BaksDevProductsSignBundle::PATH;
@@ -43,15 +41,20 @@ return static function (ContainerConfigurator $configurator): void {
     $services->load($NAMESPACE, $PATH)
         ->exclude([
             $PATH.'{Entity,Resources,Type}',
-            $PATH.'**/*Message.php',
-            $PATH.'**/*DTO.php',
-        ])
-    ;
+            $PATH.'**'.DIRECTORY_SEPARATOR.'*Message.php',
+            $PATH.'**'.DIRECTORY_SEPARATOR.'*DTO.php',
+            $PATH.'**'.DIRECTORY_SEPARATOR.'*Test.php',
+        ]);
+
 
     /* Статусы заказов */
-    $services->load($NAMESPACE.'Type\Status\ProductSignStatus\\', $PATH.'Type/Status/ProductSignStatus');
+    $services->load(
+        $NAMESPACE.'Type\Status\ProductSignStatus\\',
+        $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'Status', 'ProductSignStatus']) //.'Type/Status/ProductSignStatus'
+    );
 
     /** @see https://symfony.com/doc/current/service_container/autowiring.html#dealing-with-multiple-implementations-of-the-same-type */
+
     $services->alias(ProductSignStatusInterface::class.' $productSignStatusNew', ProductSignStatusNew::class);
     $services->alias(ProductSignStatusInterface::class.' $productSignStatusDone', ProductSignStatusDone::class);
 

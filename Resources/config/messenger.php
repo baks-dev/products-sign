@@ -39,15 +39,12 @@ return static function (FrameworkConfig $framework) {
         ->delay(1000)
         ->maxDelay(0)
         ->multiplier(3) // увеличиваем задержку перед каждой повторной попыткой
-        ->service(null)
-
-    ;
+        ->service(null);
 
     $failure = $framework->messenger();
 
     $failure->transport('failed-products-sign')
         ->dsn('%env(MESSENGER_TRANSPORT_DSN)%')
-        ->options(['queue_name' => 'failed-products-sign'])
-    ;
+        ->options(['queue_name' => 'failed-products-sign']);
 
 };
