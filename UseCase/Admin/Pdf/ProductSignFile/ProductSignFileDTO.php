@@ -32,6 +32,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class ProductSignFileDTO
 {
     #[Assert\NotBlank]
-    #[Assert\File(maxSize: '1g', mimeTypes: ['application/pdf', 'application/x-pdf'])]
+    #[Assert\File(maxSize: '100m', mimeTypes: ['application/pdf', 'application/x-pdf'])]
     public ?File $pdf = null;
 }
