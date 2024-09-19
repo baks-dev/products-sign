@@ -89,7 +89,6 @@ final class ProductSignFilterForm extends AbstractType
             'input' => 'datetime_immutable',
         ]);
 
-
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
             function (FormEvent $event): void {
@@ -101,18 +100,27 @@ final class ProductSignFilterForm extends AbstractType
                     $this->session = $this->request->getSession();
                 }
 
+                if($this->session && $this->session->get('statusCode') === 307)
+                {
+                    $this->session->remove($this->sessionKey);
+                    $this->session = false;
+                }
+
+                if($this->session && (time() - $this->session->getMetadataBag()->getLastUsed()) > 300)
+                {
+                    $this->session->remove($this->sessionKey);
+                    $this->session = false;
+                }
+
                 if($this->session)
                 {
                     $sessionData = $this->request->getSession()->get($this->sessionKey);
                     $sessionJson = $sessionData ? base64_decode($sessionData) : false;
                     $sessionArray = $sessionJson !== false && json_validate($sessionJson) ? json_decode($sessionJson, true) : [];
 
-                   /* dump($sessionArray);*/
-
                     $data->setStatus($sessionArray['status'] ?? null);
                     $data->setFrom($sessionArray['from']['date'] ?? null);
                     $data->setTo($sessionArray['to']['date'] ?? null);
-
                 }
             }
         );
@@ -140,7 +148,6 @@ final class ProductSignFilterForm extends AbstractType
                     {
                         $sessionJson = json_encode($sessionArray);
                         $sessionData = base64_encode($sessionJson);
-
                         $this->request->getSession()->set($this->sessionKey, $sessionData);
                         return;
                     }
