@@ -185,10 +185,12 @@ final class ProductSignProcessByProductStocksPackage
                 {
 
                     $dataLogs[0] = self::class.':'.__LINE__;
-                    $dataLogs['ProductUid'] = (string) $product->getProduct();
-                    $dataLogs['ProductOfferConst'] = (string) $product->getOffer();
-                    $dataLogs['ProductVariationConst'] = (string) $product->getVariation();
-                    $dataLogs['ProductModificationConst'] = (string) $product->getModification();
+                    $dataLogs['usr'] = (string) $User;
+                    $dataLogs['profile'] = (string) $ProductStockEvent->getProfile();
+                    $dataLogs['product'] = (string) $product->getProduct();
+                    $dataLogs['offer'] = (string) $product->getOffer();
+                    $dataLogs['variation'] = (string) $product->getVariation();
+                    $dataLogs['modification'] = (string) $product->getModification();
 
                     $this->logger->warning('Честный знак на продукцию не найден', $dataLogs);
 

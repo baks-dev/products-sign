@@ -59,7 +59,6 @@ class ProductSignNewTest extends KernelTestCase
 
     public static function setUpBeforeClass(): void
     {
-
         // Бросаем событие консольной комманды
         $dispatcher = self::getContainer()->get(EventDispatcherInterface::class);
         $event = new ConsoleCommandEvent(new Command(), new StringInput(''), new NullOutput());
@@ -96,30 +95,31 @@ class ProductSignNewTest extends KernelTestCase
     public function testUseCase(): void
     {
         self::assertTrue(true);
-
         return;
 
-        if(self::$product)
-        {
-            /** @var ProductSignNewInterface $ProductSignNewInterface */
-            $ProductSignNewInterface = self::getContainer()->get(ProductSignNewInterface::class);
+        /** @var ProductSignNewInterface $ProductSignNewInterface */
+        $ProductSignNewInterface = self::getContainer()->get(ProductSignNewInterface::class);
 
-            $ProductSignEvent = $ProductSignNewInterface
-                ->forUser(self::$user)
-                ->forProfile(self::$profile)
-                ->forProduct(self::$product)
-                ->forOfferConst(self::$offer)
-                ->forVariationConst(self::$variation)
-                ->forModificationConst(self::$modification)
-                ->getOneProductSign();
+        // self::$user = "0191d360-1613-7d30-8859-f43991ffe926";
+        // self::$profile = "0191d362-a007-7d4b-863e-bdd8a5d9a28a";
+        // self::$product = "01876b4b-886d-7cff-a70e-b73559356089";
+        // self::$offer = "01878a7a-aa04-7c07-ab5c-426ad8b01ae0";
+        // self::$variation = "01878a7a-aa00-77a6-9f90-4dc47498a632";
+        // self::$modification = "01878a7a-a9ff-7e4f-8809-151e88674d80";
 
-            self::assertNotFalse($ProductSignEvent);
-        }
-        else
-        {
-            echo "В базе отсутствует «Честный знак»! ".self::class.':'.__LINE__.PHP_EOL;
-            self::assertTrue(true);
-        }
+        $ProductSignEvent = $ProductSignNewInterface
+            ->forUser(self::$user)
+            ->forProfile(self::$profile)
+            ->forProduct(self::$product)
+            ->forOfferConst(self::$offer)
+            ->forVariationConst(self::$variation)
+            ->forModificationConst(self::$modification)
+            ->getOneProductSign();
+
+        // dump($ProductSignEvent);
+
+        self::assertNotFalse($ProductSignEvent);
+
     }
 
 
