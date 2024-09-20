@@ -198,7 +198,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
         if($this->offer)
         {
             $orm
-                ->andWhere('invariable.offer = :offer')
+                ->andWhere('invariable.offer = :offer OR invariable.offer IS NULL')
                 ->setParameter('offer', $this->offer, ProductOfferConst::TYPE);
         }
         else
@@ -239,7 +239,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
 
         $orm
             ->select('event')
-            ->leftJoin(
+            ->join(
                 ProductSignEvent::class,
                 'event',
                 'WITH',
@@ -260,11 +260,8 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 ProductSignStatus::TYPE
             );
 
-        $orm->setMaxResults(1);
-
-
         $orm
-            ->join(
+            ->leftJoin(
                 ProductSignModify::class,
                 'modify',
                 'WITH',
