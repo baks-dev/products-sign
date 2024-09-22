@@ -65,6 +65,7 @@ use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use BaksDev\Users\Profile\UserProfile\Entity\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
@@ -410,15 +411,16 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
             );
 
 
-                $dbal->addSelect("
-        			COALESCE(
-                        NULLIF(product_modification_quantity.quantity, 0),
-                        NULLIF(product_variation_quantity.quantity, 0),
-                        NULLIF(product_offer_quantity.quantity, 0),
-                        NULLIF(product_price.quantity, 0),
-                        0
-                    ) AS product_quantity
-        		");
+        $dbal
+            ->addSelect('
+                COALESCE(
+                    NULLIF(product_modification_quantity.quantity, 0),
+                    NULLIF(product_variation_quantity.quantity, 0),
+                    NULLIF(product_offer_quantity.quantity, 0),
+                    NULLIF(product_price.quantity, 0),
+                    0
+                ) AS product_quantity
+            ');
 
 
         $dbal->addSelect("
@@ -433,96 +435,118 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
 
 
         /* Цена торгового предо жения */
-//        $dbal->leftJoin(
-//            'product_offer',
-//            ProductOfferPrice::class,
-//            'product_offer_price',
-//            'product_offer_price.offer = product_offer.id'
-//        );
-//
-//        /* Цена множественного варианта */
-//        $dbal->leftJoin(
-//            'product_variation',
-//            ProductVariationPrice::class,
-//            'product_variation_price',
-//            'product_variation_price.variation = product_variation.id'
-//        );
-//
-//        /* Цена модификации множественного варианта */
-//        $dbal->leftJoin(
-//            'product_modification',
-//            ProductModificationPrice::class,
-//            'product_modification_price',
-//            'product_modification_price.modification = product_modification.id'
-//        );
-
-
-
+        //        $dbal->leftJoin(
+        //            'product_offer',
+        //            ProductOfferPrice::class,
+        //            'product_offer_price',
+        //            'product_offer_price.offer = product_offer.id'
+        //        );
+        //
+        //        /* Цена множественного варианта */
+        //        $dbal->leftJoin(
+        //            'product_variation',
+        //            ProductVariationPrice::class,
+        //            'product_variation_price',
+        //            'product_variation_price.variation = product_variation.id'
+        //        );
+        //
+        //        /* Цена модификации множественного варианта */
+        //        $dbal->leftJoin(
+        //            'product_modification',
+        //            ProductModificationPrice::class,
+        //            'product_modification_price',
+        //            'product_modification_price.modification = product_modification.id'
+        //        );
 
 
         /* Стоимость продукта */
 
-//        $dbal->addSelect(
-//            '
-//			COALESCE(
-//                NULLIF(product_modification_price.price, 0),
-//                NULLIF(product_variation_price.price, 0),
-//                NULLIF(product_offer_price.price, 0),
-//                NULLIF(product_price.price, 0)
-//            ) AS product_price
-//		'
-//        );
+        //        $dbal->addSelect(
+        //            '
+        //			COALESCE(
+        //                NULLIF(product_modification_price.price, 0),
+        //                NULLIF(product_variation_price.price, 0),
+        //                NULLIF(product_offer_price.price, 0),
+        //                NULLIF(product_price.price, 0)
+        //            ) AS product_price
+        //		'
+        //        );
 
         /* Валюта продукта */
 
-//        $dbal->addSelect(
-//            '
-//			CASE
-//			   WHEN product_modification_price.price IS NOT NULL AND product_modification_price.price > 0
-//			   THEN product_modification_price.currency
-//
-//			   WHEN product_variation_price.price IS NOT NULL AND product_variation_price.price > 0
-//			   THEN product_variation_price.currency
-//
-//			   WHEN product_offer_price.price IS NOT NULL AND product_offer_price.price > 0
-//			   THEN product_offer_price.currency
-//
-//			   WHEN product_price.price IS NOT NULL AND product_price.price > 0
-//			   THEN product_price.currency
-//
-//			   ELSE NULL
-//			END AS product_currency
-//		'
-//        );
+        //        $dbal->addSelect(
+        //            '
+        //			CASE
+        //			   WHEN product_modification_price.price IS NOT NULL AND product_modification_price.price > 0
+        //			   THEN product_modification_price.currency
+        //
+        //			   WHEN product_variation_price.price IS NOT NULL AND product_variation_price.price > 0
+        //			   THEN product_variation_price.currency
+        //
+        //			   WHEN product_offer_price.price IS NOT NULL AND product_offer_price.price > 0
+        //			   THEN product_offer_price.currency
+        //
+        //			   WHEN product_price.price IS NOT NULL AND product_price.price > 0
+        //			   THEN product_price.currency
+        //
+        //			   ELSE NULL
+        //			END AS product_currency
+        //		'
+        //        );
 
+
+        $dbalCounter = $this->DBALQueryBuilder
+            ->createQueryBuilder(self::class)
+            ->bindLocal();
+
+        //        $dbalCounter
+        //            ->select('COUNT(*) FROM B WHERE product_id = 'X') - (A.total - A.reserve) AS difference')
+        //        $dbalCounter
+        //            ->from(ProductSignInvariable::class, 'invariable');
+        //
 
         $notExists = $this->DBALQueryBuilder
             ->createQueryBuilder(self::class)
             ->bindLocal();
 
         $notExists
-            ->select('1')
+            ->select('COUNT(*)')
             ->from(ProductSignInvariable::class, 'invariable')
-            ->andWhere('invariable.usr = :usr')
+            //->andWhere('invariable.usr = :usr')
             ->andWhere('invariable.product = product.id')
             ->andWhere('invariable.offer = product_offer.const')
             ->andWhere('invariable.variation = product_variation.const')
             ->andWhere('invariable.modification = product_modification.const');
 
-        $dbal->setParameter('usr', $user, UserUid::TYPE);
 
         $notExists
-            ->join(
+            ->leftJoin(
                 'invariable',
                 ProductSignEvent::class,
                 'event',
-                'event.id = invariable.event AND event.status = :status'
+                'event.id = invariable.event AND (event.status = :status_new OR event.status = :status_progress)'
+            );
+
+        $dbal
+            ->addSelect('
+            product_modification_quantity.quantity -
+            product_variation_quantity.quantity - 
+            product_offer_quantity.quantity
+             - ('.$notExists->getSQL().') AS counter');
+
+        $dbal->setParameter('usr', $user, UserUid::TYPE);
+
+        $dbal
+            ->setParameter(
+                'status_new',
+                ProductSignStatusNew::class,
+                ProductSignStatus::TYPE
             );
 
         $dbal
             ->setParameter(
-                'status',
-                ProductSignStatusNew::class,
+                'status_progress',
+                ProductSignStatusProcess::class,
                 ProductSignStatus::TYPE
             );
 
@@ -535,7 +559,8 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 0
             ) != 0');
 
-        $dbal->andWhere('NOT EXISTS ('.$notExists->getSQL().')');
+
+        //$dbal->andWhere('NOT EXISTS ('.$notExists->getSQL().')');
 
 
         /** Ответственное лицо */
