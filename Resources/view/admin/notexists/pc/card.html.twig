@@ -114,21 +114,33 @@
 
                         <div>
 
-                        <strong class="text-success pointer"
-                                style="cursor: default;"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="bottom"
-                                data-bs-delay='{"show":100,"hide":300}'
-                                title="Доступно"
-                        ><small class="text-muted">доступно </small> &nbsp; {{ item.product_quantity }}</strong>
+                            <strong class="text-primary pointer"
+                                    style="cursor: default;"
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="bottom"
+                                    data-bs-delay='{"show":100,"hide":300}'
+                                    title="Доступно"
+                            ><small class="text-muted">доступно </small> &nbsp; {{ item.product_quantity }}</strong>
                             &nbsp; | &nbsp;
-                            <strong class="text-danger pointer"
-                                style="cursor: default;"
-                                data-bs-toggle="tooltip"
-                                data-bs-placement="bottom"
-                                data-bs-delay='{"show":100,"hide":300}'
-                                title="Требует загрузку"
-                        >{{ item.counter ?: item.product_quantity }}</strong>
+
+                            {% if item.counter > 0 %}
+                                <strong class="text-danger pointer"
+                                        style="cursor: default;"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom"
+                                        data-bs-delay='{"show":100,"hide":300}'
+                                        title="Недостаток честных знаков"
+                                >{{ item.counter }}</strong>
+                            {% else %}
+                                <strong class="text-success pointer"
+                                        style="cursor: default;"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-placement="bottom"
+                                        data-bs-delay='{"show":100,"hide":300}'
+                                        title="Излишек честных знаков"
+                                >{{ item.counter ?: item.product_quantity }}</strong>
+                            {% endif %}
+
                         </div>
 
                         {% if is_granted('ROLE_PRODUCT_SIGN_NEW') or is_granted('ROLE_ADMIN') %}
