@@ -135,7 +135,8 @@ final class ProductSignPdfHandler
             /** Создаем предварительно закупку для заполнения продукции */
             if($message->isPurchase() && $message->getProfile())
             {
-                $PurchaseProductStockDTO = new PurchaseProductStockDTO($message->getProfile());
+                $PurchaseProductStockDTO = new PurchaseProductStockDTO();
+                $PurchaseProductStockDTO->setProfile($message->getProfile());
                 $PurchaseNumber = number_format(microtime(true) * 100, 0, '.', '.');
                 $PurchaseProductStockDTO->setNumber($PurchaseNumber);
             }

@@ -182,7 +182,8 @@ class ProductSignPdfParserCommand extends Command
 
             if($isPurchase)
             {
-                $PurchaseProductStockDTO = new PurchaseProductStockDTO($UserProfileUid);
+                $PurchaseProductStockDTO = new PurchaseProductStockDTO();
+                $PurchaseProductStockDTO->setProfile($UserProfileUid);
                 $PurchaseNumber = number_format(microtime(true) * 100, 0, '.', '.');
                 $PurchaseProductStockDTO->setNumber($PurchaseNumber);
             }

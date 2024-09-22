@@ -84,7 +84,7 @@ executeFunc(function productsSignPdf()
 
 
     return true;
-})
+});
 
 async function changeObjectCategory(forms)
 {
@@ -194,7 +194,6 @@ async function changeObjectCategory(forms)
             enableElementsForm(forms);
         });
 }
-
 
 async function changeObjectProduct(forms)
 {
@@ -419,7 +418,6 @@ async function changeObjectOffer(forms)
         });
 }
 
-
 async function changeObjectVariation(forms)
 {
 
@@ -510,6 +508,9 @@ async function changeObjectVariation(forms)
             enableElementsForm(forms);
         });
 }
+
+
+
 
 
 function _____changeObjectProduct()

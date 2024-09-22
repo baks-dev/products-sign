@@ -357,7 +357,7 @@ final class ProductSignPdfForm extends AbstractType
             return;
         }
 
-        $offer = $this->productOfferChoice->fetchProductOfferByProduct($product);
+        $offer = $this->productOfferChoice->findByProduct($product);
 
         // Если у продукта нет ТП
         if(!$offer->valid())
