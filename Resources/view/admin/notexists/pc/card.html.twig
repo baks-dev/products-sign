@@ -138,7 +138,7 @@
                                         data-bs-placement="bottom"
                                         data-bs-delay='{"show":100,"hide":300}'
                                         title="Излишек честных знаков"
-                                >{{ item.counter ?: item.product_quantity }}</strong>
+                                >{{ (item.counter ?: item.product_quantity)|abs }}</strong>
                             {% endif %}
 
                         </div>

@@ -512,7 +512,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
         $notExists
             ->select('COUNT(*)')
             ->from(ProductSignInvariable::class, 'invariable')
-            //->andWhere('invariable.usr = :usr')
+            ->andWhere('invariable.usr = :usr')
             ->andWhere('invariable.product = product.id')
             ->andWhere('invariable.offer = product_offer.const')
             ->andWhere('invariable.variation = product_variation.const')
@@ -529,9 +529,10 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
 
         $dbal
             ->addSelect('
-            product_modification_quantity.quantity -
+            (product_modification_quantity.quantity -
             product_variation_quantity.quantity - 
-            product_offer_quantity.quantity
+            product_offer_quantity.quantity -
+            product_price.quantity)
              - ('.$notExists->getSQL().') AS counter');
 
         $dbal->setParameter('usr', $user, UserUid::TYPE);
@@ -558,6 +559,13 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 NULLIF(product_price.quantity, 0),
                 0
             ) != 0');
+
+        $dbal->andWhere('(product_modification_quantity.quantity -
+            product_variation_quantity.quantity - 
+            product_offer_quantity.quantity - 
+            product_price.quantity
+            )
+             > ('.$notExists->getSQL().')');
 
 
         //$dbal->andWhere('NOT EXISTS ('.$notExists->getSQL().')');
