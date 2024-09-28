@@ -76,6 +76,14 @@ final class ExportController extends AbstractController
             ->dateTo($to)
             ->execute();
 
+        if($data === false)
+        {
+            return new JsonResponse([
+                'status' => 404,
+                'message' => 'За указанный период выполненных честных знаков не найдено'
+            ], status: 404);
+        }
+
         $rows = null;
 
         foreach($data as $key => $item)

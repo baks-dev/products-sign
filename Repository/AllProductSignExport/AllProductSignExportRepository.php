@@ -106,7 +106,7 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
     }
 
 
-    public function execute(): Generator
+    public function execute(): Generator|false
     {
         if($this->profile === false)
         {

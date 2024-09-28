@@ -36,5 +36,5 @@ interface AllProductSignExportInterface
 
     public function dateTo(DateTimeImmutable|string $to): self;
 
-    public function execute(): Generator;
+    public function execute(): Generator|false;
 }
