@@ -310,11 +310,6 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
 
         $dbal->allGroupByExclude();
 
-
-        return $dbal
-
-            //->fetchAllHydrate(AllProductSignExportDTO::class)
-            // ->enableCache('Namespace', 3600)
-            ->iterateAssociative();
+        return $dbal->iterateAssociative();
     }
 }
