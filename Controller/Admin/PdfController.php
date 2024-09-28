@@ -46,7 +46,10 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 #[RoleSecurity('ROLE_PRODUCT_SIGN_NEW')]
 final class PdfController extends AbstractController
 {
-    #[Route('/admin/product/sign/pdf/{category}/{product}/{offer}/{variation}/{modification}', name: 'admin.pdf', methods: ['GET', 'POST'])]
+    #[Route('/admin/product/sign/pdf/{category}/{product}/{offer}/{variation}/{modification}',
+        name: 'admin.pdf',
+        methods: ['GET', 'POST'])
+    ]
     public function news(
         Request $request,
         ProductSignPdfHandler $ProductSignHandler,
