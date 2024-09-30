@@ -310,6 +310,6 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
 
         $dbal->allGroupByExclude();
 
-        return $dbal->iterateAssociative();
+        return $dbal->fetchAllGenerator();
     }
 }
