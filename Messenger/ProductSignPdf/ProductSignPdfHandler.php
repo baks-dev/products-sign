@@ -122,6 +122,34 @@ final class ProductSignPdfHandler
         $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
 
 
+        /**
+         * Сохраняем все листы PDF в отдельные файлы
+         */
+
+        /** @var DirectoryIterator $SignPdfFile */
+        foreach(new DirectoryIterator($uploadDir) as $SignPdfFile)
+        {
+            if($SignPdfFile->getExtension() !== 'pdf')
+            {
+                continue;
+            }
+
+            /** Пропускаем файлы, которые уже разбиты на страницы */
+            if(str_starts_with($SignPdfFile->getFilename(), 'page') === true)
+            {
+                continue;
+            }
+
+            $process = new Process(['pdftk', $SignPdfFile->getRealPath(), 'burst', 'output', $SignPdfFile->getPath().DIRECTORY_SEPARATOR.uniqid('page_', true).'.%d.pdf']);
+            $process->mustRun();
+
+            /** Удаляем после обработки основной файл PDF */
+            $this->filesystem->remove($SignPdfFile->getRealPath());
+        }
+
+
+        /** Обрабатываем страницы */
+
         foreach(new DirectoryIterator($uploadDir) as $SignFile)
         {
             if($SignFile->getExtension() !== 'pdf')
@@ -156,6 +184,7 @@ final class ProductSignPdfHandler
             }
 
             /** Создаем полный путь для сохранения файла с кодом относительно директории сущности */
+            $pathCode = null;
             $pathCode[] = $this->upload;
             $pathCode[] = 'public';
             $pathCode[] = 'upload';
@@ -172,16 +201,17 @@ final class ProductSignPdfHandler
 
 
             /**
-             * Открываем PDF для подсчета страниц
+             * Открываем PDF для подсчета страниц на случай если их несколько
              */
-            $pdfPath = $SignFile->getPathname();
+            $pdfPath = $SignFile->getRealPath();
             $Imagick = new Imagick();
-            $Imagick->setResolution(500, 500);
+            $Imagick->setResolution(450, 450);
             $Imagick->readImage($pdfPath);
             $pages = $Imagick->getNumberImages(); // количество страниц в файле
 
             /** Удаляем после обработки файл PDF */
             $this->filesystem->remove($pdfPath);
+
 
             for($number = 0; $number < $pages; $number++)
             {
@@ -269,10 +299,11 @@ final class ProductSignPdfHandler
                 {
                     if($handle === false)
                     {
+                        $this->logger->warning(sprintf('Дубликат честного знака %s: ', $code));
                         continue;
                     }
 
-                    $this->logger->critical(sprintf('products-sign: Ошибка %s при сканировании PDF лист %s: ', $handle, $number));
+                    $this->logger->critical(sprintf('products-sign: Ошибка %s при сканировании: ', $handle));
                 }
                 else
                 {
@@ -342,21 +373,6 @@ final class ProductSignPdfHandler
 
             $Imagick->clear();
             $Imagick->destroy();
-
-            if($errors > 0)
-            {
-                $this->logger->critical(sprintf(
-                    'products-sign: Всего добавлено %s из %s честных знаков, c ошибками %s',
-                    $counter,
-                    $pages,
-                    $errors
-                ));
-            }
-            else
-            {
-                $this->logger->info(sprintf('Всего добавлено %s из %s честных знаков', $counter, $pages));
-            }
-
         }
     }
 }
