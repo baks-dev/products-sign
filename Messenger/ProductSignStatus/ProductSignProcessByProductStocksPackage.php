@@ -28,6 +28,7 @@ namespace BaksDev\Products\Sign\Messenger\ProductSignStatus;
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Repository\ProductSignNew\ProductSignNewInterface;
+use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignProcessDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
@@ -166,6 +167,10 @@ final class ProductSignProcessByProductStocksPackage
          *
          * @var ProductStockProduct $product
          */
+
+
+        $ProductSignUid = new ProductSignUid();
+
         foreach($products as $product)
         {
             $total = $product->getTotal();
@@ -198,6 +203,9 @@ final class ProductSignProcessByProductStocksPackage
                 }
 
                 $ProductSignProcessDTO = new ProductSignProcessDTO($ProductStockEvent->getProfile(), $ProductStockEvent->getOrder());
+                $ProductSignInvariableDTO = $ProductSignProcessDTO->getInvariable();
+                $ProductSignInvariableDTO->setPart($ProductSignUid);
+
                 $ProductSignEvent->getDto($ProductSignProcessDTO);
 
                 $handle = $this->productSignStatusHandler->handle($ProductSignProcessDTO);

@@ -50,6 +50,8 @@ final class ProductSignPdfDTO
     #[Assert\Valid]
     private ArrayCollection $files;
 
+
+
     /** Категория */
     #[Assert\NotBlank]
     #[Assert\Uuid]

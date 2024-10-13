@@ -105,7 +105,7 @@ final class ProductSignByOrder implements ProductSignByOrderInterface
             'event',
             ProductSign::class,
             'main',
-            'main.event = event.id'
+            'main.id = event.main'
         );
 
         $dbal
@@ -121,6 +121,7 @@ final class ProductSignByOrder implements ProductSignByOrderInterface
             ->addSelect("code.ext AS code_ext")
             ->addSelect("code.cdn AS code_cdn")
             ->addSelect("code.event AS code_event")
+            ->addSelect("code.code AS code_string")
             ->leftJoin(
                 'event',
                 ProductSignCode::class,

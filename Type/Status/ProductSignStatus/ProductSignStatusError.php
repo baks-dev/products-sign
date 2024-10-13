@@ -34,7 +34,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 #[AutoconfigureTag('baks.sign.status')]
 class ProductSignStatusError implements ProductSignStatusInterface
 {
-    public const STATUS = 'error';
+    public const string STATUS = 'error';
 
     public function __toString(): string
     {

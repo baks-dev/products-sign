@@ -30,6 +30,8 @@ use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
+use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
+use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
@@ -38,8 +40,8 @@ use Symfony\Component\Routing\Attribute\Route;
 #[RoleSecurity('ROLE_ORDERS')]
 final class PrintController extends AbstractController
 {
-    #[Route('/admin/order/document/sign/{order}', name: 'admin.print', methods: ['GET', 'POST'])]
-    public function document(
+    #[Route('/admin/order/print/sign/orders/{order}', name: 'admin.print.orders', methods: ['GET'])]
+    public function orders(
         ProductSignByOrderInterface $productSignByOrder,
         #[ParamConverter(OrderUid::class)] $order,
     ): Response {
@@ -48,6 +50,27 @@ final class PrintController extends AbstractController
             ->forOrder($order)
             ->execute();
 
-        return $this->render(['codes' => $codes]);
+        return $this->render(
+            ['codes' => $codes],
+            routingName: 'admin.print'
+        );
     }
+
+
+    #[Route('/admin/order/print/sign/parts/{part}', name: 'admin.print.parts', methods: ['GET'])]
+    public function parts(
+        ProductSignByPartInterface $productSignByPart,
+        #[ParamConverter(ProductSignUid::class)] $part,
+    ): Response {
+
+        $codes = $productSignByPart
+            ->forPart($part)
+            ->execute();
+
+        return $this->render(
+            ['codes' => $codes,],
+            routingName: 'admin.print'
+        );
+    }
+
 }

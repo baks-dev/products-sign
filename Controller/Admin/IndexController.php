@@ -25,21 +25,19 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Controller\Admin;
 
+use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Form\Search\SearchForm;
+use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Products\Product\Forms\ProductFilter\Admin\ProductFilterDTO;
 use BaksDev\Products\Product\Forms\ProductFilter\Admin\ProductFilterForm;
 use BaksDev\Products\Sign\Forms\ProductSignFilter\ProductSignFilterDTO;
 use BaksDev\Products\Sign\Forms\ProductSignFilter\ProductSignFilterForm;
-use BaksDev\Products\Sign\Repository\AllProductSign\AllProductSignInterface;
-use BaksDev\Users\User\Type\Id\UserUid;
+use BaksDev\Products\Sign\Repository\GroupProductSigns\GroupProductSignsInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use BaksDev\Core\Controller\AbstractController;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\Routing\Attribute\Route;
-use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
 #[RoleSecurity('ROLE_PRODUCT_SIGN')]
@@ -48,10 +46,9 @@ final class IndexController extends AbstractController
     #[Route('/admin/product/signs/{page<\d+>}', name: 'admin.index', methods: ['GET', 'POST'])]
     public function index(
         Request $request,
-        AllProductSignInterface $allProductSign,
+        GroupProductSignsInterface $groupProductSigns,
         int $page = 0,
     ): Response {
-
 
         // Поиск
         $search = new SearchDTO();
@@ -85,12 +82,11 @@ final class IndexController extends AbstractController
 
 
         // Получаем список
-        $ProductSign = $allProductSign
+        $ProductSign = $groupProductSigns
             ->search($search)
             ->filter($filter)
             ->status($filterSign)
             ->findPaginator();
-
 
 
         return $this->render(

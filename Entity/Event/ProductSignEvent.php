@@ -25,11 +25,8 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Entity\Event;
 
-use BaksDev\Core\Type\Locale\Locale;
-use BaksDev\Core\Type\Modify\ModifyAction;
+use BaksDev\Core\Entity\EntityEvent;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Orders\Order\Type\Product\OrderProductUid;
-use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
@@ -38,11 +35,8 @@ use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
-use BaksDev\Core\Entity\EntityEvent;
-use BaksDev\Core\Entity\EntityState;
+use Doctrine\ORM\Mapping as ORM;
 use InvalidArgumentException;
 use Symfony\Component\Validator\Constraints as Assert;
 

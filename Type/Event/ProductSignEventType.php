@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Type\Event;
 
-
 use BaksDev\Core\Type\UidType\UidType;
 
 final class ProductSignEventType extends UidType

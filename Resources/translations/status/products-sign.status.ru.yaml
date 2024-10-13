@@ -1,4 +1,5 @@
 new: 'Новый'
+decommission: 'Списание'
 done: 'Выполнен'
 error: 'Ошибка'
 cancel: 'Отменен'

@@ -28,13 +28,11 @@ namespace BaksDev\Products\Sign\Type\Event;
 use BaksDev\Core\Type\UidType\Uid;
 use Symfony\Component\Uid\AbstractUid;
 
-
 final class ProductSignEventUid extends Uid
 {
+    public const string TEST = 'c20f3706-6df0-7cbd-92a8-e0b1cb73e1a7';
 
-    public const TEST = 'c20f3706-6df0-7cbd-92a8-e0b1cb73e1a7';
-
-    public const TYPE = 'product_sign_event';
+    public const string TYPE = 'product_sign_event';
 
     private mixed $attr;
 
@@ -51,8 +49,7 @@ final class ProductSignEventUid extends Uid
         mixed $option = null,
         mixed $property = null,
         mixed $characteristic = null,
-    )
-    {
+    ) {
         parent::__construct($value);
 
         $this->attr = $attr;

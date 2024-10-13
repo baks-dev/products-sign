@@ -69,11 +69,11 @@ class ProductSignInvariable extends EntityReadonly
     private readonly UserUid $usr;
 
 
-    /** Группа штрихкодов (для отмены)  */
+    /** Группа штрихкодов (для групповой отмены либо списания) */
     #[Assert\NotBlank]
     #[Assert\Uuid]
     #[ORM\Column(type: ProductSignUid::TYPE)]
-    private readonly ProductSignUid $part;
+    private ProductSignUid $part;
 
     // Продукция
 

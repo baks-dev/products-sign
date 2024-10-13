@@ -34,22 +34,12 @@ use DomainException;
 
 final class ProductSignStatusHandler extends AbstractHandler
 {
-    public function handle(ProductSignCancelDTO|ProductSignProcessDTO|ProductSignDoneDTO $command): string|ProductSign
+    public function handle(ProductSignEventInterface $command): string|ProductSign
     {
-        /** Валидация DTO  */
-        $this->validatorCollection->add($command);
+        $this
+            ->setCommand($command)
+            ->preEventPersistOrUpdate(ProductSign::class, ProductSignEvent::class);
 
-        $this->main = new ProductSign();
-        $this->event = new ProductSignEvent();
-
-        try
-        {
-            $this->preUpdate($command, true);
-        }
-        catch(DomainException $errorUniqid)
-        {
-            return $errorUniqid->getMessage();
-        }
 
         /** Валидация всех объектов */
         if($this->validatorCollection->isInvalid())
@@ -57,7 +47,7 @@ final class ProductSignStatusHandler extends AbstractHandler
             return $this->validatorCollection->getErrorUniqid();
         }
 
-        $this->entityManager->flush();
+        $this->flush();
 
         /* Отправляем сообщение в шину */
         $this->messageDispatch->dispatch(

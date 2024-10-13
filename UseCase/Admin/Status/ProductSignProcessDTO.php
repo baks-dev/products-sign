@@ -63,7 +63,11 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
     /**
      * Идентификатор заказа
      */
+    #[Assert\NotBlank]
     private OrderUid $ord;
+
+    #[Assert\Valid]
+    private Invariable\ProductSignInvariableDTO $invariable;
 
 
     public function __construct(UserProfileUid $profile, OrderUid $ord)
@@ -73,6 +77,7 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
 
         /** Статус Process «В процессе» */
         $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
+        $this->invariable = new Invariable\ProductSignInvariableDTO();
 
     }
 
@@ -111,6 +116,14 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
     public function getOrd(): OrderUid
     {
         return $this->ord;
+    }
+
+    /**
+     * Invariable
+     */
+    public function getInvariable(): Invariable\ProductSignInvariableDTO
+    {
+        return $this->invariable;
     }
 
 }

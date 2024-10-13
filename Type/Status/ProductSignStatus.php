@@ -31,9 +31,9 @@ use InvalidArgumentException;
 
 final class ProductSignStatus
 {
-    public const TYPE = 'product_sign_status';
+    public const string TYPE = 'product_sign_status';
 
-    public const TEST = ProductSignStatusNew::class;
+    public const string TEST = ProductSignStatusNew::class;
 
     private ProductSignStatusInterface $status;
 

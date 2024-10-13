@@ -29,13 +29,9 @@ use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 
 final class ProductSignStatusCollection
 {
-    private iterable $status;
-
     public function __construct(
-        #[AutowireIterator('baks.sign.status')] iterable $status
-    ) {
-        $this->status = $status;
-    }
+        #[AutowireIterator('baks.sign.status')] private readonly iterable $status
+    ) {}
 
     public function cases(): array
     {

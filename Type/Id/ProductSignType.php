@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Type\Id;
 
-
 use BaksDev\Core\Type\UidType\UidType;
 
 final class ProductSignType extends UidType

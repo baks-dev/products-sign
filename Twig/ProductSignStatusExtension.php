@@ -23,7 +23,6 @@
 
 namespace BaksDev\Products\Sign\Twig;
 
-use BaksDev\Orders\Order\Type\Status\OrderStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Twig\Environment;
@@ -36,15 +35,18 @@ final class ProductSignStatusExtension extends AbstractExtension
 
     public function __construct(
         #[Autowire('%kernel.project_dir%')] string $project_dir,
-    )
-    {
+    ) {
         $this->project_dir = $project_dir;
     }
 
     public function getFunctions(): array
     {
         return [
-            new TwigFunction('product_sign_status', [$this, 'status'], ['needs_environment' => true, 'is_safe' => ['html']]),
+            new TwigFunction(
+                'product_sign_status',
+                [$this, 'status'],
+                ['needs_environment' => true, 'is_safe' => ['html']]
+            ),
         ];
     }
 

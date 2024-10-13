@@ -28,13 +28,11 @@ namespace BaksDev\Products\Sign\Type\Id;
 use BaksDev\Core\Type\UidType\Uid;
 use Symfony\Component\Uid\AbstractUid;
 
-
 final class ProductSignUid extends Uid
 {
+    public const string TEST = '8e961635-3e46-7e92-8436-b6ed8cbece0a';
 
-    public const TEST = '8e961635-3e46-7e92-8436-b6ed8cbece0a';
-
-    public const TYPE = 'product_sign';
+    public const string TYPE = 'product_sign';
 
     private mixed $attr;
 
@@ -51,8 +49,7 @@ final class ProductSignUid extends Uid
         mixed $option = null,
         mixed $property = null,
         mixed $characteristic = null,
-    )
-    {
+    ) {
         parent::__construct($value);
 
         $this->attr = $attr;

@@ -17,6 +17,13 @@ process: 'В процессе'#}
 		</span>
     </h6>
 
+{% elseif status == 'decommission' %}
+    <h6 class="lh-normal m-0">
+		<span class="badge bg-light shadow text-dark">
+			{{ status|trans }}
+		</span>
+    </h6>
+
 {% elseif status == 'process' %}
     <h6 class="lh-normal m-0">
 		<span class="badge bg-secondary shadow">

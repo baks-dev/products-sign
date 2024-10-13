@@ -101,7 +101,6 @@ final class AllProductSignRepository implements AllProductSignInterface
     /** Метод возвращает пагинатор ProductSign */
     public function findPaginator(): PaginatorInterface
     {
-
         $user = $this->userProfileTokenStorage->getUser();
 
         $profile = $this->userProfileTokenStorage->getProfile();
@@ -270,6 +269,7 @@ final class AllProductSignRepository implements AllProductSignInterface
             $dbal->andWhere('product_offer.value = :offer');
             $dbal->setParameter('offer', $this->filter->getOffer());
         }
+
 
 
         // Получаем тип торгового предложения

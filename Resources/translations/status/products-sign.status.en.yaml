@@ -1,4 +1,5 @@
 new: 'New'
+decommission: 'Decommissioned'
 done: 'Done'
 error: 'Error'
 cancel: 'Cancelled'
