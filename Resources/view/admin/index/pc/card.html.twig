@@ -90,17 +90,8 @@
 
     </td>
 
-    <td class="text-nowrap">
-        {# {% if item.sign_status != 'new' %} #}
-        <span class="{{ item.sign_date|date('d.m.Y') == date('now')|date('d.m.Y') ? 'fw-bolder' }}">
-                {{ item.sign_date|format_datetime(pattern="d MMMM HH:mm") }}
-            </span>
-        {# {% endif %} #}
-    </td>
-
     <td class="text-nowrap text-nowrap">
         <div class="d-flex gap-1">
-
 
             {# EXEL #}
 
@@ -168,9 +159,7 @@
             {% endif %}
 
 
-
-
-            {% if item.sign_status == 'new' and (is_granted('ROLE_PRODUCT_SIGN_DECOMMISSION') or is_granted('ROLE_ADMIN')) %}
+            {% if item.sign_status == 'new' and (is_granted('ROLE_PRODUCT_SIGN_STATUS') or is_granted('ROLE_ADMIN')) %}
                 <button
                         data-href="{{ path('products-sign:admin.decommission', {
                             category : item.product_category,

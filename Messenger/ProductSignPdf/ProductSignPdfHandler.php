@@ -148,6 +148,10 @@ final class ProductSignPdfHandler
         }
 
 
+        /** Генерируем идентификатор группы для отмены */
+        $part = new ProductSignUid();
+
+
         /** Обрабатываем страницы */
 
         foreach(new DirectoryIterator($uploadDir) as $SignFile)
@@ -196,8 +200,6 @@ final class ProductSignPdfHandler
             /** Если директория загрузки не найдена - создаем с правами 0700 */
             $this->filesystem->exists($dirCode) ?: $this->filesystem->mkdir($dirCode);
 
-            /** Генерируем идентификатор группы для отмены */
-            $part = new ProductSignUid();
 
 
             /**

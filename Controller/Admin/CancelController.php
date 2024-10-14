@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Controller\Admin;
 
-
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
@@ -50,8 +49,8 @@ final class CancelController extends AbstractController
         Request $request,
         #[MapEntity] ProductSignEvent $ProductSignEvent,
         ProductSignStatusHandler $ProductSignStatusHandler,
-    ): Response
-    {
+    ): Response {
+
         if(!$ProductSignEvent->getStatus()->equals(ProductSignStatusProcess::class))
         {
             throw new InvalidArgumentException('Page Not Found');
@@ -72,8 +71,7 @@ final class CancelController extends AbstractController
 
             $handle = $ProductSignStatusHandler->handle($ProductSignStatusDTO);
 
-            $this->addFlash
-            (
+            $this->addFlash(
                 'page.cancel',
                 $handle instanceof ProductSign ? 'success.cancel' : 'danger.cancel',
                 'products-sign.admin',

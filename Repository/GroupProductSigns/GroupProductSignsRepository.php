@@ -172,7 +172,6 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
 
 
         $dbal
-            ->addSelect('modify.mod_date AS sign_date')
             ->leftJoin(
                 'main',
                 ProductSignModify::class,
@@ -548,7 +547,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 ->addSearchLike('product_info.article');
         }
 
-        $dbal->orderBy('modify.mod_date', 'DESC');
+        $dbal->orderBy('invariable.part', 'DESC');
 
         $dbal->allGroupByExclude();
         //dd($dbal->fetchAllAssociative());

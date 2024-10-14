@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Controller\Admin;
 
-
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
@@ -37,8 +36,8 @@ use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignForm;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignHandler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
 #[RoleSecurity('ROLE_PRODUCT_SIGN_NEW')]
@@ -50,8 +49,8 @@ final class NewController extends AbstractController
         ExistsProductSignCodeInterface $existsProductSignCode,
         ProductSignHandler $ProductSignHandler,
         MessageDispatchInterface $messageDispatch,
-    ): Response
-    {
+    ): Response {
+
         $ProductSignDTO = new ProductSignDTO($this->getProfileUid());
         $ProductSignDTO->getCode()->setUsr($this->getUsr()?->getId());
 
@@ -68,8 +67,7 @@ final class NewController extends AbstractController
 
             if($existsProductSignCode->isExists($this->getUsr()?->getId(), $ProductSignDTO->getCode()->getCode()))
             {
-                $this->addFlash
-                (
+                $this->addFlash(
                     'page.new',
                     'success.new',
                     'products-sign.admin'
@@ -81,8 +79,7 @@ final class NewController extends AbstractController
 
             $handle = $ProductSignHandler->handle($ProductSignDTO);
 
-            $this->addFlash
-            (
+            $this->addFlash(
                 'page.new',
                 $handle instanceof ProductSign ? 'success.new' : 'danger.new',
                 'products-sign.admin',

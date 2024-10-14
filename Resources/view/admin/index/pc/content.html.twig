@@ -39,7 +39,7 @@
 
 
             {# Списать честные знаки #}
-            {% if is_granted(ROLE~'_OFF') or is_granted('ROLE_ADMIN') %}
+            {% if is_granted(ROLE~'_STATUS') or is_granted('ROLE_ADMIN') %}
                 <button
                         data-href="{{ path('products-sign:admin.decommission') }}"
                         class='btn btn-danger d-flex gap-3 disabled'
@@ -211,7 +211,6 @@
                     <th>Продукция</th>
                     <th>Заказ</th>
                     <th class="text-center">Профиль</th>
-                    <th class="text-center text-nowrap">Дата обновления</th>
                     <th></th>
                 </tr>
                 </thead>

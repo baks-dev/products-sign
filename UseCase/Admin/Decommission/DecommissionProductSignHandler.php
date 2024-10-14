@@ -61,7 +61,7 @@ final class DecommissionProductSignHandler
             }
 
             /** Меняем статус и присваиваем идентификатор партии  */
-            $ProductSignOffDTO = new ProductSignDecommissionDTO();
+            $ProductSignOffDTO = new ProductSignDecommissionDTO($command->getProfile());
             $ProductSignInvariableDTO = $ProductSignOffDTO->getInvariable();
             $ProductSignInvariableDTO->setPart($ProductSignUid);
 

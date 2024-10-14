@@ -29,6 +29,7 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDecommission;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductSignEvent */
@@ -47,15 +48,24 @@ final readonly class ProductSignDecommissionDTO implements ProductSignEventInter
     #[Assert\NotBlank]
     private ProductSignStatus $status;
 
+    /**
+     * Профиль пользователя (null - общий)
+     */
+    #[Assert\Uuid]
+    #[Assert\NotBlank]
+    private UserProfileUid $profile;
+
+
     #[Assert\Valid]
     private Invariable\ProductSignInvariableDTO $invariable;
 
 
-    public function __construct()
+    public function __construct(UserProfileUid $profile)
     {
         /** Статус Off «Списание» */
         $this->status = new ProductSignStatus(ProductSignStatusDecommission::class);
         $this->invariable = new Invariable\ProductSignInvariableDTO();
+        $this->profile = $profile;
     }
 
     /**
@@ -85,5 +95,13 @@ final readonly class ProductSignDecommissionDTO implements ProductSignEventInter
     public function getInvariable(): Invariable\ProductSignInvariableDTO
     {
         return $this->invariable;
+    }
+
+    /**
+     * Profile
+     */
+    public function getProfile(): UserProfileUid
+    {
+        return $this->profile;
     }
 }

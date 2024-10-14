@@ -45,6 +45,7 @@ final class DecommissionProductSignDTO
      * Профиль пользователя (null - общий)
      */
     #[Assert\Uuid]
+    #[Assert\NotBlank]
     private ?UserProfileUid $profile = null;
 
     /** Категория */

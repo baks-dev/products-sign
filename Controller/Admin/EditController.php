@@ -25,14 +25,8 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Controller\Admin;
 
-
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
-use BaksDev\Delivery\Entity\Delivery;
-use BaksDev\Delivery\Entity\Event\DeliveryEvent;
-use BaksDev\Delivery\UseCase\Admin\NewEdit\DeliveryDTO;
-use BaksDev\Delivery\UseCase\Admin\NewEdit\DeliveryForm;
-use BaksDev\Delivery\UseCase\Admin\NewEdit\DeliveryHandler;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignDTO;
@@ -41,8 +35,8 @@ use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignHandler;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
 #[RoleSecurity('ROLE_PRODUCT_SIGN_EDIT')]
@@ -53,8 +47,8 @@ final class EditController extends AbstractController
         Request $request,
         #[MapEntity] ProductSignEvent $ProductSignEvent,
         ProductSignHandler $ProductSignHandler,
-    ): Response
-    {
+    ): Response {
+
         $ProductSignDTO = new ProductSignDTO();
         $ProductSignEvent->getDto($ProductSignDTO);
 
@@ -70,8 +64,7 @@ final class EditController extends AbstractController
 
             $handle = $ProductSignHandler->handle($ProductSignDTO);
 
-            $this->addFlash
-            (
+            $this->addFlash(
                 'page.edit',
                 $handle instanceof ProductSign ? 'success.edit' : 'danger.edit',
                 'products-sign.admin',

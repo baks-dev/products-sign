@@ -33,22 +33,23 @@ use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
-use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Products\Sign\UseCase\Admin\Pdf\ProductSignPdfHandler;
 use BaksDev\Products\Sign\UseCase\Admin\Pdf\ProductSignPdfDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Pdf\ProductSignPdfForm;
+use BaksDev\Products\Sign\UseCase\Admin\Pdf\ProductSignPdfHandler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
 #[RoleSecurity('ROLE_PRODUCT_SIGN_NEW')]
 final class PdfController extends AbstractController
 {
-    #[Route('/admin/product/sign/pdf/{category}/{product}/{offer}/{variation}/{modification}',
+    #[Route(
+        '/admin/product/sign/pdf/{category}/{product}/{offer}/{variation}/{modification}',
         name: 'admin.pdf',
-        methods: ['GET', 'POST'])
+        methods: ['GET', 'POST']
+    )
     ]
     public function news(
         Request $request,

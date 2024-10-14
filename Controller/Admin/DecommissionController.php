@@ -28,33 +28,22 @@ namespace BaksDev\Products\Sign\Controller\Admin;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
-use BaksDev\Delivery\Entity\Delivery;
-use BaksDev\Delivery\Entity\Event\DeliveryEvent;
-use BaksDev\Delivery\UseCase\Admin\NewEdit\DeliveryDTO;
-use BaksDev\Delivery\UseCase\Admin\NewEdit\DeliveryForm;
-use BaksDev\Delivery\UseCase\Admin\NewEdit\DeliveryHandler;
 use BaksDev\Products\Category\Type\Id\CategoryProductUid;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
-use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
-use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
-use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignDTO;
-use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignForm;
-use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignHandler;
 use BaksDev\Products\Sign\UseCase\Admin\Decommission\DecommissionProductSignDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Decommission\DecommissionProductSignForm;
 use BaksDev\Products\Sign\UseCase\Admin\Decommission\DecommissionProductSignHandler;
-use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-#[RoleSecurity('ROLE_PRODUCT_SIGN_OFF')]
+#[RoleSecurity('ROLE_PRODUCT_SIGN_STATUS')]
 final class DecommissionController extends AbstractController
 {
     #[Route('/admin/product/sign/decommission/{category}/{product}/{offer}/{variation}/{modification}', name: 'admin.decommission', methods: ['GET', 'POST'])]
