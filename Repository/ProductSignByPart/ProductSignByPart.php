@@ -26,8 +26,6 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Repository\ProductSignByPart;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
-use BaksDev\Orders\Order\Entity\Order;
-use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
@@ -35,7 +33,6 @@ use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDecommission;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use InvalidArgumentException;
 
@@ -51,14 +48,14 @@ final class ProductSignByPart implements ProductSignByPartInterface
         $this->status = new ProductSignStatus(ProductSignStatusDecommission::class);
     }
 
-    public function forPart(ProductSignUid|string $order): self
+    public function forPart(ProductSignUid|string $part): self
     {
-        if(is_string($order))
+        if(is_string($part))
         {
-            $order = new ProductSignUid($order);
+            $part = new ProductSignUid($part);
         }
 
-        $this->part = $order;
+        $this->part = $part;
 
         return $this;
     }
@@ -96,7 +93,10 @@ final class ProductSignByPart implements ProductSignByPartInterface
             ->setParameter('part', $this->part, ProductSignUid::TYPE);
 
 
-        $dbal->join(
+        $dbal
+            ->addSelect('main.id AS sign_id')
+            ->addSelect('main.event AS sign_event')
+            ->join(
             'invariable',
             ProductSign::class,
             'main',

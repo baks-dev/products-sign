@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\UseCase\Admin\Status;
 
-use BaksDev\Orders\Order\Type\Product\OrderProductUid;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;

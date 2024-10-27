@@ -29,7 +29,7 @@ use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 
 interface ProductSignByPartInterface
 {
-    public function forPart(ProductSignUid|string $order): self;
+    public function forPart(ProductSignUid|string $part): self;
 
     /**
      * Возвращает знаки со статусом Done «Выполнен»

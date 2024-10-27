@@ -30,7 +30,6 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Messenger\ProductSignMessage;
-use DomainException;
 
 final class ProductSignStatusHandler extends AbstractHandler
 {
