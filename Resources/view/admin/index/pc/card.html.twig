@@ -106,7 +106,7 @@
                     {% set document_txt = path('products-sign:admin.txt.parts', { part: item.sign_part }) %}
                 {% else %}
                     {% set document_csv = path('products-sign:admin.csv.orders', { order: item.order_id }) %}
-                    {% set document_csv = path('products-sign:admin.txt.orders', { order: item.order_id }) %}
+                    {% set document_txt = path('products-sign:admin.txt.orders', { order: item.order_id }) %}
                 {% endif %}
 
                 <a

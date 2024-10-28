@@ -1,17 +1,17 @@
 <?php
 /*
- *  Copyright 2023.  Baks.dev <admin@baks.dev>
- *
+ *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *
+ *  
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -57,7 +57,20 @@ final class ProductSignCancelByOrderCanceled
      */
     public function __invoke(OrderMessage $message): void
     {
+        $Deduplicator = $this->deduplicator
+            ->namespace('products-sign')
+            ->deduplication([
+                (string) $message->getId(),
+                ProductSignStatusCancel::STATUS,
+                self::class
+            ]);
 
+        if($Deduplicator->isExecuted())
+        {
+            return;
+        }
+
+        $this->logger->debug(self::class, [$message]);
 
         /** Log Data */
         $dataLogs['OrderUid'] = (string) $message->getId();
@@ -78,19 +91,6 @@ final class ProductSignCancelByOrderCanceled
          * Если статус не Canceled «Отмена» - завершаем обработчик
          */
         if(false === $OrderEvent->isStatusEquals(OrderStatusCanceled::class))
-        {
-            return;
-        }
-
-        $Deduplicator = $this->deduplicator
-            ->namespace('products-sign')
-            ->deduplication([
-                (string) $message->getId(),
-                ProductSignStatusCancel::STATUS,
-                md5(self::class)
-            ]);
-
-        if($Deduplicator->isExecuted())
         {
             return;
         }
