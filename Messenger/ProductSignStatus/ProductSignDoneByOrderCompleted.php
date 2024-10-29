@@ -83,8 +83,6 @@ final class ProductSignDoneByOrderCompleted
             return;
         }
 
-        $this->logger->debug(self::class, [$message]);
-
         /** Log Data */
         $dataLogs['OrderUid'] = (string) $message->getId();
         $dataLogs['OrderEventUid'] = (string) $message->getEvent();

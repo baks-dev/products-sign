@@ -70,8 +70,6 @@ final class ProductSignCancelByOrderCanceled
             return;
         }
 
-        $this->logger->debug(self::class, [$message]);
-
         /** Log Data */
         $dataLogs['OrderUid'] = (string) $message->getId();
         $dataLogs['OrderEventUid'] = (string) $message->getEvent();
