@@ -58,7 +58,7 @@ final class PrintController extends AbstractController
     }
 
 
-    #[Route('/admin/product/sign/document/csv/parts/{part}', name: 'admin.print.parts', methods: ['GET'])]
+    #[Route('/admin/product/sign/document/print/parts/{part}', name: 'admin.print.parts', methods: ['GET'])]
     public function parts(
         ProductSignByPartInterface $productSignByPart,
         #[ParamConverter(ProductSignUid::class)] $part,

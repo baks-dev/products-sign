@@ -10,7 +10,7 @@
 # systemctl stop baks-products-sign@1.service
 
 [Unit]
-Description=Symfony messenger products-sign %i
+Description=products-sign
 StartLimitBurst=5
 StartLimitIntervalSec=0
 
