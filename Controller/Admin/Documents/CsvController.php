@@ -32,7 +32,6 @@ use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
-use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -56,7 +55,9 @@ final class CsvController extends AbstractController
 
         if($codes === false)
         {
-            throw new InvalidArgumentException('Page not found');
+            $this->addFlash('danger', 'Честных знаков не найдено');
+
+            return $this->redirectToReferer();
         }
 
         $response = new StreamedResponse(function() use ($codes) {
@@ -112,7 +113,9 @@ final class CsvController extends AbstractController
 
         if($codes === false)
         {
-            throw new InvalidArgumentException('Page not found');
+            $this->addFlash('danger', 'Честных знаков не найдено');
+
+            return $this->redirectToReferer();
         }
 
         //dd($codes);
