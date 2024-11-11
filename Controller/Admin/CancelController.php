@@ -70,7 +70,8 @@ final class CancelController extends AbstractController
             /** Получаем все честные знаки по партии */
             $signs = $ProductSignByPart
                 ->forPart($part)
-                ->execute();
+                ->withStatusDecommission()
+                ->findAll();
 
             if(false === $signs)
             {

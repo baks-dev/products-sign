@@ -1,17 +1,17 @@
 <?php
 /*
  *  Copyright 2024.  Baks.dev <admin@baks.dev>
- *
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *
+ *  
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,22 +26,10 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Messenger\ProductSignPdf;
 
 use BaksDev\Barcode\Reader\BarcodeRead;
-use BaksDev\Barcode\Writer\BarcodeFormat;
-use BaksDev\Barcode\Writer\BarcodeType;
-use BaksDev\Barcode\Writer\BarcodeWrite;
-use BaksDev\Core\Doctrine\ORMQueryBuilder;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
-use BaksDev\Core\Validator\ValidatorCollectionInterface;
-use BaksDev\Elastic\Api\Index\ElasticGetIndex;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
-use BaksDev\Files\Resources\Upload\Image\ImageUploadInterface;
-use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
-use BaksDev\Products\Product\Repository\ProductByModification\ProductByModificationInterface;
-use BaksDev\Products\Product\Type\Offers\Variation\Modification\Id\ProductModificationUid;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Products\Sign\Repository\CurrentEvent\ProductSignCurrentEventInterface;
-use BaksDev\Products\Sign\Repository\ExistsProductSignCode\ExistsProductSignCodeInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignDTO;
@@ -49,17 +37,12 @@ use BaksDev\Products\Sign\UseCase\Admin\NewEdit\ProductSignHandler;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\Products\ProductStockDTO;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockDTO;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockHandler;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use BaksDev\Users\User\Type\Id\UserUid;
 use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
 use Imagick;
 use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
 use ReflectionClass;
-use RuntimeException;
-use setasign\Fpdi\Fpdi;
-use Smalot\PdfParser\Parser;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -78,7 +61,8 @@ final class ProductSignPdfHandler
         private readonly BarcodeRead $barcodeRead,
         private readonly MessageDispatchInterface $messageDispatch,
         LoggerInterface $productsSignLogger
-    ) {
+    )
+    {
 
         $this->logger = $productsSignLogger;
     }
@@ -201,7 +185,6 @@ final class ProductSignPdfHandler
             $this->filesystem->exists($dirCode) ?: $this->filesystem->mkdir($dirCode);
 
 
-
             /**
              * Открываем PDF для подсчета страниц на случай если их несколько
              */
@@ -294,6 +277,7 @@ final class ProductSignPdfHandler
                 $ProductSignInvariableDTO->setOffer($message->getOffer());
                 $ProductSignInvariableDTO->setVariation($message->getVariation());
                 $ProductSignInvariableDTO->setModification($message->getModification());
+                $ProductSignInvariableDTO->setNumber($message->getNumber());
 
                 $handle = $this->productSignHandler->handle($ProductSignDTO);
 
@@ -325,7 +309,7 @@ final class ProductSignPdfHandler
                 if($message->isPurchase() && $message->getProfile())
                 {
                     /** Ищем в массиве такой продукт */
-                    $getPurchaseProduct = $PurchaseProductStockDTO->getProduct()->filter(function (
+                    $getPurchaseProduct = $PurchaseProductStockDTO->getProduct()->filter(function(
                         ProductStockDTO $element
                     ) use ($message) {
                         return

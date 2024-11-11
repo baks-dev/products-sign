@@ -49,7 +49,7 @@ final class PrintController extends AbstractController
 
         $codes = $productSignByOrder
             ->forOrder($order)
-            ->execute();
+            ->findAll();
 
         return $this->render(
             ['codes' => $codes],
@@ -67,7 +67,8 @@ final class PrintController extends AbstractController
 
         $codes = $productSignByPart
             ->forPart($part)
-            ->execute();
+            ->withStatusDone()
+            ->findAll();
 
         return $this->render(
             ['codes' => $codes,],

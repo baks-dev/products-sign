@@ -23,39 +23,26 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\UseCase\Admin\Delete;
+namespace BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 
-use BaksDev\Core\Entity\AbstractHandler;
-use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
-use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Products\Sign\Messenger\ProductSignMessage;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
-
-final class ProductSignDeleteHandler extends AbstractHandler
+/**
+ * Статус Delete «Удален»
+ */
+#[AutoconfigureTag('baks.sign.status')]
+class ProductSignStatusDelete implements ProductSignStatusInterface
 {
-    public function handle(ProductSignDeleteDTO $command): string|ProductSign
+    public const string STATUS = 'delete';
+
+    public function __toString(): string
     {
-        $this
-            ->setCommand($command)
-            ->preEventRemove(ProductSign::class, ProductSignEvent::class);
+        return self::STATUS;
+    }
 
-        /** Валидация всех объектов */
-        if($this->validatorCollection->isInvalid())
-        {
-            return $this->validatorCollection->getErrorUniqid();
-        }
-
-        /** Сбрасываем код */
-        $this->event->deleteCode();
-
-        $this->flush();
-
-        /* Отправляем сообщение в шину */
-        $this->messageDispatch->dispatch(
-            message: new ProductSignMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()),
-            transport: 'products-sign'
-        );
-
-        return $this->main;
+    public function getValue(): string
+    {
+        return self::STATUS;
     }
 }

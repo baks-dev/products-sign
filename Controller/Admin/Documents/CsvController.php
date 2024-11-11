@@ -51,7 +51,7 @@ final class CsvController extends AbstractController
         $codes = $productSignByOrder
             ->forOrder($order)
             //->withStatusDone()
-            ->execute();
+            ->findAll();
 
         if($codes === false)
         {
@@ -109,7 +109,8 @@ final class CsvController extends AbstractController
 
         $codes = $productSignByPart
             ->forPart($part)
-            ->execute();
+            ->withStatusDecommission()
+            ->findAll();
 
         if($codes === false)
         {

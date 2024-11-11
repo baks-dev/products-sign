@@ -4,5 +4,4 @@ done: 'Done'
 error: 'Error'
 cancel: 'Cancelled'
 process: 'In progress'
-
-
+delete: 'Delete'

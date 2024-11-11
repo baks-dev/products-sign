@@ -51,7 +51,7 @@ final class TxtController extends AbstractController
         $codes = $productSignByOrder
             ->forOrder($order)
             //->withStatusDone()
-            ->execute();
+            ->findAll();
 
         if($codes === false)
         {
@@ -110,7 +110,9 @@ final class TxtController extends AbstractController
 
         $codes = $productSignByPart
             ->forPart($part)
-            ->execute();
+            ->withStatusNew()
+            ->withStatusDecommission()
+            ->findAll();
 
         if($codes === false)
         {
@@ -118,7 +120,6 @@ final class TxtController extends AbstractController
 
             return $this->redirectToReferer();
         }
-
 
         $response = new StreamedResponse(function() use ($codes) {
 

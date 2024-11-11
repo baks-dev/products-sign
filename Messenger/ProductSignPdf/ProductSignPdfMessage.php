@@ -1,17 +1,17 @@
 <?php
 /*
  *  Copyright 2024.  Baks.dev <admin@baks.dev>
- *
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *
+ *  
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,7 +29,6 @@ use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -38,31 +37,33 @@ final class ProductSignPdfMessage
 {
     #[Assert\NotBlank]
     #[Assert\Uuid]
-    private UserUid $usr;
+    private string $usr;
 
     #[Assert\Uuid]
-    private ?UserProfileUid $profile;
+    private ?string $profile;
 
     /** ID продукта */
     #[Assert\NotBlank]
     #[Assert\Uuid]
-    private readonly ProductUid $product;
+    private readonly string $product;
 
     /** Постоянный уникальный идентификатор ТП */
     #[Assert\Uuid]
-    private readonly ?ProductOfferConst $offer;
+    private readonly ?string $offer;
 
     /** Постоянный уникальный идентификатор варианта */
     #[Assert\Uuid]
-    private readonly ?ProductVariationConst $variation;
+    private readonly ?string $variation;
 
     /** Постоянный уникальный идентификатор модификации */
     #[Assert\Uuid]
-    private readonly ?ProductModificationConst $modification;
+    private readonly ?string $modification;
 
     /** Добавить лист закупки */
     private bool $purchase;
 
+    /** Грузовая таможенная декларация (номер) */
+    private ?string $number;
 
     public function __construct(
         UserUid $usr,
@@ -71,16 +72,20 @@ final class ProductSignPdfMessage
         ?ProductOfferConst $offer,
         ?ProductVariationConst $variation,
         ?ProductModificationConst $modification,
-        bool $purchase
-    ) {
-        $this->usr = $usr;
-        $this->profile = $profile;
-        $this->product = $product;
-        $this->offer = $offer;
-        $this->variation = $variation;
-        $this->modification = $modification;
+        bool $purchase,
+        ?string $number
+    )
+    {
+        $this->usr = (string) $usr;
+        $this->profile = (string) $profile;
+        $this->product = (string) $product;
+
+        $this->offer = $offer ? (string) $offer : null;
+        $this->variation = $variation ? (string) $variation : null;
+        $this->modification = $modification ? (string) $modification : null;
 
         $this->purchase = $purchase;
+        $this->number = $number;
     }
 
     /**
@@ -88,7 +93,7 @@ final class ProductSignPdfMessage
      */
     public function getUsr(): UserUid
     {
-        return $this->usr;
+        return new UserUid($this->usr);
     }
 
     /**
@@ -104,7 +109,7 @@ final class ProductSignPdfMessage
      */
     public function getProfile(): ?UserProfileUid
     {
-        return $this->profile;
+        return $this->profile ? new UserProfileUid($this->profile) : null;
     }
 
     /**
@@ -112,7 +117,7 @@ final class ProductSignPdfMessage
      */
     public function getProduct(): ProductUid
     {
-        return $this->product;
+        return new ProductUid($this->product);
     }
 
     /**
@@ -120,7 +125,7 @@ final class ProductSignPdfMessage
      */
     public function getOffer(): ?ProductOfferConst
     {
-        return $this->offer;
+        return $this->offer ? new ProductOfferConst($this->offer) : null;
     }
 
     /**
@@ -128,7 +133,7 @@ final class ProductSignPdfMessage
      */
     public function getVariation(): ?ProductVariationConst
     {
-        return $this->variation;
+        return $this->variation ? new ProductVariationConst($this->variation) : null;
     }
 
     /**
@@ -136,6 +141,14 @@ final class ProductSignPdfMessage
      */
     public function getModification(): ?ProductModificationConst
     {
-        return $this->modification;
+        return $this->modification ? new ProductModificationConst($this->modification) : null;
+    }
+
+    /**
+     * Number
+     */
+    public function getNumber(): ?string
+    {
+        return $this->number;
     }
 }

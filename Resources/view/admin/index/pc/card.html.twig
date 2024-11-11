@@ -75,6 +75,19 @@
             </button>
         {% endif %}
 
+
+        {% if item.sign_number %}
+            <div class="d-flex align-items-center gap-1 text-primary pointer copy small text-nowrap"
+                 data-copy="{{ item.sign_number }}">
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="14" height="14"
+                     fill="currentColor" viewBox="0 0 115.77 122.88">
+                    <path d="M89.62,13.96v7.73h12.19h0.01v0.02c3.85,0.01,7.34,1.57,9.86,4.1c2.5,2.51,4.06,5.98,4.07,9.82h0.02v0.02 v73.27v0.01h-0.02c-0.01,3.84-1.57,7.33-4.1,9.86c-2.51,2.5-5.98,4.06-9.82,4.07v0.02h-0.02h-61.7H40.1v-0.02 c-3.84-0.01-7.34-1.57-9.86-4.1c-2.5-2.51-4.06-5.98-4.07-9.82h-0.02v-0.02V92.51H13.96h-0.01v-0.02c-3.84-0.01-7.34-1.57-9.86-4.1 c-2.5-2.51-4.06-5.98-4.07-9.82H0v-0.02V13.96v-0.01h0.02c0.01-3.85,1.58-7.34,4.1-9.86c2.51-2.5,5.98-4.06,9.82-4.07V0h0.02h61.7 h0.01v0.02c3.85,0.01,7.34,1.57,9.86,4.1c2.5,2.51,4.06,5.98,4.07,9.82h0.02V13.96L89.62,13.96z M79.04,21.69v-7.73v-0.02h0.02 c0-0.91-0.39-1.75-1.01-2.37c-0.61-0.61-1.46-1-2.37-1v0.02h-0.01h-61.7h-0.02v-0.02c-0.91,0-1.75,0.39-2.37,1.01 c-0.61,0.61-1,1.46-1,2.37h0.02v0.01v64.59v0.02h-0.02c0,0.91,0.39,1.75,1.01,2.37c0.61,0.61,1.46,1,2.37,1v-0.02h0.01h12.19V35.65 v-0.01h0.02c0.01-3.85,1.58-7.34,4.1-9.86c2.51-2.5,5.98-4.06,9.82-4.07v-0.02h0.02H79.04L79.04,21.69z M105.18,108.92V35.65v-0.02 h0.02c0-0.91-0.39-1.75-1.01-2.37c-0.61-0.61-1.46-1-2.37-1v0.02h-0.01h-61.7h-0.02v-0.02c-0.91,0-1.75,0.39-2.37,1.01 c-0.61,0.61-1,1.46-1,2.37h0.02v0.01v73.27v0.02h-0.02c0,0.91,0.39,1.75,1.01,2.37c0.61,0.61,1.46,1,2.37,1v-0.02h0.01h61.7h0.02 v0.02c0.91,0,1.75-0.39,2.37-1.01c0.61-0.61,1-1.46,1-2.37h-0.02V108.92L105.18,108.92z"></path>
+                </svg>
+                ГТД: {{ item.sign_number }}
+            </div>
+        {% endif %}
+
+
     </td>
 
     <td class="text-center text-nowrap w-75">
@@ -94,48 +107,6 @@
     <td class="text-nowrap text-nowrap">
         <div class="d-flex gap-1">
 
-            {# EXEL #}
-
-            {% if (item.sign_status != 'new' and item.sign_status != 'error') and (is_granted('ROLE_PRODUCT_SIGN') or is_granted('ROLE_ADMIN')) %}
-
-                {% set document_csv = null %}
-                {% set document_txt = null %}
-
-                {% if item.sign_status == 'decommission' %}
-                    {% set document_csv = path('products-sign:admin.csv.parts', { part: item.sign_part }) %}
-                    {% set document_txt = path('products-sign:admin.txt.parts', { part: item.sign_part }) %}
-                {% else %}
-                    {% set document_csv = path('products-sign:admin.csv.orders', { order: item.order_id }) %}
-                    {% set document_txt = path('products-sign:admin.txt.orders', { order: item.order_id }) %}
-                {% endif %}
-
-                <a
-                        href="{{ document_csv }}"
-                        class='btn btn-sm btn-light d-flex gap-3'
-                        title='Скачать Exel'
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
-                         class="bi bi-filetype-csv" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd"
-                              d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM3.517 14.841a1.13 1.13 0 0 0 .401.823q.195.162.478.252.284.091.665.091.507 0 .859-.158.354-.158.539-.44.187-.284.187-.656 0-.336-.134-.56a1 1 0 0 0-.375-.357 2 2 0 0 0-.566-.21l-.621-.144a1 1 0 0 1-.404-.176.37.37 0 0 1-.144-.299q0-.234.185-.384.188-.152.512-.152.214 0 .37.068a.6.6 0 0 1 .246.181.56.56 0 0 1 .12.258h.75a1.1 1.1 0 0 0-.2-.566 1.2 1.2 0 0 0-.5-.41 1.8 1.8 0 0 0-.78-.152q-.439 0-.776.15-.337.149-.527.421-.19.273-.19.639 0 .302.122.524.124.223.352.367.228.143.539.213l.618.144q.31.073.463.193a.39.39 0 0 1 .152.326.5.5 0 0 1-.085.29.56.56 0 0 1-.255.193q-.167.07-.413.07-.175 0-.32-.04a.8.8 0 0 1-.248-.115.58.58 0 0 1-.255-.384zM.806 13.693q0-.373.102-.633a.87.87 0 0 1 .302-.399.8.8 0 0 1 .475-.137q.225 0 .398.097a.7.7 0 0 1 .272.26.85.85 0 0 1 .12.381h.765v-.072a1.33 1.33 0 0 0-.466-.964 1.4 1.4 0 0 0-.489-.272 1.8 1.8 0 0 0-.606-.097q-.534 0-.911.223-.375.222-.572.632-.195.41-.196.979v.498q0 .568.193.976.197.407.572.626.375.217.914.217.439 0 .785-.164t.55-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.764a.8.8 0 0 1-.118.363.7.7 0 0 1-.272.25.9.9 0 0 1-.401.087.85.85 0 0 1-.478-.132.83.83 0 0 1-.299-.392 1.7 1.7 0 0 1-.102-.627zm8.239 2.238h-.953l-1.338-3.999h.917l.896 3.138h.038l.888-3.138h.879z"/>
-                    </svg>
-                </a>
-
-
-                <a
-                        href="{{ document_txt }}"
-                        class='btn btn-sm btn-light d-flex gap-3'
-                        title='Скачать TXT'
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
-                         class="bi bi-filetype-txt" viewBox="0 0 16 16">
-                        <path fill-rule="evenodd"
-                              d="M14 4.5V14a2 2 0 0 1-2 2h-2v-1h2a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM1.928 15.849v-3.337h1.136v-.662H0v.662h1.134v3.337zm4.689-3.999h-.894L4.9 13.289h-.035l-.832-1.439h-.932l1.228 1.983-1.24 2.016h.862l.853-1.415h.035l.85 1.415h.907l-1.253-1.992zm1.93.662v3.337h-.794v-3.337H6.619v-.662h3.064v.662H8.546Z"/>
-                    </svg>
-                </a>
-
-
-            {% endif %}
 
             {% if (item.sign_status != 'new' and item.sign_status != 'error') and (is_granted('ROLE_PRODUCT_SIGN') or is_granted('ROLE_ADMIN')) %}
 
@@ -176,8 +147,55 @@
 
             {% endif %}
 
+            {# EXEL #}
+
+            {% if (item.sign_status != 'new' and item.sign_status != 'error') and (is_granted('ROLE_PRODUCT_SIGN') or is_granted('ROLE_ADMIN')) %}
+
+                {# {% set document_csv = null %} #}
+                {% set document_txt = null %}
+
+                {% if item.sign_status == 'decommission' %}
+                    {# {% set document_csv = path('products-sign:admin.csv.parts', { part: item.sign_part }) %} #}
+                    {% set document_txt = path('products-sign:admin.txt.parts', { part: item.sign_part }) %}
+                {% else %}
+                    {# {% set document_csv = path('products-sign:admin.csv.orders', { order: item.order_id }) %} #}
+                    {% set document_txt = path('products-sign:admin.txt.orders', { order: item.order_id }) %}
+                {% endif %}
+
+                {# <a
+                        href="{{ document_csv }}"
+                        class='btn btn-sm btn-light d-flex gap-3'
+                        title='Скачать Exel'
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
+                         class="bi bi-filetype-csv" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                              d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM3.517 14.841a1.13 1.13 0 0 0 .401.823q.195.162.478.252.284.091.665.091.507 0 .859-.158.354-.158.539-.44.187-.284.187-.656 0-.336-.134-.56a1 1 0 0 0-.375-.357 2 2 0 0 0-.566-.21l-.621-.144a1 1 0 0 1-.404-.176.37.37 0 0 1-.144-.299q0-.234.185-.384.188-.152.512-.152.214 0 .37.068a.6.6 0 0 1 .246.181.56.56 0 0 1 .12.258h.75a1.1 1.1 0 0 0-.2-.566 1.2 1.2 0 0 0-.5-.41 1.8 1.8 0 0 0-.78-.152q-.439 0-.776.15-.337.149-.527.421-.19.273-.19.639 0 .302.122.524.124.223.352.367.228.143.539.213l.618.144q.31.073.463.193a.39.39 0 0 1 .152.326.5.5 0 0 1-.085.29.56.56 0 0 1-.255.193q-.167.07-.413.07-.175 0-.32-.04a.8.8 0 0 1-.248-.115.58.58 0 0 1-.255-.384zM.806 13.693q0-.373.102-.633a.87.87 0 0 1 .302-.399.8.8 0 0 1 .475-.137q.225 0 .398.097a.7.7 0 0 1 .272.26.85.85 0 0 1 .12.381h.765v-.072a1.33 1.33 0 0 0-.466-.964 1.4 1.4 0 0 0-.489-.272 1.8 1.8 0 0 0-.606-.097q-.534 0-.911.223-.375.222-.572.632-.195.41-.196.979v.498q0 .568.193.976.197.407.572.626.375.217.914.217.439 0 .785-.164t.55-.454a1.27 1.27 0 0 0 .226-.674v-.076h-.764a.8.8 0 0 1-.118.363.7.7 0 0 1-.272.25.9.9 0 0 1-.401.087.85.85 0 0 1-.478-.132.83.83 0 0 1-.299-.392 1.7 1.7 0 0 1-.102-.627zm8.239 2.238h-.953l-1.338-3.999h.917l.896 3.138h.038l.888-3.138h.879z"/>
+                    </svg>
+                </a> #}
+
+
+                <a
+                        href="{{ document_txt }}"
+                        class='btn btn-sm btn-light d-flex gap-3'
+                        title='Скачать TXT'
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
+                         class="bi bi-filetype-txt" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                              d="M14 4.5V14a2 2 0 0 1-2 2h-2v-1h2a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM1.928 15.849v-3.337h1.136v-.662H0v.662h1.134v3.337zm4.689-3.999h-.894L4.9 13.289h-.035l-.832-1.439h-.932l1.228 1.983-1.24 2.016h.862l.853-1.415h.035l.85 1.415h.907l-1.253-1.992zm1.93.662v3.337h-.794v-3.337H6.619v-.662h3.064v.662H8.546Z"/>
+                    </svg>
+                </a>
+
+
+            {% endif %}
+
+
+
 
             {% if item.sign_status == 'new' and (is_granted('ROLE_PRODUCT_SIGN_STATUS') or is_granted('ROLE_ADMIN')) %}
+
+
                 <button
                         data-href="{{ path('products-sign:admin.decommission', {
                             category : item.product_category,
@@ -186,7 +204,7 @@
                             variation: item.product_variation_const,
                             modification: item.product_modification_const
                         }) }}"
-                        class='btn btn-sm btn-primary d-flex gap-3 disabled'
+                        class='btn btn-sm btn-outline-danger d-flex gap-3 disabled'
                         data-bs-toggle="modal"
                         data-bs-target="#modal"
                         title='Списать честные знаки'
@@ -198,6 +216,18 @@
                         <path d="m8.354 10.354 7-7a.5.5 0 0 0-.708-.708L8 9.293 5.354 6.646a.5.5 0 1 0-.708.708l3 3a.5.5 0 0 0 .708 0"/>
                     </svg>
                 </button>
+
+                <a
+                        href="{{ path('products-sign:admin.txt.parts', { part: item.sign_part }) }}"
+                        class='btn btn-sm btn-light d-flex gap-3'
+                        title='Скачать TXT'
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
+                         class="bi bi-filetype-txt" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                              d="M14 4.5V14a2 2 0 0 1-2 2h-2v-1h2a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM1.928 15.849v-3.337h1.136v-.662H0v.662h1.134v3.337zm4.689-3.999h-.894L4.9 13.289h-.035l-.832-1.439h-.932l1.228 1.983-1.24 2.016h.862l.853-1.415h.035l.85 1.415h.907l-1.253-1.992zm1.93.662v3.337h-.794v-3.337H6.619v-.662h3.064v.662H8.546Z"/>
+                    </svg>
+                </a>
 
             {% endif %}
         </div>

@@ -45,10 +45,9 @@ value="{{ item.sign_event }}">
 
 
         {# Удалить #}
-        {# {% if  is_granted(ROLE~'_DELETE') or is_granted('ROLE_ADMIN') %}
+        {% if item.sign_status == 'new' and (is_granted(ROLE~'_DELETE') or is_granted('ROLE_ADMIN')) %}
             <li class="list-group-item d-flex justify-content-between bg-transparent border-0 text-truncate rounded-5">
-
-                <a href="{{ path('products-sign:admin.delete', { id: item.sign_event }) }}"
+                <a href="{{ path('products-sign:admin.delete', { part: item.sign_part }) }}"
                    class="text-decoration-none text-dark w-100 modal-link disabled"
                    data-bs-toggle="modal"
                    data-bs-target="#modal"
@@ -56,8 +55,7 @@ value="{{ item.sign_event }}">
                     {{ 'btn.delete'|trans({}, 'core.btn') }}
                 </a>
             </li>
-        {% endif %} #}
-
+        {% endif %}
 
     </ul>
 </div>

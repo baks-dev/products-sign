@@ -1,17 +1,17 @@
 <?php
 /*
  *  Copyright 2024.  Baks.dev <admin@baks.dev>
- *
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *
+ *  
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -34,18 +34,21 @@ use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDecommission;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use InvalidArgumentException;
 
 final class ProductSignByPart implements ProductSignByPartInterface
 {
     private ProductSignUid|false $part = false;
 
-    private ProductSignStatus $status;
+    private array $status;
+
+    //private ProductSignStatus $status;
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder)
     {
         /** По умолчанию возвращаем знаки со статусом Decommission «Списано» */
-        $this->status = new ProductSignStatus(ProductSignStatusDecommission::class);
+        $this->status[] = new ProductSignStatus(ProductSignStatusDecommission::class);
     }
 
     public function forPart(ProductSignUid|string $part): self
@@ -60,21 +63,39 @@ final class ProductSignByPart implements ProductSignByPartInterface
         return $this;
     }
 
+
     /**
      * Возвращает знаки со статусом Done «Выполнен»
      */
     public function withStatusDone(): self
     {
-        $this->status = new ProductSignStatus(ProductSignStatusDone::class);
+        $this->status[] = new ProductSignStatus(ProductSignStatusDone::class);
         return $this;
     }
 
+    /**
+     * Возвращает знаки со статусом Decommission «Списано»
+     */
+    public function withStatusDecommission(): self
+    {
+        $this->status[] = new ProductSignStatus(ProductSignStatusDecommission::class);
+        return $this;
+    }
+
+    /**
+     * Возвращает знаки со статусом New «Новый»
+     */
+    public function withStatusNew(): self
+    {
+        $this->status[] = new ProductSignStatus(ProductSignStatusNew::class);
+        return $this;
+    }
 
     /**
      * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору артии
      * По умолчанию возвращает знаки со статусом Process «В процессе»
      */
-    public function execute(): array|false
+    public function findAll(): array|false
     {
         if($this->part === false)
         {
@@ -97,25 +118,38 @@ final class ProductSignByPart implements ProductSignByPartInterface
             ->addSelect('main.id AS sign_id')
             ->addSelect('main.event AS sign_event')
             ->join(
-            'invariable',
-            ProductSign::class,
-            'main',
-            'main.id = invariable.main'
-        );
-
-
-        $dbal
-            ->join(
                 'invariable',
-                ProductSignEvent::class,
-                'event',
-                'event.id = invariable.event AND event.status = :status'
-            )
-            ->setParameter(
-                'status',
-                $this->status,
-                ProductSignStatus::TYPE
+                ProductSign::class,
+                'main',
+                'main.id = invariable.main'
             );
+
+
+        if(!empty($this->status))
+        {
+            $condition = null;
+
+            foreach($this->status as $status)
+            {
+                $key = uniqid('status_', false);
+                $condition[] = sprintf('event.status = :%s', $key);
+
+                $dbal
+                    ->setParameter(
+                        $key,
+                        $status,
+                        ProductSignStatus::TYPE
+                    );
+            }
+            $dbal
+                ->join(
+                    'invariable',
+                    ProductSignEvent::class,
+                    'event',
+                    sprintf('event.id = invariable.event AND (%s)', implode(' OR ', $condition))
+                );
+
+        }
 
 
         $dbal
