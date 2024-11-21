@@ -29,7 +29,7 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 
 /**
  * @group products-sign
- * @depends BaksDev\Products\Sign\UseCase\Admin\NewEdit\Tests\ProductSignNewHandleTest::class
+ * @depends BaksDev\Products\Sign\UseCase\Admin\New\Tests\ProductSignNewHandleTest::class
  */
 #[When(env: 'test')]
 final class StatusControllerTest extends WebTestCase

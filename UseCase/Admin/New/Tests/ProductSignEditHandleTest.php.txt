@@ -23,33 +23,31 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\UseCase\Admin\Delete\Tests;
+namespace BaksDev\Products\Sign\UseCase\Admin\New\Tests;
 
-use BaksDev\Products\Sign\Controller\Admin\Tests\DeleteControllerTest;
-use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Repository\CurrentEvent\ProductSignCurrentEventInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusCollection;
-use BaksDev\Products\Sign\UseCase\Admin\Delete\ProductSignDeleteDTO;
-use BaksDev\Products\Sign\UseCase\Admin\Delete\ProductSignDeleteHandler;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
+use BaksDev\Products\Sign\UseCase\Admin\New\Code\ProductSignCodeDTO;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignDTO;
-use BaksDev\Products\Sign\UseCase\Admin\Cancel\ProductSignCancelDTO;
-use BaksDev\Products\Sign\UseCase\Admin\Cancel\Tests\ProductSignCancelHandleTest;
+use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignHandler;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
 /**
- * @group @group products-sign
- *
- * @depends BaksDev\Products\Sign\UseCase\Admin\Cancel\Tests\ProductSignCancelHandleTest::class
- * @depends BaksDev\Products\Sign\Controller\Admin\Tests\DeleteControllerTest::class
- *
+ * @group products-sign
+ * @depends BaksDev\Products\Sign\UseCase\Admin\New\Tests\ProductSignNewHandleTest::class
  */
 #[When(env: 'test')]
-final class ProductSignDeleteHandleTest extends KernelTestCase
+final class ProductSignEditHandleTest extends KernelTestCase
 {
     public function testUseCase(): void
     {
@@ -68,43 +66,40 @@ final class ProductSignDeleteHandleTest extends KernelTestCase
 
         /** @see ProductSignDTO */
 
-        $ProductSignDTO = new ProductSignDeleteDTO($UserProfileUid = clone new UserProfileUid());
+        $ProductSignDTO = new ProductSignDTO($UserProfileUid = clone new UserProfileUid());
         $ProductSignEvent->getDto($ProductSignDTO);
         self::assertSame($UserProfileUid, $ProductSignDTO->getProfile());
 
+        self::assertTrue($ProductSignDTO->getStatus()->equals(ProductSignStatusNew::class));
+        $ProductSignDTO->setStatus(ProductSignStatusDone::class);
 
-        /** @var ProductSignDeleteHandler $ProductSignHandler */
-        $ProductSignHandler = self::getContainer()->get(ProductSignDeleteHandler::class);
+        /** @see ProductSignCodeDTO */
+
+        $ProductSignCodeDTO = $ProductSignDTO->getCode();
+
+        self::assertEquals('code', $ProductSignCodeDTO->getCode());
+        $ProductSignCodeDTO->setCode('code_edit');
+
+        self::assertNotNull($ProductSignCodeDTO->getQr());
+
+        self::assertTrue($ProductSignCodeDTO->getProduct()->equals(ProductUid::TEST));
+        $ProductSignCodeDTO->setProduct(clone $ProductSignCodeDTO->getProduct());
+
+        self::assertTrue($ProductSignCodeDTO->getOffer()->equals(ProductOfferConst::TEST));
+        $ProductSignCodeDTO->setOffer(clone $ProductSignCodeDTO->getOffer());
+
+        self::assertTrue($ProductSignCodeDTO->getVariation()->equals(ProductVariationConst::TEST));
+        $ProductSignCodeDTO->setVariation(clone $ProductSignCodeDTO->getVariation());
+
+        self::assertTrue($ProductSignCodeDTO->getModification()->equals(ProductModificationConst::TEST));
+        $ProductSignCodeDTO->setModification(clone $ProductSignCodeDTO->getModification());
+
+
+        /** @var ProductSignHandler $ProductSignHandler */
+        $ProductSignHandler = self::getContainer()->get(ProductSignHandler::class);
         $handle = $ProductSignHandler->handle($ProductSignDTO);
 
         self::assertTrue(($handle instanceof ProductSign), $handle.': Ошибка ProductSign');
 
-    }
-
-    public static function tearDownAfterClass(): void
-    {
-        /** @var EntityManagerInterface $em */
-        $em = self::getContainer()->get(EntityManagerInterface::class);
-
-        $main = $em->getRepository(ProductSign::class)
-            ->findOneBy(['id' => ProductSignUid::TEST]);
-
-        if($main)
-        {
-            $em->remove($main);
-        }
-
-        $event = $em->getRepository(ProductSignEvent::class)
-            ->findBy(['main' => ProductSignUid::TEST]);
-
-        foreach($event as $remove)
-        {
-            $em->remove($remove);
-        }
-
-        $em->flush();
-        $em->clear();
-
-        self::assertTrue(true);
     }
 }

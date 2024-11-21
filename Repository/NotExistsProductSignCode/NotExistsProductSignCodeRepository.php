@@ -1,17 +1,17 @@
 <?php
 /*
  *  Copyright 2024.  Baks.dev <admin@baks.dev>
- *
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *
+ *  
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,7 +28,6 @@ namespace BaksDev\Products\Sign\Repository\NotExistsProductSignCode;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Services\Paginator\PaginatorInterface;
-use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Products\Category\Entity\CategoryProduct;
 use BaksDev\Products\Category\Entity\Info\CategoryProductInfo;
 use BaksDev\Products\Category\Entity\Offers\CategoryProductOffers;
@@ -40,15 +39,12 @@ use BaksDev\Products\Product\Entity\Category\ProductCategory;
 use BaksDev\Products\Product\Entity\Event\ProductEvent;
 use BaksDev\Products\Product\Entity\Info\ProductInfo;
 use BaksDev\Products\Product\Entity\Offers\Image\ProductOfferImage;
-use BaksDev\Products\Product\Entity\Offers\Price\ProductOfferPrice;
 use BaksDev\Products\Product\Entity\Offers\ProductOffer;
 use BaksDev\Products\Product\Entity\Offers\Quantity\ProductOfferQuantity;
 use BaksDev\Products\Product\Entity\Offers\Variation\Image\ProductVariationImage;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\Image\ProductModificationImage;
-use BaksDev\Products\Product\Entity\Offers\Variation\Modification\Price\ProductModificationPrice;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\Quantity\ProductModificationQuantity;
-use BaksDev\Products\Product\Entity\Offers\Variation\Price\ProductVariationPrice;
 use BaksDev\Products\Product\Entity\Offers\Variation\ProductVariation;
 use BaksDev\Products\Product\Entity\Offers\Variation\Quantity\ProductVariationQuantity;
 use BaksDev\Products\Product\Entity\Photo\ProductPhoto;
@@ -58,18 +54,13 @@ use BaksDev\Products\Product\Entity\Property\ProductProperty;
 use BaksDev\Products\Product\Entity\Trans\ProductTrans;
 use BaksDev\Products\Product\Forms\ProductFilter\Admin\ProductFilterDTO;
 use BaksDev\Products\Product\Forms\ProductFilter\Admin\Property\ProductFilterPropertyDTO;
-use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
-use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
-use BaksDev\Users\Profile\UserProfile\Entity\Personal\UserProfilePersonal;
-use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 
 final class NotExistsProductSignCodeRepository implements NotExistsProductSignCodeRepositoryInterface
@@ -434,77 +425,6 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
 		");
 
 
-        /* Цена торгового предо жения */
-        //        $dbal->leftJoin(
-        //            'product_offer',
-        //            ProductOfferPrice::class,
-        //            'product_offer_price',
-        //            'product_offer_price.offer = product_offer.id'
-        //        );
-        //
-        //        /* Цена множественного варианта */
-        //        $dbal->leftJoin(
-        //            'product_variation',
-        //            ProductVariationPrice::class,
-        //            'product_variation_price',
-        //            'product_variation_price.variation = product_variation.id'
-        //        );
-        //
-        //        /* Цена модификации множественного варианта */
-        //        $dbal->leftJoin(
-        //            'product_modification',
-        //            ProductModificationPrice::class,
-        //            'product_modification_price',
-        //            'product_modification_price.modification = product_modification.id'
-        //        );
-
-
-        /* Стоимость продукта */
-
-        //        $dbal->addSelect(
-        //            '
-        //			COALESCE(
-        //                NULLIF(product_modification_price.price, 0),
-        //                NULLIF(product_variation_price.price, 0),
-        //                NULLIF(product_offer_price.price, 0),
-        //                NULLIF(product_price.price, 0)
-        //            ) AS product_price
-        //		'
-        //        );
-
-        /* Валюта продукта */
-
-        //        $dbal->addSelect(
-        //            '
-        //			CASE
-        //			   WHEN product_modification_price.price IS NOT NULL AND product_modification_price.price > 0
-        //			   THEN product_modification_price.currency
-        //
-        //			   WHEN product_variation_price.price IS NOT NULL AND product_variation_price.price > 0
-        //			   THEN product_variation_price.currency
-        //
-        //			   WHEN product_offer_price.price IS NOT NULL AND product_offer_price.price > 0
-        //			   THEN product_offer_price.currency
-        //
-        //			   WHEN product_price.price IS NOT NULL AND product_price.price > 0
-        //			   THEN product_price.currency
-        //
-        //			   ELSE NULL
-        //			END AS product_currency
-        //		'
-        //        );
-
-
-        $dbalCounter = $this->DBALQueryBuilder
-            ->createQueryBuilder(self::class)
-            ->bindLocal();
-
-        //        $dbalCounter
-        //            ->select('COUNT(*) FROM B WHERE product_id = 'X') - (A.total - A.reserve) AS difference')
-        //        $dbalCounter
-        //            ->from(ProductSignInvariable::class, 'invariable');
-        //
-
         $notExists = $this->DBALQueryBuilder
             ->createQueryBuilder(self::class)
             ->bindLocal();
@@ -518,13 +438,20 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
             ->andWhere('invariable.variation = product_variation.const')
             ->andWhere('invariable.modification = product_modification.const');
 
+        $notExists
+            ->join(
+                'invariable',
+                ProductSign::class,
+                'sign_exists',
+                'sign_exists.id = invariable.main'
+            );
 
         $notExists
-            ->leftJoin(
-                'invariable',
+            ->join(
+                'sign_exists',
                 ProductSignEvent::class,
-                'event',
-                'event.id = invariable.event AND (event.status = :status_new OR event.status = :status_progress)'
+                'event_exists',
+                'event_exists.id = sign_exists.event AND (event_exists.status = :status_new OR event_exists.status = :status_progress)'
             );
 
         $dbal
@@ -563,34 +490,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
         $dbal->andWhere('(product_modification_quantity.quantity -
             product_variation_quantity.quantity - 
             product_offer_quantity.quantity - 
-            product_price.quantity
-            )
-             > ('.$notExists->getSQL().')');
-
-
-        //$dbal->andWhere('NOT EXISTS ('.$notExists->getSQL().')');
-
-
-        /** Ответственное лицо */
-
-        //        $dbal
-        //            ->leftJoin(
-        //                'event',
-        //                UserProfile::TABLE,
-        //                'users_profile',
-        //                'users_profile.id = event.profile'
-        //            );
-        //
-        //
-        //        $dbal
-        //            ->addSelect('users_profile_personal.username AS users_profile_username')
-        //            ->addSelect('users_profile_personal.location AS users_profile_location')
-        //            ->leftJoin(
-        //                'users_profile',
-        //                UserProfilePersonal::TABLE,
-        //                'users_profile_personal',
-        //                'users_profile_personal.event = users_profile.event'
-        //            );
+            product_price.quantity) > ('.$notExists->getSQL().')');
 
 
         /**
@@ -630,11 +530,6 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 ->addSearchLike('product_offer.article')
                 ->addSearchLike('product_info.article');
         }
-
-        //$dbal->orderBy('modify.mod_date', 'DESC');
-
-
-        //dd($dbal->fetchAllAssociative());
 
         return $this->paginator->fetchAllAssociative($dbal);
     }

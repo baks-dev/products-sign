@@ -110,6 +110,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
         $dbal
             ->addSelect('COUNT(invariable.part) AS counter')
             ->addSelect('invariable.part AS sign_part')
+            //->addSelect('invariable.event AS sign_event')
             ->addSelect('invariable.number AS sign_number')
             ->from(
                 ProductSignInvariable::class,

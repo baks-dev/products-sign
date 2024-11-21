@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2023.  Baks.dev <admin@baks.dev>
+ *  Copyright 2024.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,7 @@ use BaksDev\Products\Sign\Repository\CurrentEvent\ProductSignCurrentEventInterfa
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusCollection;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
-use BaksDev\Products\Sign\UseCase\Admin\NewEdit\Tests\ProductSignEditHandleTest;
+use BaksDev\Products\Sign\UseCase\Admin\New\Tests\ProductSignEditHandleTest;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignProcessDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
@@ -41,7 +41,7 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 
 /**
  * @group products-sign
- * @depends BaksDev\Products\Sign\UseCase\Admin\NewEdit\Tests\ProductSignEditHandleTest::class
+ * @depends BaksDev\Products\Sign\UseCase\Admin\New\Tests\ProductSignEditHandleTest::class
  */
 #[When(env: 'test')]
 final class ProductSignProcessHandleTest extends KernelTestCase

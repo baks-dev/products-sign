@@ -45,7 +45,8 @@ final class ProductSignPdfHandler
         private readonly MessageDispatchInterface $messageDispatch,
         private readonly ValidatorCollectionInterface $validatorCollection,
         LoggerInterface $productsSignLogger
-    ) {
+    )
+    {
 
         $this->logger = $productsSignLogger;
     }
@@ -54,7 +55,8 @@ final class ProductSignPdfHandler
     /** @see ProductSign */
     public function handle(
         ProductSignPdfDTO $command
-    ): string|bool {
+    ): string|bool
+    {
 
         $upload[] = $this->upload;
         $upload[] = 'public';
@@ -152,7 +154,6 @@ final class ProductSignPdfHandler
 
 
         /** @var ProductSignPdfMessage $message */
-
 
         /* Отправляем сообщение в шину для обработки файлов */
         $this->messageDispatch->dispatch(
