@@ -286,7 +286,7 @@ final class DecommissionProductSignForm extends AbstractType
         );
 
 
-        $builder->add('total', IntegerType::class, ['required' => true]);
+        $builder->add('total', IntegerType::class, ['required' => true, 'attr' => ['min' => 1, 'max' => 500]]);
 
 
         /* Сохранить ******************************************************/

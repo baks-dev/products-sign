@@ -122,23 +122,25 @@ final class ProductSignPdfHandler
         /** @var ProductSignFileDTO $file */
         foreach($command->getFiles() as $file)
         {
-            $name = uniqid('', true).'.pdf';
+            $name = uniqid('original_', true).'.pdf';
             $filename[] = $name;
 
-
-            /**
-             * Для запуска pdfcrop от пользователя sudo:
-             * sudo visudo
-             * unit ALL=(ALL) NOPASSWD: /usr/bin/pdfcrop
-             * Ctrl+X -> Y
-             */
-
-            $process = new Process(['sudo', 'pdfcrop', $file->pdf->getRealPath(), $uploadDir.$name]);
-            $process->mustRun();
-
+            $file->pdf->move($uploadDir, $name);
 
             /** Валидация файла  */
             $this->validatorCollection->add($file->pdf);
+
+
+            //            /**
+            //             * Для запуска pdfcrop от пользователя sudo:
+            //             * sudo visudo
+            //             * unit ALL=(ALL) NOPASSWD: /usr/bin/pdfcrop
+            //             * Ctrl+X -> Y
+            //             */
+            //
+            //            $process = new Process(['sudo', 'pdfcrop', $file->pdf->getRealPath(), $uploadDir.$name]);
+            //            $process->mustRun();
+
         }
 
         /** Валидация всех объектов */

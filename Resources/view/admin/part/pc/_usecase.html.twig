@@ -2,7 +2,7 @@
 
 
 <button class="btn btn-link btn-sm p-0"
-        id="usecase-{{ item.sign_part }}"
+        id="usecase-{{ item.sign_event }}"
         data-bs-container="body"
         data-bs-toggle="popover"
         data-bs-placement="right"
@@ -18,56 +18,35 @@
 
 
 {# Чекбокс #}
-{# <label>
+<label>
     <input class="form-check-input ms-3 p-2" type="checkbox"
-#}{# onchange=checkedItem(); #}{#
-value="{{ item.sign_event }}">
-</label> #}
+            {# onchange=checkedItem(); #}
+           value="{{ item.sign_event }}">
+</label>
 
 
-<div id="usecase-{{ item.sign_part }}-content" class="d-none">
+<div id="usecase-{{ item.sign_event }}-content" class="d-none">
     <ul class="leader list-group list-group-flush ">
 
-        {# Отмена #}
-        {% if item.sign_status == 'decommission' and (is_granted(ROLE~'_STATUS') or is_granted('ROLE_ADMIN')) %}
-
-            <li class="list-group-item d-flex justify-content-between bg-transparent border-0 text-truncate rounded-5">
-                <a href="{{ path('products-sign:admin.cancel', { part: item.sign_part }) }}"
-                   class="text-decoration-none text-dark w-100 modal-link disabled"
-                   data-bs-toggle="modal"
-                   data-bs-target="#modal"
-                   title="{{ 'btn.cancel'|trans({}, 'core.btn') }}">
-                    {{ 'btn.cancel'|trans({}, 'core.btn') }}
-                </a>
-            </li>
-
-        {% endif %}
-
-
-
-
         {# Редактировать #}
-
-        {% if  item.sign_status == 'new' and (is_granted(ROLE~'_EDIT') or is_granted('ROLE_ADMIN')) %}
+        {# {% if item.sign_status == 'process' and is_granted(ROLE~'_STATUS') or is_granted('ROLE_ADMIN') %}
             <li class="list-group-item d-flex justify-content-between bg-transparent border-0 text-truncate rounded-5">
-                <a href="{{ path('products-sign:admin.edit', { part: item.sign_part }) }}"
+                <a href="{{ path('products-sign:admin.cancel', { id: item.sign_event }) }}"
                    class="text-decoration-none text-dark w-100 modal-link disabled"
                    data-bs-toggle="modal"
                    data-bs-target="#modal"
                    title="{{ 'btn.edit'|trans({}, 'core.btn') }}">
-                    {{ 'btn.edit'|trans({}, 'core.btn') }}
+                    {{ 'btn.cancel'|trans({}, 'core.btn') }}
                 </a>
             </li>
-        {% endif %}
 
-
-
+        {% endif %} #}
 
         {# Удалить #}
-
-        {% if (item.sign_status == 'new' or item.sign_status == 'error') and (is_granted(ROLE~'_DELETE') or is_granted('ROLE_ADMIN')) %}
+        {# {% if  is_granted(ROLE~'_DELETE') or is_granted('ROLE_ADMIN') %}
             <li class="list-group-item d-flex justify-content-between bg-transparent border-0 text-truncate rounded-5">
-                <a href="{{ path('products-sign:admin.delete', { part: item.sign_part }) }}"
+
+                <a href="{{ path('products-sign:admin.delete', { id: item.sign_event }) }}"
                    class="text-decoration-none text-dark w-100 modal-link disabled"
                    data-bs-toggle="modal"
                    data-bs-target="#modal"
@@ -75,7 +54,7 @@ value="{{ item.sign_event }}">
                     {{ 'btn.delete'|trans({}, 'core.btn') }}
                 </a>
             </li>
-        {% endif %}
+        {% endif %} #}
 
 
     </ul>

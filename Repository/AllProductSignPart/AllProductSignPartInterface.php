@@ -21,40 +21,17 @@
  *  THE SOFTWARE.
  */
 
-namespace BaksDev\Products\Sign\Repository\ProductSignByPart;
+namespace BaksDev\Products\Sign\Repository\AllProductSignPart;
 
-use BaksDev\Orders\Order\Entity\Order;
-use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Core\Form\Search\SearchDTO;
+use BaksDev\Core\Services\Paginator\PaginatorInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use BaksDev\Users\User\Type\Id\UserUid;
 
-interface ProductSignByPartInterface
+interface AllProductSignPartInterface
 {
-    public function forPart(ProductSignUid|string $part): self;
+    /** Метод возвращает пагинатор ProductSign */
+    public function findPaginator(ProductSignUid $part): PaginatorInterface;
 
-    /**
-     * Возвращает знаки со статусом Done «Выполнен»
-     */
-    public function withStatusDone(): self;
-
-    /**
-     * Возвращает знаки со статусом New «Новый»
-     */
-    public function withStatusNew(): self;
-
-    /**
-     * Возвращает знаки со статусом Decommission «Списано»
-     */
-    public function withStatusDecommission(): self;
-
-    /**
-     * Возвращает знаки со статусом Decommission «Списано»
-     */
-    public function withStatusError(): self;
-
-
-    /**
-     * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
-     * По умолчанию возвращает знаки со статусом Process «В процессе»
-     */
-    public function findAll(): array|false;
+    public function search(SearchDTO $search): self;
 }

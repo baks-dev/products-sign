@@ -68,8 +68,10 @@ final class DeleteController extends AbstractController
         {
 
             /** Получаем все честные знаки по партии */
+
             $signs = $ProductSignByPart
                 ->forPart($part)
+                ->withStatusError()
                 ->withStatusNew()
                 ->findAll();
 

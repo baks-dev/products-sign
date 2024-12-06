@@ -21,18 +21,11 @@
             <div class="w-100">
 
                 {# Название #}
-                <a href="{{ path('products-product:user.detail', {
-                    category: item.category_url,
-                    url : item.product_url ,
-                    offer: item.product_offer_value,
-                    variation: item.product_variation_value,
-                    modification: item.product_modification_value
-                }) }}"
+                <a href="{{ path('products-sign:admin.part', { part: item.sign_part }) }}"
                    class="text-decoration-none mb-1 fw-bolder text-muted"
-                   target="_detail"
                 >
 
-                    {{ item.product_name }}<br>
+                    {{ item.product_name }}
 
                     {# Значение множественного варианта ТП #}
                     {{ item.product_variation_value|call_twig_func(item.product_variation_reference~'_render')

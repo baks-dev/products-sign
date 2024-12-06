@@ -27,8 +27,10 @@ namespace BaksDev\Products\Sign\UseCase\Admin\New;
 
 use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
+use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -48,12 +50,6 @@ final class ProductSignDTO implements ProductSignEventInterface
     #[Assert\Valid]
     private Code\ProductSignCodeDTO $code;
 
-    /**
-     * Код честного знака
-     */
-    #[Assert\Valid]
-    private Invariable\ProductSignInvariableDTO $invariable;
-
 
     /**
      * Статус
@@ -69,8 +65,11 @@ final class ProductSignDTO implements ProductSignEventInterface
     private ?UserProfileUid $profile = null;
 
 
-    //    /** Добавить лист закупки */
-    //    private bool $purchase = false;
+    /**
+     * Код честного знака
+     */
+    #[Assert\Valid]
+    private Invariable\ProductSignInvariableDTO $invariable;
 
 
     public function __construct()
@@ -98,6 +97,11 @@ final class ProductSignDTO implements ProductSignEventInterface
      */
     public function getStatus(): ProductSignStatus
     {
+        if($this->status->equals(ProductSignStatusError::class))
+        {
+            $this->invariable->setPart(new ProductSignUid());
+        }
+
         return $this->status;
     }
 

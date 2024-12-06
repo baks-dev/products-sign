@@ -46,9 +46,8 @@ use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
-use Symfony\Component\Process\Process;
 
-#[AsMessageHandler]
+#[AsMessageHandler(priority: 0)]
 final class ProductSignPdfHandler
 {
     private LoggerInterface $logger;
@@ -106,30 +105,30 @@ final class ProductSignPdfHandler
         $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
 
 
-        /**
-         * Сохраняем все листы PDF в отдельные файлы
-         */
-
-        /** @var DirectoryIterator $SignPdfFile */
-        foreach(new DirectoryIterator($uploadDir) as $SignPdfFile)
-        {
-            if($SignPdfFile->getExtension() !== 'pdf')
-            {
-                continue;
-            }
-
-            /** Пропускаем файлы, которые уже разбиты на страницы */
-            if(str_starts_with($SignPdfFile->getFilename(), 'page') === true)
-            {
-                continue;
-            }
-
-            $process = new Process(['pdftk', $SignPdfFile->getRealPath(), 'burst', 'output', $SignPdfFile->getPath().DIRECTORY_SEPARATOR.uniqid('page_', true).'.%d.pdf']);
-            $process->mustRun();
-
-            /** Удаляем после обработки основной файл PDF */
-            $this->filesystem->remove($SignPdfFile->getRealPath());
-        }
+        //        /**
+        //         * Сохраняем все листы PDF в отдельные файлы на случай, если есть непреобразованные
+        //         */
+        //
+        //        /** @var DirectoryIterator $SignPdfFile */
+        //        foreach(new DirectoryIterator($uploadDir) as $SignPdfFile)
+        //        {
+        //            if($SignPdfFile->getExtension() !== 'pdf')
+        //            {
+        //                continue;
+        //            }
+        //
+        //            /** Пропускаем файлы, которые уже разбиты на страницы */
+        //            if(str_starts_with($SignPdfFile->getFilename(), 'page') === true)
+        //            {
+        //                continue;
+        //            }
+        //
+        //            $process = new Process(['pdftk', $SignPdfFile->getRealPath(), 'burst', 'output', $SignPdfFile->getPath().DIRECTORY_SEPARATOR.uniqid('page_', true).'.%d.pdf']);
+        //            $process->mustRun();
+        //
+        //            /** Удаляем после обработки основной файл PDF */
+        //            $this->filesystem->remove($SignPdfFile->getRealPath());
+        //        }
 
 
         /** Генерируем идентификатор группы для отмены */
@@ -144,6 +143,13 @@ final class ProductSignPdfHandler
             {
                 continue;
             }
+
+            /** Пропускаем файлы, которые не разбиты на страницы и обрезана пустую область */
+            if(str_starts_with($SignFile->getFilename(), 'crop') === false)
+            {
+                continue;
+            }
+
 
             $counter = 0;
             $errors = 0;
@@ -190,7 +196,7 @@ final class ProductSignPdfHandler
              */
             $pdfPath = $SignFile->getRealPath();
             $Imagick = new Imagick();
-            $Imagick->setResolution(450, 450);
+            $Imagick->setResolution(500, 500);
             $Imagick->readImage($pdfPath);
             $pages = $Imagick->getNumberImages(); // количество страниц в файле
 
@@ -259,7 +265,6 @@ final class ProductSignPdfHandler
                 }
 
                 $decode->isError() ? ++$errors : ++$counter;
-
 
                 //$cleanedString = preg_replace('/\((\d+)\)/', '$1', $code);
 

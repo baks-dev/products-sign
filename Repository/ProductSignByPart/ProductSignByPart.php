@@ -34,6 +34,7 @@ use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDecommission;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use InvalidArgumentException;
 
@@ -88,6 +89,16 @@ final class ProductSignByPart implements ProductSignByPartInterface
     public function withStatusNew(): self
     {
         $this->status[] = new ProductSignStatus(ProductSignStatusNew::class);
+        return $this;
+    }
+
+
+    /**
+     * Возвращает знаки со статусом Error «Ошибки»
+     */
+    public function withStatusError(): self
+    {
+        $this->status[] = new ProductSignStatus(ProductSignStatusError::class);
         return $this;
     }
 
