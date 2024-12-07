@@ -59,6 +59,25 @@ final readonly class ProductSignCrop
             $upload[] = (string) $message->getProfile();
         }
 
+        $upload[] = (string) $message->getProduct();
+
+        if($message->getOffer())
+        {
+            $upload[] = (string) $message->getOffer();
+        }
+
+        if($message->getVariation())
+        {
+            $upload[] = (string) $message->getVariation();
+        }
+
+        if($message->getModification())
+        {
+            $upload[] = (string) $message->getModification();
+        }
+
+        $upload[] = '';
+
         /**
          * Рекурсивно сохраняем все листы PDF в отдельные файлы
          */
