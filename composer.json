@@ -22,6 +22,7 @@
   ],
   "require": {
     "php": ">=8.3",
+    "ext-imagick": "*",
     "baks-dev/core": "^7.1"
   },
   "require-dev": {
