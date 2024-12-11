@@ -37,7 +37,7 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-#[RoleSecurity('ROLE_ORDERS')]
+#[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
 final class PrintController extends AbstractController
 {
     #[Route('/admin/product/sign/document/print/orders/{order}', name: 'admin.print.orders', methods: ['GET'])]

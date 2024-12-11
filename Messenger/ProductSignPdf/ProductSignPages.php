@@ -107,11 +107,17 @@ final readonly class ProductSignPages
                 continue;
             }
 
+            if(false === file_exists($info->getRealPath()))
+            {
+                continue;
+            }
+
             $process = new Process(['pdftk', $info->getRealPath(), 'burst', 'output', $info->getPath().DIRECTORY_SEPARATOR.uniqid('page_', true).'.%d.pdf']);
             $process->mustRun();
 
-            /** Удаляем после обработки основной файл PDF */
+            /** Удаляем после обработки основной файл PDF и doc_data.txt */
             $this->filesystem->remove($info->getRealPath());
+            $this->filesystem->remove($info->getPath().DIRECTORY_SEPARATOR.'doc_data.txt');
 
         }
     }

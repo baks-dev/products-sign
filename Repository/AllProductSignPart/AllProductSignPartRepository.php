@@ -217,7 +217,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
             ->addSelect('category_offer.reference as product_offer_reference')
             ->leftJoin(
                 'product_offer',
-                CategoryProductOffers::TABLE,
+                CategoryProductOffers::class,
                 'category_offer',
                 'category_offer.id = product_offer.category_offer'
             );
@@ -340,13 +340,13 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
 			CASE
 			 
 			 WHEN product_modification_image.name IS NOT NULL THEN
-					CONCAT ( '/upload/".ProductModificationImage::TABLE."' , '/', product_modification_image.name)
+					CONCAT ( '/upload/".$dbal->table(ProductModificationImage::class)."' , '/', product_modification_image.name)
 			   WHEN product_variation_image.name IS NOT NULL THEN
-					CONCAT ( '/upload/".ProductVariationImage::TABLE."' , '/', product_variation_image.name)
+					CONCAT ( '/upload/".$dbal->table(ProductVariationImage::class)."' , '/', product_variation_image.name)
 			   WHEN product_offer_images.name IS NOT NULL THEN
-					CONCAT ( '/upload/".ProductOfferImage::TABLE."' , '/', product_offer_images.name)
+					CONCAT ( '/upload/".$dbal->table(ProductOfferImage::class)."' , '/', product_offer_images.name)
 			   WHEN product_photo.name IS NOT NULL THEN
-					CONCAT ( '/upload/".ProductPhoto::TABLE."' , '/', product_photo.name)
+					CONCAT ( '/upload/".$dbal->table(ProductPhoto::class)."' , '/', product_photo.name)
 			   ELSE NULL
 			END AS product_image
 		"
@@ -393,7 +393,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
 
         $dbal->leftJoin(
             'product_event_category',
-            CategoryProduct::TABLE,
+            CategoryProduct::class,
             'category',
             'category.id = product_event_category.category'
         );
@@ -402,7 +402,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
             ->addSelect('category_info.url AS category_url')
             ->leftJoin(
                 'category',
-                CategoryProductInfo::TABLE,
+                CategoryProductInfo::class,
                 'category_info',
                 'category_info.event = category.event'
             );
@@ -411,7 +411,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
             ->addSelect('category_trans.name AS category_name')
             ->leftJoin(
                 'category',
-                CategoryProductTrans::TABLE,
+                CategoryProductTrans::class,
                 'category_trans',
                 'category_trans.event = category.event AND category_trans.local = :local'
             );
@@ -421,7 +421,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
         $dbal
             ->leftJoin(
                 'event',
-                UserProfile::TABLE,
+                UserProfile::class,
                 'users_profile',
                 'users_profile.id = event.profile'
             );
@@ -432,7 +432,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
             ->addSelect('users_profile_personal.location AS users_profile_location')
             ->leftJoin(
                 'users_profile',
-                UserProfilePersonal::TABLE,
+                UserProfilePersonal::class,
                 'users_profile_personal',
                 'users_profile_personal.event = users_profile.event'
             );

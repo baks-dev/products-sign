@@ -38,7 +38,7 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-#[RoleSecurity('ROLE_ORDERS')]
+#[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
 final class TxtController extends AbstractController
 {
     #[Route('/admin/product/sign/document/txt/orders/{order}', name: 'admin.txt.orders', methods: ['GET'])]

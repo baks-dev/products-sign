@@ -105,6 +105,11 @@ final readonly class ProductSignCrop
                 continue;
             }
 
+            if(false === file_exists($info->getRealPath()))
+            {
+                continue;
+            }
+
             /** Обрезаем пустую область */
             $nameCrop = $info->getPath().DIRECTORY_SEPARATOR.uniqid('crop_', true).'.pdf';
             $processCrop = new Process(['sudo', 'pdfcrop', $info->getRealPath(), $nameCrop]);

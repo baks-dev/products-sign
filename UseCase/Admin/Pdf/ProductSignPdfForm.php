@@ -321,11 +321,6 @@ final class ProductSignPdfForm extends AbstractType
         // Если у продукта нет ТП
         if(!$products)
         {
-            //            $form->add(
-            //                'product',
-            //                HiddenType::class
-            //            );
-
             return;
         }
 
@@ -333,7 +328,7 @@ final class ProductSignPdfForm extends AbstractType
         // Продукт
         $form
             ->add('product', ChoiceType::class, [
-                'choices' => $this->productChoice->fetchAllProduct($category),
+                'choices' => $products,
                 'choice_value' => function(?ProductUid $product) {
                     return $product?->getValue();
                 },
@@ -362,11 +357,6 @@ final class ProductSignPdfForm extends AbstractType
         // Если у продукта нет ТП
         if(!$offer->valid())
         {
-            //            $form->add(
-            //                'offer',
-            //                HiddenType::class
-            //            );
-
             return;
         }
 
@@ -420,11 +410,6 @@ final class ProductSignPdfForm extends AbstractType
         // Если у продукта нет множественных вариантов
         if(!$variations->valid())
         {
-            //            $form->add(
-            //                'variation',
-            //                HiddenType::class
-            //            );
-
             return;
         }
 
@@ -475,11 +460,6 @@ final class ProductSignPdfForm extends AbstractType
         // Если у продукта нет модификаций множественных вариантов
         if(!$modifications->valid())
         {
-            //            $form->add(
-            //                'modification',
-            //                HiddenType::class
-            //            );
-
             return;
         }
 

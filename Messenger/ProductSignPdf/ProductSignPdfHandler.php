@@ -144,8 +144,12 @@ final class ProductSignPdfHandler
                 continue;
             }
 
-            /** Пропускаем файлы, которые не разбиты на страницы и обрезана пустую область */
             if(str_starts_with($SignFile->getFilename(), 'crop') === false)
+            {
+                continue;
+            }
+
+            if(false === file_exists($SignFile->getRealPath()))
             {
                 continue;
             }
