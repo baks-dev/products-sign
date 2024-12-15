@@ -2,13 +2,16 @@
 
 <tr class="vertical-middle">
 
-
     <td class="text-nowrap">
         {# Пользовательское меню #}
         {{ include(_self|replace({ "card.html.twig": "_usecase.html.twig" })) }}
     </td>
 
     <td>
+        {{ item.sign_part|uuid_format_date('d.m.Y') }}
+    </td>
+
+    <td class="text-center">
         {{ product_sign_status(item.sign_status) }}
     </td>
     <td class="text-center">

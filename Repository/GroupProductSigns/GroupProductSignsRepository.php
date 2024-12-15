@@ -275,7 +275,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             ->addSelect('category_offer.reference as product_offer_reference')
             ->leftJoin(
                 'product_offer',
-                CategoryProductOffers::TABLE,
+                CategoryProductOffers::class,
                 'category_offer',
                 'category_offer.id = product_offer.category_offer'
             );
@@ -457,7 +457,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
 
         $dbal->leftJoin(
             'product_event_category',
-            CategoryProduct::TABLE,
+            CategoryProduct::class,
             'category',
             'category.id = product_event_category.category'
         );
@@ -466,19 +466,11 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             ->addSelect('category_info.url AS category_url')
             ->leftJoin(
                 'category',
-                CategoryProductInfo::TABLE,
+                CategoryProductInfo::class,
                 'category_info',
                 'category_info.event = category.event'
             );
 
-        /*$dbal
-            ->addSelect('category_trans.name AS category_name')
-            ->leftJoin(
-                'category',
-                CategoryProductTrans::TABLE,
-                'category_trans',
-                'category_trans.event = category.event AND category_trans.local = :local'
-            );*/
 
 
         /** Ответственное лицо */
@@ -486,7 +478,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
         $dbal
             ->leftJoin(
                 'event',
-                UserProfile::TABLE,
+                UserProfile::class,
                 'users_profile',
                 'users_profile.id = event.profile'
             );
@@ -497,7 +489,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             ->addSelect('users_profile_personal.location AS users_profile_location')
             ->leftJoin(
                 'users_profile',
-                UserProfilePersonal::TABLE,
+                UserProfilePersonal::class,
                 'users_profile_personal',
                 'users_profile_personal.event = users_profile.event'
             );

@@ -23,14 +23,6 @@
 
                     {% set image_path = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDE2IDE2IiBmaWxsPSIjYWRiNWJkIj4KICA8cGF0aCBkPSJNMiAyaDJ2MkgyVjJaIj48L3BhdGg+CiAgPHBhdGggZD0iTTYgMHY2SDBWMGg2Wk01IDFIMXY0aDRWMVpNNCAxMkgydjJoMnYtMloiPjwvcGF0aD4KICA8cGF0aCBkPSJNNiAxMHY2SDB2LTZoNlptLTUgMXY0aDR2LTRIMVptMTEtOWgydjJoLTJWMloiPjwvcGF0aD4KICA8cGF0aCBkPSJNMTAgMHY2aDZWMGgtNlptNSAxdjRoLTRWMWg0Wk04IDFWMGgxdjJIOHYySDdWMWgxWm0wIDVWNGgxdjJIOFpNNiA4VjdoMVY2aDF2MmgxVjdoNXYxaC00djFIN1Y4SDZabTAgMHYxSDJWOEgxdjFIMFY3aDN2MWgzWm0xMCAxaC0xVjdoMXYyWm0tMSAwaC0xdjJoMnYtMWgtMVY5Wm0tNCAwaDJ2MWgtMXYxaC0xVjlabTIgM3YtMWgtMXYxaC0xdjFIOXYxaDN2LTJoMVptMCAwaDN2MWgtMnYxaC0xdi0yWm0tNC0xdjFoMXYtMkg3djFoMloiPjwvcGF0aD4KICA8cGF0aCBkPSJNNyAxMmgxdjNoNHYxSDd2LTRabTkgMnYyaC0zdi0xaDJ2LTFoMVoiPjwvcGF0aD4KPC9zdmc+' %}
 
-                    {# {% if form.cover.vars.data.ext is defined and form.cover.vars.data.ext is not null %}
-                {% set img_host =  form.cover.vars.data.cdn == true  ? CDN_HOST : '' %}
-                {% set img_table = '/upload/' ~ constant('BaksDev\\Products\\Category\\Entity\\Cover\\CategoryProductCover::TABLE') ~ '/' %}
-                {% set img_dir = form.cover.vars.data.name %}
-                {% set img_file = (img_host is empty ? '/image.' : '/small.') ~ form.cover.vars.data.ext %}
-                {% set image_path = img_host ~ img_table ~ img_dir ~ img_file %}
-            {% endif %} #}
-
                     <label class="icon rounded-3 bg-contain lazy position-relative image-input p-3"
                            style="width: 150px; height: 150px;"
                            data-bg="{{ image_path }}"

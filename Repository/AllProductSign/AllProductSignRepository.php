@@ -1,17 +1,17 @@
 <?php
 /*
  *  Copyright 2024.  Baks.dev <admin@baks.dev>
- *
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *
+ *  
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,16 +25,15 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Repository\AllProductSign;
 
+use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Services\Paginator\PaginatorInterface;
-use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Products\Category\Entity\CategoryProduct;
 use BaksDev\Products\Category\Entity\Info\CategoryProductInfo;
 use BaksDev\Products\Category\Entity\Offers\CategoryProductOffers;
-use BaksDev\Products\Category\Entity\Offers\Variation\Modification\CategoryProductModification;
 use BaksDev\Products\Category\Entity\Offers\Variation\CategoryProductVariation;
-use BaksDev\Products\Category\Entity\Trans\CategoryProductTrans;
+use BaksDev\Products\Category\Entity\Offers\Variation\Modification\CategoryProductModification;
 use BaksDev\Products\Category\Type\Id\CategoryProductUid;
 use BaksDev\Products\Product\Entity\Category\ProductCategory;
 use BaksDev\Products\Product\Entity\Event\ProductEvent;
@@ -62,7 +61,6 @@ use BaksDev\Users\Profile\UserProfile\Entity\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\DBAL\Types\Types;
 
@@ -271,13 +269,12 @@ final class AllProductSignRepository implements AllProductSignInterface
         }
 
 
-
         // Получаем тип торгового предложения
         $dbal
             ->addSelect('category_offer.reference as product_offer_reference')
             ->leftJoin(
                 'product_offer',
-                CategoryProductOffers::TABLE,
+                CategoryProductOffers::class,
                 'category_offer',
                 'category_offer.id = product_offer.category_offer'
             );
@@ -454,7 +451,7 @@ final class AllProductSignRepository implements AllProductSignInterface
 
         $dbal->leftJoin(
             'product_event_category',
-            CategoryProduct::TABLE,
+            CategoryProduct::class,
             'category',
             'category.id = product_event_category.category'
         );
@@ -463,7 +460,7 @@ final class AllProductSignRepository implements AllProductSignInterface
             ->addSelect('category_info.url AS category_url')
             ->leftJoin(
                 'category',
-                CategoryProductInfo::TABLE,
+                CategoryProductInfo::class,
                 'category_info',
                 'category_info.event = category.event'
             );
@@ -472,7 +469,7 @@ final class AllProductSignRepository implements AllProductSignInterface
             ->addSelect('category_trans.name AS category_name')
             ->leftJoin(
                 'category',
-                CategoryProductTrans::TABLE,
+                CategoryProductTrans::class,
                 'category_trans',
                 'category_trans.event = category.event AND category_trans.local = :local'
             );*/
@@ -483,7 +480,7 @@ final class AllProductSignRepository implements AllProductSignInterface
         $dbal
             ->leftJoin(
                 'event',
-                UserProfile::TABLE,
+                UserProfile::class,
                 'users_profile',
                 'users_profile.id = event.profile'
             );
@@ -494,7 +491,7 @@ final class AllProductSignRepository implements AllProductSignInterface
             ->addSelect('users_profile_personal.location AS users_profile_location')
             ->leftJoin(
                 'users_profile',
-                UserProfilePersonal::TABLE,
+                UserProfilePersonal::class,
                 'users_profile_personal',
                 'users_profile_personal.event = users_profile.event'
             );
