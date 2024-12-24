@@ -345,7 +345,7 @@ final class ProductSignPdfForm extends AbstractType
     }
 
 
-    public function formOfferModifier(FormInterface $form, ProductUid $product = null): void
+    public function formOfferModifier(FormInterface $form, ?ProductUid $product = null): void
     {
         if(null === $product)
         {
@@ -397,7 +397,7 @@ final class ProductSignPdfForm extends AbstractType
             ]);
     }
 
-    public function formVariationModifier(FormInterface $form, ProductOfferConst $offer = null): void
+    public function formVariationModifier(FormInterface $form, ?ProductOfferConst $offer = null): void
     {
 
         if(null === $offer)
@@ -448,7 +448,7 @@ final class ProductSignPdfForm extends AbstractType
             ]);
     }
 
-    public function formModificationModifier(FormInterface $form, ProductVariationConst $variation = null): void
+    public function formModificationModifier(FormInterface $form, ?ProductVariationConst $variation = null): void
     {
         if(null === $variation)
         {
