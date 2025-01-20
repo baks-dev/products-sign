@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -44,27 +44,23 @@ use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(priority: 0)]
-final class ProductSignPdfHandler
+final readonly class ProductSignPdfHandler
 {
-    private LoggerInterface $logger;
-
     public function __construct(
-        #[Autowire('%kernel.project_dir%')] private readonly string $upload,
-        private readonly ProductSignHandler $productSignHandler,
-        private readonly PurchaseProductStockHandler $purchaseProductStockHandler,
-        private readonly Filesystem $filesystem,
-        private readonly BarcodeRead $barcodeRead,
-        private readonly MessageDispatchInterface $messageDispatch,
-        LoggerInterface $productsSignLogger
-    )
-    {
+        #[Autowire('%kernel.project_dir%')] private string $upload,
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
+        private ProductSignHandler $productSignHandler,
+        private PurchaseProductStockHandler $purchaseProductStockHandler,
+        private Filesystem $filesystem,
+        private BarcodeRead $barcodeRead,
+        private MessageDispatchInterface $messageDispatch,
 
-        $this->logger = $productsSignLogger;
-    }
+    ) {}
 
     public function __invoke(ProductSignPdfMessage $message): void
     {

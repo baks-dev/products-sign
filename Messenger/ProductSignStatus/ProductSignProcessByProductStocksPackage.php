@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -43,26 +43,22 @@ use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserPro
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-final class ProductSignProcessByProductStocksPackage
+final readonly class ProductSignProcessByProductStocksPackage
 {
-    private LoggerInterface $logger;
-
     public function __construct(
-        private readonly ProductStocksByIdInterface $productStocks,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly CurrentProductStocksInterface $currentProductStocks,
-        private readonly ProductSignStatusHandler $productSignStatusHandler,
-        private readonly ProductSignNewInterface $productSignNew,
-        private readonly UserByUserProfileInterface $userByUserProfile,
-        private readonly DeduplicatorInterface $deduplicator,
-        LoggerInterface $productsSignLogger,
-    ) {
-
-        $this->logger = $productsSignLogger;
-    }
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
+        private ProductStocksByIdInterface $productStocks,
+        private EntityManagerInterface $entityManager,
+        private CurrentProductStocksInterface $currentProductStocks,
+        private ProductSignStatusHandler $productSignStatusHandler,
+        private ProductSignNewInterface $productSignNew,
+        private UserByUserProfileInterface $userByUserProfile,
+        private DeduplicatorInterface $deduplicator,
+    ) {}
 
     /**
      * При статусе складской заявки Package «Упаковка» - резервируем честный знак в статус Process «В процессе»

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -32,24 +32,18 @@ use BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignPdfMessage;
 use BaksDev\Products\Sign\UseCase\Admin\Pdf\ProductSignFile\ProductSignFileDTO;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Process\Process;
 
-final class ProductSignPdfHandler
+final readonly class ProductSignPdfHandler
 {
-    private LoggerInterface $logger;
-
     public function __construct(
-        #[Autowire('%kernel.project_dir%')] private readonly string $upload,
-        private readonly MessageDispatchInterface $messageDispatch,
-        private readonly ValidatorCollectionInterface $validatorCollection,
-        LoggerInterface $productsSignLogger
-    )
-    {
-
-        $this->logger = $productsSignLogger;
-    }
+        #[Autowire('%kernel.project_dir%')] private string $upload,
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
+        private MessageDispatchInterface $messageDispatch,
+        private ValidatorCollectionInterface $validatorCollection,
+    ) {}
 
 
     /** @see ProductSign */

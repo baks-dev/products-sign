@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -34,22 +34,19 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusCancel;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignCancelDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-final class ProductSignCancelByOrderCanceled
+final readonly class ProductSignCancelByOrderCanceled
 {
-    private readonly LoggerInterface $logger;
-
     public function __construct(
-        private readonly ProductSignStatusHandler $productSignStatusHandler,
-        private readonly OrderEventInterface $orderEventRepository,
-        private readonly ProductSignProcessByOrderInterface $productSignProcessByOrder,
-        private readonly DeduplicatorInterface $deduplicator,
-        LoggerInterface $productsSignLogger,
-    ) {
-        $this->logger = $productsSignLogger;
-    }
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
+        private ProductSignStatusHandler $productSignStatusHandler,
+        private OrderEventInterface $orderEventRepository,
+        private ProductSignProcessByOrderInterface $productSignProcessByOrder,
+        private DeduplicatorInterface $deduplicator,
+    ) {}
 
 
     /**

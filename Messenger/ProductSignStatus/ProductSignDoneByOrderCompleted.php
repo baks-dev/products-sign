@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -42,27 +42,23 @@ use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignDoneDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]
-final class ProductSignDoneByOrderCompleted
+final readonly class ProductSignDoneByOrderCompleted
 {
-    private LoggerInterface $logger;
-
     public function __construct(
-        private readonly ProductOfferConstInterface $productOfferConst,
-        private readonly ProductVariationConstInterface $productVariationConst,
-        private readonly ProductModificationConstInterface $productModificationConst,
-        private readonly ProductSignStatusHandler $productSignStatusHandler,
-        private readonly OrderEventInterface $orderEventRepository,
-        private readonly ProductSignProcessByOrderProductInterface $productSignProcessByOrderProduct,
-        private readonly ProductSignProcessByOrderInterface $productSignProcessByOrder,
-        private readonly DeduplicatorInterface $deduplicator,
-        LoggerInterface $productsSignLogger,
-    )
-    {
-        $this->logger = $productsSignLogger;
-    }
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
+        private ProductOfferConstInterface $productOfferConst,
+        private ProductVariationConstInterface $productVariationConst,
+        private ProductModificationConstInterface $productModificationConst,
+        private ProductSignStatusHandler $productSignStatusHandler,
+        private OrderEventInterface $orderEventRepository,
+        private ProductSignProcessByOrderProductInterface $productSignProcessByOrderProduct,
+        private ProductSignProcessByOrderInterface $productSignProcessByOrder,
+        private DeduplicatorInterface $deduplicator,
+    ) {}
 
 
     /**

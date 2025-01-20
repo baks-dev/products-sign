@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -33,34 +33,23 @@ use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignCancelDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
 use BaksDev\Products\Stocks\Entity\Stock\Event\ProductStockEvent;
-use BaksDev\Products\Stocks\Entity\Stock\Products\ProductStockProduct;
-use BaksDev\Products\Stocks\Entity\Total\ProductStockTotal;
 use BaksDev\Products\Stocks\Messenger\ProductStockMessage;
-use BaksDev\Products\Stocks\Repository\ProductStocksById\ProductStocksByIdInterface;
-use BaksDev\Products\Stocks\Repository\ProductStocksTotalStorage\ProductStocksTotalStorageInterface;
-use BaksDev\Products\Stocks\Repository\UpdateProductStock\AddProductStockInterface;
-use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\Collection\ProductStockStatusCollection;
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusIncoming;
-use BaksDev\Products\Stocks\UseCase\Admin\Package\PackageProductStockDTO;
-use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(priority: 0)]
-final class ReturnProductSignByIncomingStock
+final readonly class ReturnProductSignByIncomingStock
 {
-    private LoggerInterface $logger;
-
     public function __construct(
-        private readonly EntityManagerInterface $entityManager,
-        private readonly DeduplicatorInterface $deduplicator,
-        private readonly ProductSignByOrderInterface $productSignByOrder,
-        private readonly ProductSignStatusHandler $productSignStatusHandler,
-        LoggerInterface $productsSignLogger,
-    ) {
-        $this->logger = $productsSignLogger;
-    }
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
+        private EntityManagerInterface $entityManager,
+        private DeduplicatorInterface $deduplicator,
+        private ProductSignByOrderInterface $productSignByOrder,
+        private ProductSignStatusHandler $productSignStatusHandler,
+    ) {}
 
     /**
      * Отменить (вернуть в оборот) «Честный знак» при возврате заказа
