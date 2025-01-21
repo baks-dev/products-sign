@@ -8,7 +8,9 @@
 ## Установка
 
 ``` bash
-$ composer require baks-dev/products-sign
+composer require \
+baks-dev/barcode
+baks-dev/products-sign
 ```
 
 Добавить директорию и установить права для загрузки файлов:
