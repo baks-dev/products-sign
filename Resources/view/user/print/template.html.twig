@@ -1,0 +1,6 @@
+{% extends Template('/admin/base.html.twig') %}
+
+{# ---- КОНТЕНТ-БЛОК ------------------------------------------------------------ #}
+{% block content %}
+    {{ include(_self|replace({ "template.html.twig" : "/content.html.twig" })) }}
+{% endblock %}

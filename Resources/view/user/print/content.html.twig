@@ -1,0 +1,40 @@
+{# ПЕЧАТЬ #}
+
+
+{% if codes %}
+
+    <div class="{{ app.request.headers.get('X-Requested-With') is not null ? 'd-none' }} d-print-block p-0 w-100">
+
+
+        {% for item in codes %}
+
+            {# Обложка  #}
+            {% set image_path = '/assets/img/blank.svg' %}
+
+            {% if item.code_ext is defined and item.code_ext is not null %}
+                {% set img_host =  item.code_cdn == true  ? CDN_HOST : '' %}
+                {% set img_dir = item.code_image %}
+                {% set img_file = (img_host is empty ? '/image.' : '/small.') ~ item.code_ext %}
+                {% set image_path = img_host ~ img_dir ~ img_file %}
+            {% endif %}
+
+            <img src="{{ image_path }}" alt="Честный знак">
+            <div style="page-break-after: always !important;"></div>
+
+        {% endfor %}
+    </div>
+{% else %}
+    {% set image_path = '/assets/img/blank.svg' %}
+
+    <div class="text-center w-25">
+        <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" fill="currentColor"
+             class="bi bi-file-image text-muted" viewBox="0 0 16 16">
+            <path d="M8.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/>
+            <path d="M12 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2M3 2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v8l-2.083-2.083a.5.5 0 0 0-.76.063L8 11 5.835 9.7a.5.5 0 0 0-.611.076L3 12z"/>
+        </svg>
+        <div class="text-nowrap mt-3">Честный знак для печати не найден</div>
+    </div>
+
+{% endif %}
+
+

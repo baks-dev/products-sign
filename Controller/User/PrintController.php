@@ -21,28 +21,39 @@
  *  THE SOFTWARE.
  */
 
-namespace BaksDev\Products\Sign\Repository\ProductSignByOrder;
+declare(strict_types=1);
 
-use BaksDev\Orders\Order\Entity\Order;
+namespace BaksDev\Products\Sign\Controller\User;
+
+use BaksDev\Core\Controller\AbstractController;
+use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
+use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\Routing\Attribute\Route;
 
-interface ProductSignByOrderInterface
+#[AsController]
+#[RoleSecurity('ROLE_USER')]
+final class PrintController extends AbstractController
 {
+    #[Route('/product/sign/document/print/orders/{order}', name: 'user.print.orders', methods: ['GET'])]
+    public function orders(
+        ProductSignByOrderInterface $productSignByOrder,
+        #[ParamConverter(OrderUid::class)] $order,
+    ): Response
+    {
+        $codes = $productSignByOrder
+            ->profile($this->getCurrentProfileUid())
+            ->withStatusDone()
+            ->forOrder($order)
+            ->findAll();
 
-    public function profile(UserProfile|UserProfileUid|string $profile): self;
+        return $this->render(
+            ['codes' => $codes],
+            routingName: 'user.print'
+        );
+    }
 
-    public function forOrder(Order|OrderUid|string $order): self;
-
-    /**
-     * Возвращает знаки со статусом Done «Выполнен»
-     */
-    public function withStatusDone(): self;
-
-    /**
-     * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
-     * По умолчанию возвращает знаки со статусом Process «В процессе»
-     */
-    public function findAll(): array|false;
 }

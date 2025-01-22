@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ namespace BaksDev\Products\Sign\Repository\ProductSignByOrder;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Orders\Order\Entity\Order;
+use BaksDev\Orders\Order\Entity\User\OrderUser;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
@@ -34,11 +35,16 @@ use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
+use BaksDev\Users\Profile\UserProfile\Entity\Event\UserProfileEvent;
+use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use InvalidArgumentException;
 
 final class ProductSignByOrder implements ProductSignByOrderInterface
 {
     private OrderUid|false $order = false;
+
+    private UserProfileUid|false $profile = false;
 
     private ProductSignStatus $status;
 
@@ -46,6 +52,24 @@ final class ProductSignByOrder implements ProductSignByOrderInterface
     {
         /** По умолчанию возвращаем знаки со статусом Process «В процессе» */
         $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
+    }
+
+    public function profile(UserProfileUid|string|UserProfile $profile): self
+    {
+        if(is_string($profile))
+        {
+            $profile = new UserProfileUid($profile);
+        }
+
+        if($profile instanceof UserProfile)
+        {
+            $profile = $profile->getId();
+        }
+
+        $this->profile = $profile;
+
+        return $this;
+
     }
 
     public function forOrder(Order|OrderUid|string $order): self
@@ -101,6 +125,34 @@ final class ProductSignByOrder implements ProductSignByOrderInterface
             ->andWhere('event.status = :status')
             ->setParameter('status', $this->status, ProductSignStatus::TYPE);
 
+        if($this->profile !== false)
+        {
+            $dbal->leftJoin(
+                'event',
+                Order::class,
+                'ord',
+                'ord.id = event.ord'
+            );
+
+
+            $dbal->leftJoin(
+                'ord',
+                OrderUser::class,
+                'ord_usr',
+                'ord_usr.event = ord.event'
+            );
+
+
+            $dbal
+                ->join(
+                    'ord_usr',
+                    UserProfileEvent::class,
+                    'profile_event',
+                    'profile_event.id = ord_usr.profile AND profile_event.profile = :profile'
+                )
+                ->setParameter('profile', $this->profile, UserProfileUid::TYPE);
+        }
+
         $dbal->join(
             'event',
             ProductSign::class,
@@ -134,4 +186,6 @@ final class ProductSignByOrder implements ProductSignByOrderInterface
             // ->enableCache('Namespace', 3600)
             ->fetchAllAssociative() ?: false;
     }
+
+
 }
