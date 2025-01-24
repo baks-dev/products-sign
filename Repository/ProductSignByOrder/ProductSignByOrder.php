@@ -29,8 +29,14 @@ use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Entity\User\OrderUser;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Product\Entity\Product;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
@@ -42,17 +48,105 @@ use InvalidArgumentException;
 
 final class ProductSignByOrder implements ProductSignByOrderInterface
 {
+    /** Фильтр по продукту */
+
+    private ProductUid|false $product = false;
+
+    private ProductOfferConst|false $offer = false;
+
+    private ProductVariationConst|false $variation = false;
+
+    private ProductModificationConst|false $modification = false;
+
+    /** Фильтр по заказу */
+
     private OrderUid|false $order = false;
 
     private UserProfileUid|false $profile = false;
 
     private ProductSignStatus $status;
 
+
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder)
     {
         /** По умолчанию возвращаем знаки со статусом Process «В процессе» */
         $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
     }
+
+
+    /** Фильтр по продукту */
+    public function product(Product|ProductUid|string $product): self
+    {
+        if(is_string($product))
+        {
+            $product = new ProductUid($product);
+        }
+
+        if(!$product instanceof Product)
+        {
+
+            $product = $product->getId();
+        }
+
+        $this->product = $product;
+
+        return $this;
+    }
+
+    public function offer(ProductOfferConst|string|null|false $offer): self
+    {
+        if(empty($offer))
+        {
+            $this->offer = false;
+            return $this;
+        }
+
+        if(is_string($offer))
+        {
+            $offer = new ProductOfferConst($offer);
+        }
+
+        $this->offer = $offer;
+
+        return $this;
+    }
+
+    public function variation(ProductVariationConst|string|null|false $variation): self
+    {
+        if(empty($variation))
+        {
+            $this->variation = false;
+            return $this;
+        }
+
+        if(is_string($variation))
+        {
+            $variation = new ProductVariationConst($variation);
+        }
+
+        $this->variation = $variation;
+
+        return $this;
+    }
+
+    public function modification(ProductModificationConst|string|null|false $modification): self
+    {
+        if(empty($modification))
+        {
+            $this->modification = false;
+            return $this;
+        }
+
+        if(is_string($modification))
+        {
+            $modification = new ProductModificationConst($modification);
+        }
+
+        $this->modification = $modification;
+
+        return $this;
+    }
+
 
     public function profile(UserProfileUid|string|UserProfile $profile): self
     {
@@ -142,7 +236,6 @@ final class ProductSignByOrder implements ProductSignByOrderInterface
                 'ord_usr.event = ord.event'
             );
 
-
             $dbal
                 ->join(
                     'ord_usr',
@@ -159,6 +252,39 @@ final class ProductSignByOrder implements ProductSignByOrderInterface
             'main',
             'main.id = event.main'
         );
+
+
+        if($this->product)
+        {
+            $offerParam = $this->offer ? ' = :offer' : ' IS NULL';
+            !$this->offer ?: $dbal->setParameter('offer', $this->offer, ProductOfferConst::TYPE);
+
+            $variationParam = $this->variation ? ' = :variation' : ' IS NULL';
+            !$this->variation ?: $dbal->setParameter('variation', $this->variation, ProductVariationConst::TYPE);
+
+            $modificationParam = $this->modification ? ' = :modification' : ' IS NULL';
+            !$this->modification ?: $dbal->setParameter('modification', $this->modification, ProductModificationConst::TYPE);
+
+            $dbal
+                ->join(
+                    'event',
+                    ProductSignInvariable::class,
+                    'invariable',
+                    '
+                    invariable.main = main.id AND 
+                    invariable.product = :product AND
+                    invariable.offer '.$offerParam.' AND
+                    invariable.variation '.$variationParam.' AND
+                    invariable.modification '.$modificationParam.'
+                '
+                )
+                ->setParameter(
+                    'product',
+                    $this->product,
+                    ProductUid::TYPE
+                );
+        }
+
 
         $dbal
             ->addSelect(

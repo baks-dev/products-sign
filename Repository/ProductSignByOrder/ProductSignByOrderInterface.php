@@ -25,11 +25,27 @@ namespace BaksDev\Products\Sign\Repository\ProductSignByOrder;
 
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Product\Entity\Product;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 
 interface ProductSignByOrderInterface
 {
+    /** Фильтр по продукту */
+
+    public function product(Product|ProductUid|string $product): self;
+
+    public function offer(ProductOfferConst|string|null|false $offer): self;
+
+    public function variation(ProductVariationConst|string|null|false $variation): self;
+
+    public function modification(ProductModificationConst|string|null|false $modification): self;
+
+    /** Фильтр по заказу */
 
     public function profile(UserProfile|UserProfileUid|string $profile): self;
 

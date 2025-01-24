@@ -29,6 +29,10 @@ use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -38,17 +42,33 @@ use Symfony\Component\Routing\Attribute\Route;
 #[RoleSecurity('ROLE_USER')]
 final class PrintController extends AbstractController
 {
-    #[Route('/product/sign/document/print/orders/{order}', name: 'user.print.orders', methods: ['GET'])]
+    #[Route('/product/sign/document/print/orders/{order}/{product}/{offer}/{variation}/{modification}', name: 'user.print.orders', methods: ['GET'])]
     public function orders(
         ProductSignByOrderInterface $productSignByOrder,
         #[ParamConverter(OrderUid::class)] $order,
+
+        #[ParamConverter(ProductUid::class)] $product = null,
+        #[ParamConverter(ProductOfferConst::class)] $offer = null,
+        #[ParamConverter(ProductVariationConst::class)] $variation = null,
+        #[ParamConverter(ProductModificationConst::class)] $modification = null,
     ): Response
     {
+
+        if(false === is_null($product))
+        {
+            $productSignByOrder
+                ->product($product)
+                ->offer($offer)
+                ->variation($variation)
+                ->modification($modification);
+        }
+
         $codes = $productSignByOrder
             ->profile($this->getCurrentProfileUid())
             ->withStatusDone()
             ->forOrder($order)
             ->findAll();
+
 
         return $this->render(
             ['codes' => $codes],
