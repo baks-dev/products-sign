@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignPdf;
 
+use BaksDev\Barcode\Reader\BarcodeRead;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -38,6 +39,7 @@ final readonly class ProductSignCrop
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $upload,
         private Filesystem $filesystem,
+        private BarcodeRead $barcodeRead,
     ) {}
 
     /**
@@ -108,9 +110,27 @@ final readonly class ProductSignCrop
                 continue;
             }
 
-            /** Обрезаем пустую область */
-            $nameCrop = $info->getPath().DIRECTORY_SEPARATOR.uniqid('crop_', true).'.pdf';
-            $processCrop = new Process(['sudo', 'pdfcrop', $info->getRealPath(), $nameCrop]);
+            /**
+             * Пробуем просканировать без обрезки
+             */
+
+            $cropFilename = $info->getPath().DIRECTORY_SEPARATOR.uniqid('crop_', true).'.pdf';
+
+            $decode = $this->barcodeRead->decode($info->getRealPath());
+
+            if(false === $decode->isError())
+            {
+                $this->filesystem->remove($info->getRealPath().'.png');
+                $this->filesystem->rename($info->getRealPath(), $cropFilename);
+                continue;
+            }
+
+
+            /**
+             * Обрезаем пустую область
+             */
+
+            $processCrop = new Process(['sudo', 'pdfcrop', $info->getRealPath(), $cropFilename]);
             $processCrop->mustRun();
 
             /** Удаляем после обработки основной файл PDF */
