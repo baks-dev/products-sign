@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 /**
  * Статус Delete «Удален»
  */
-#[AutoconfigureTag('baks.sign.status')]
+#[AutoconfigureTag('baks.product.sign.status')]
 class ProductSignStatusDelete implements ProductSignStatusInterface
 {
     public const string STATUS = 'delete';

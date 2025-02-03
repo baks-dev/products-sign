@@ -34,8 +34,8 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 #[When(env: 'test')]
 final class StatusControllerTest extends WebTestCase
 {
-    private const URL = '/admin/product/sign/status/%s';
-    private const ROLE = 'ROLE_PRODUCT_SIGN_STATUS';
+    private const string URL = '/admin/product/sign/status/%s';
+    private const string ROLE = 'ROLE_PRODUCT_SIGN_STATUS';
 
     private static ?ProductEventUid $identifier;
 

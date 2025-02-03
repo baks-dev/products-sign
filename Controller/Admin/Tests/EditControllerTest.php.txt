@@ -34,8 +34,8 @@ use BaksDev\Products\Sign\UseCase\Admin\New\Tests\ProductSignNewHandleTest;
 #[When(env: 'test')]
 final class EditControllerTest extends WebTestCase
 {
-    private const URL = '/admin/product/sign/edit/%s';
-    private const ROLE = 'ROLE_PRODUCT_SIGN_EDIT';
+    private const string URL = '/admin/product/sign/edit/%s';
+    private const string ROLE = 'ROLE_PRODUCT_SIGN_EDIT';
 
     private static ?ProductEventUid $identifier;
 

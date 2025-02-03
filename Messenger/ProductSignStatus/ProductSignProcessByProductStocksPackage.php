@@ -101,7 +101,7 @@ final readonly class ProductSignProcessByProductStocksPackage
         $User = $this
             ->userByUserProfile
             ->forProfile($ProductStockEvent->getProfile())
-            ->findUser();
+            ->find();
 
         if(false === $User)
         {

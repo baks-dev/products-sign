@@ -1,17 +1,17 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
- *
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *
+ *  
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -32,7 +32,6 @@ use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
-use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
@@ -55,11 +54,11 @@ final class ProductSignNewRepository implements ProductSignNewInterface
 
     private ProductUid $product;
 
-    private ?ProductOfferConst $offer = null;
+    private ProductOfferConst|false $offer = false;
 
-    private ?ProductVariationConst $variation = null;
+    private ProductVariationConst|false $variation = false;
 
-    private ?ProductModificationConst $modification = null;
+    private ProductModificationConst|false $modification = false;
 
     public function __construct(ORMQueryBuilder $ORMQueryBuilder)
     {
@@ -102,7 +101,6 @@ final class ProductSignNewRepository implements ProductSignNewInterface
 
     public function forProduct(Product|ProductUid|string $product): self
     {
-
         if($product instanceof Product)
         {
             $product = $product->getId();
@@ -118,10 +116,11 @@ final class ProductSignNewRepository implements ProductSignNewInterface
         return $this;
     }
 
-    public function forOfferConst(ProductOfferConst|string|null $offer): self
+    public function forOfferConst(ProductOfferConst|string|null|false $offer): self
     {
-        if($offer === null)
+        if(empty($offer))
         {
+            $this->offer = false;
             return $this;
         }
 
@@ -135,10 +134,11 @@ final class ProductSignNewRepository implements ProductSignNewInterface
         return $this;
     }
 
-    public function forVariationConst(ProductVariationConst|string|null $variation): self
+    public function forVariationConst(ProductVariationConst|string|null|false $variation): self
     {
-        if($variation === null)
+        if(empty($variation))
         {
+            $this->variation = false;
             return $this;
         }
 
@@ -152,10 +152,11 @@ final class ProductSignNewRepository implements ProductSignNewInterface
         return $this;
     }
 
-    public function forModificationConst(ProductModificationConst|string|null $modification): self
+    public function forModificationConst(ProductModificationConst|string|null|false $modification): self
     {
-        if($modification === null)
+        if(empty($modification))
         {
+            $this->modification = false;
             return $this;
         }
 
@@ -247,8 +248,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 event.id = main.event AND 
                 (event.profile IS NULL OR event.profile = :profile) AND
                 event.status = :status
-            '
-            )
+            ')
             ->setParameter(
                 'profile',
                 $this->profile,

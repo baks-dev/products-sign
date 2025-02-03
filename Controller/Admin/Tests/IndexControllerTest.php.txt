@@ -26,8 +26,8 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 #[When(env: 'test')]
 final class IndexControllerTest extends WebTestCase
 {
-    private const URL = '/admin/product/signs';
-    private const ROLE = 'ROLE_PRODUCT_SIGN';
+    private const string URL = '/admin/product/signs';
+    private const string ROLE = 'ROLE_PRODUCT_SIGN';
 
     /** Доступ по роли ROLE_PRODUCT */
     public function testRoleSuccessful(): void

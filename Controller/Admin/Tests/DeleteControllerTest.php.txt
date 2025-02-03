@@ -32,9 +32,9 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 #[When(env: 'test')]
 final class DeleteControllerTest extends WebTestCase
 {
-    private const URL = '/admin/product/sign/delete/%s';
+    private const string URL = '/admin/product/sign/delete/%s';
 
-    private const ROLE = 'ROLE_PRODUCT_SIGN_DELETE';
+    private const string ROLE = 'ROLE_PRODUCT_SIGN_DELETE';
 
     private static ?ProductEventUid $identifier = null;
 
