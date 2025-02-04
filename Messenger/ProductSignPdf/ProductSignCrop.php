@@ -125,8 +125,3 @@ final readonly class ProductSignCrop
         }
     }
 }
-
-
-// https://cdn.baks.dev/upload/product_sign_code/10b2c79ed6bfcc7775c4d4ad99c474ba/small.webp
-// https://cdn.baks.dev/upload/product_sign_code/bc5a1b81d97a06d1924b856a496c96ea/small.webp
-// convert "https://cdn.baks.dev/upload/product_sign_code/10b2c79ed6bfcc7775c4d4ad99c474ba/small.webp" "https://cdn.baks.dev/upload/product_sign_code/bc5a1b81d97a06d1924b856a496c96ea/small.webp" -trim /home/bundles.baks.dev/public/wsoutput.pdf
