@@ -31,7 +31,6 @@ use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignDTO;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignHandler;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\Products\ProductStockDTO;
@@ -240,29 +239,29 @@ final readonly class ProductSignPdfHandler
                 $decode = $this->barcodeRead->decode($fileMove);
                 $code = $decode->getText();
 
-                if($decode->isError())
-                {
-                    /** Пробуем обрезать изображение по углу и просканировать повторно */
-                    $cropWidth = 450;
-                    $cropHeight = 500;
-
-                    $x = 55; // Позиция по оси X
-                    $y = 200; // Позиция по оси Y
-
-                    // Обрезаем изображение
-                    $Imagick->cropImage($cropWidth, $cropHeight, $x, $y);
-                    $Imagick->writeImage($fileMove);
-
-                    /** Пробуем считать честный знак с обрезанного файла */
-                    $decode = $this->barcodeRead->decode($fileMove);
-                    $code = $decode->getText();
-
-                    if($decode->isError())
-                    {
-                        $code = uniqid('error_', true);
-                        $ProductSignDTO->setStatus(ProductSignStatusError::class);
-                    }
-                }
+                //                if($decode->isError())
+                //                {
+                //                    /** Пробуем обрезать изображение по углу и просканировать повторно */
+                //                    $cropWidth = 450;
+                //                    $cropHeight = 500;
+                //
+                //                    $x = 55; // Позиция по оси X
+                //                    $y = 200; // Позиция по оси Y
+                //
+                //                    // Обрезаем изображение
+                //                    $Imagick->cropImage($cropWidth, $cropHeight, $x, $y);
+                //                    $Imagick->writeImage($fileMove);
+                //
+                //                    /** Пробуем считать честный знак с обрезанного файла */
+                //                    $decode = $this->barcodeRead->decode($fileMove);
+                //                    $code = $decode->getText();
+                //
+                //                    if($decode->isError())
+                //                    {
+                //                        $code = uniqid('error_', true);
+                //                        $ProductSignDTO->setStatus(ProductSignStatusError::class);
+                //                    }
+                //                }
 
                 $decode->isError() ? ++$errors : ++$counter;
 

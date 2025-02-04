@@ -53,6 +53,12 @@ unit ALL=(ALL) NOPASSWD: /usr/bin/pdfcrop
 <policy domain="coder" rights="read|write" pattern="PDF"/>
 ```
 
+Для преобразования изображений в PDF
+
+```bash
+sudo apt install imagemagick
+```
+
 ## Дополнительно
 
 Установка конфигурации и файловых ресурсов:

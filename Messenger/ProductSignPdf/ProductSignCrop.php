@@ -110,27 +110,13 @@ final readonly class ProductSignCrop
                 continue;
             }
 
-            /**
-             * Пробуем просканировать без обрезки
-             */
-
-            $cropFilename = $info->getPath().DIRECTORY_SEPARATOR.uniqid('crop_', true).'.pdf';
-
-            $decode = $this->barcodeRead->decode($info->getRealPath());
-
-            if(false === $decode->isError())
-            {
-                $this->filesystem->remove($info->getRealPath().'.png');
-                $this->filesystem->rename($info->getRealPath(), $cropFilename);
-                continue;
-            }
-
 
             /**
              * Обрезаем пустую область
              */
 
-            $processCrop = new Process(['sudo', 'pdfcrop', $info->getRealPath(), $cropFilename]);
+            $cropFilename = $info->getPath().DIRECTORY_SEPARATOR.uniqid('crop_', true).'.pdf';
+            $processCrop = new Process(['sudo', 'pdfcrop', '--margins', '1', $info->getRealPath(), $cropFilename]);
             $processCrop->mustRun();
 
             /** Удаляем после обработки основной файл PDF */
@@ -139,3 +125,8 @@ final readonly class ProductSignCrop
         }
     }
 }
+
+
+// https://cdn.baks.dev/upload/product_sign_code/10b2c79ed6bfcc7775c4d4ad99c474ba/small.webp
+// https://cdn.baks.dev/upload/product_sign_code/bc5a1b81d97a06d1924b856a496c96ea/small.webp
+// convert "https://cdn.baks.dev/upload/product_sign_code/10b2c79ed6bfcc7775c4d4ad99c474ba/small.webp" "https://cdn.baks.dev/upload/product_sign_code/bc5a1b81d97a06d1924b856a496c96ea/small.webp" -trim /home/bundles.baks.dev/public/wsoutput.pdf
