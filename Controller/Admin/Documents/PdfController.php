@@ -33,6 +33,7 @@ use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Repository\MaterialSignByOrder\MaterialSignByOrderInterface;
 use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartInterface;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
@@ -103,7 +104,7 @@ final class PdfController extends AbstractController
          * Создаем путь для создания PDF файла
          */
 
-        $ref = new ReflectionClass(MaterialSignCode::class);
+        $ref = new ReflectionClass(ProductSignCode::class);
         /** @var ReflectionAttribute $current */
         $current = current($ref->getAttributes(Table::class));
         $dirName = $current->getArguments()['name'] ?? 'barcode';
