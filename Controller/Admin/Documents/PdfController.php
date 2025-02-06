@@ -86,7 +86,27 @@ final class PdfController extends AbstractController
             //->withStatusDone()
             ->findAll();
 
-        return $this->BinaryFileResponse((string) $order, $codes);
+        /**
+         * Создаем путь для создания PDF файла
+         */
+
+        $ref = new ReflectionClass(ProductSignCode::class);
+        /** @var ReflectionAttribute $current */
+        $current = current($ref->getAttributes(Table::class));
+        $dirName = $current->getArguments()['name'] ?? 'barcode';
+
+        $paths[] = $projectDir;
+        $paths[] = 'public';
+        $paths[] = 'upload';
+        $paths[] = $dirName;
+
+        $paths[] = (string) $order;
+        !$product ?: $paths[] = (string) $product;
+        !$offer ?: $paths[] = (string) $offer;
+        !$variation ?: $paths[] = (string) $variation;
+        !$modification ?: $paths[] = (string) $modification;
+
+        return $this->BinaryFileResponse($paths, $codes);
 
     }
 
@@ -106,12 +126,6 @@ final class PdfController extends AbstractController
             ->withStatusDone()
             ->findAll();
 
-        return $this->BinaryFileResponse((string) $part, $codes);
-    }
-
-    private function BinaryFileResponse(string $identifier, array $codes): BinaryFileResponse
-    {
-        $filesystem = new Filesystem();
 
         /**
          * Создаем путь для создания PDF файла
@@ -122,13 +136,25 @@ final class PdfController extends AbstractController
         $current = current($ref->getAttributes(Table::class));
         $dirName = $current->getArguments()['name'] ?? 'barcode';
 
-        $uploadDir = implode(DIRECTORY_SEPARATOR, [
-            $this->projectDir,
-            'public',
-            'upload',
-            $dirName,
-            $identifier
-        ]);
+        $paths[] = $projectDir;
+        $paths[] = 'public';
+        $paths[] = 'upload';
+        $paths[] = $dirName;
+
+        $paths[] = (string) $part;
+
+        return $this->BinaryFileResponse($paths, $codes);
+    }
+
+    /**
+     * Для файлов с большим количество требуется больше времени на генерацию
+     * ~ на 1к честных знаков требуется +-1 мин (в веб-сервере нужен соответствующий лимит)
+     */
+    private function BinaryFileResponse(array $paths, array $codes): BinaryFileResponse
+    {
+        $filesystem = new Filesystem();
+
+        $uploadDir = implode(DIRECTORY_SEPARATOR, $paths);
 
         $uploadFile = $uploadDir.DIRECTORY_SEPARATOR.'output.pdf';
 
@@ -138,6 +164,7 @@ final class PdfController extends AbstractController
 
         if($filesystem->exists($uploadFile))
         {
+
             return new BinaryFileResponse($uploadFile, Response::HTTP_OK)
                 ->setContentDisposition(
                     ResponseHeaderBag::DISPOSITION_ATTACHMENT,
@@ -160,6 +187,7 @@ final class PdfController extends AbstractController
 
         $Process[] = 'convert';
 
+        /** Присваиваем директорию public для локальных файлов */
         $projectDir = implode(DIRECTORY_SEPARATOR, [
             $this->projectDir,
             'public',

@@ -28,6 +28,8 @@ namespace BaksDev\Products\Sign\Messenger\ProductSignStatus;
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Files\Resources\Twig\ImagePathExtension;
 use BaksDev\Orders\Order\Messenger\OrderMessage;
+use BaksDev\Orders\Order\Repository\OrderProducts\OrderProductRepositoryDTO;
+use BaksDev\Orders\Order\Repository\OrderProducts\OrderProductsInterface;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
 use Doctrine\ORM\Mapping\Table;
@@ -46,11 +48,12 @@ final readonly class ProductSignPdfByOrderCompleted
         private DeduplicatorInterface $deduplicator,
         private ProductSignByOrderInterface $productSignByOrder,
         private ImagePathExtension $ImagePathExtension,
+        private OrderProductsInterface $OrderProducts,
 
     ) {}
 
     /**
-     * Делаем отметку Честный знак Done «Выполнен» если статус заказа Completed «Выполнен»
+     * Генерируем PDF если статус заказа Completed «Выполнен»
      */
     public function __invoke(OrderMessage $message): void
     {
@@ -68,6 +71,17 @@ final readonly class ProductSignPdfByOrderCompleted
             return;
         }
 
+        /** Получаем идентификаторы заказа для путей генерации */
+
+        $products = $this->OrderProducts
+            ->order($OrderUid)
+            ->findAllProducts();
+
+        if(false === ($products || $products->valid()))
+        {
+            return;
+        }
+
         $Deduplicator->save();
 
         $filesystem = new Filesystem();
@@ -81,65 +95,79 @@ final readonly class ProductSignPdfByOrderCompleted
         $current = current($ref->getAttributes(Table::class));
         $dirName = $current->getArguments()['name'] ?? 'barcode';
 
-        $uploadDir = implode(DIRECTORY_SEPARATOR, [
-            $this->projectDir,
-            'public',
-            'upload',
-            $dirName,
-            $OrderUid
-        ]);
-
-        $uploadFile = $uploadDir.DIRECTORY_SEPARATOR.'output.pdf';
-
-        if($filesystem->exists($uploadFile))
+        /** @var OrderProductRepositoryDTO $product */
+        foreach($products as $product)
         {
-            $Deduplicator->delete();
-            return;
+            $paths[] = $this->projectDir;
+            $paths[] = 'public';
+            $paths[] = 'upload';
+            $paths[] = $dirName;
+            $paths[] = $OrderUid;
+            $paths[] = (string) $product->getProduct();
+
+            !$product->getProductOfferConst() ?: $paths[] = (string) $product->getProductOfferConst();
+            !$product->getProductVariationConst() ?: $paths[] = (string) $product->getProductVariationConst();
+            !$product->getProductModificationConst() ?: $paths[] = (string) $product->getProductModificationConst();
+
+
+            $uploadDir = implode(DIRECTORY_SEPARATOR, $paths);
+            $uploadFile = $uploadDir.DIRECTORY_SEPARATOR.'output.pdf';
+
+            if($filesystem->exists($uploadFile))
+            {
+                $Deduplicator->delete();
+                return;
+            }
+
+            /**
+             * Создаем директорию при отсутствии
+             */
+
+            if($filesystem->exists($uploadDir) === false)
+            {
+                $filesystem->mkdir($uploadDir);
+            }
+
+            $codes = $this->productSignByOrder
+                ->forOrder($OrderUid)
+                ->product($product->getProduct())
+                ->offer($product->getProductOfferConst())
+                ->variation($product->getProductVariationConst())
+                ->modification($product->getProductModificationConst())
+                ->findAll();
+
+            if(empty($codes))
+            {
+                $Deduplicator->delete();
+                return;
+            }
+
+            /**
+             * Формируем запрос на генерацию PDF с массивом изображений
+             */
+
+            $Process = null;
+            $Process[] = 'convert';
+
+            /** Присваиваем директорию public для локальных файлов */
+            $projectDir = implode(DIRECTORY_SEPARATOR, [
+                $this->projectDir,
+                'public',
+                ''
+            ]);
+
+            foreach($codes as $code)
+            {
+                $Process[] = ($code['code_cdn'] === false ? $projectDir : '').$this->ImagePathExtension->imagePath($code['code_image'], $code['code_ext'], $code['code_cdn']);
+            }
+
+            $Process[] = $uploadFile;
+
+            $processCrop = new Process($Process);
+            $processCrop->mustRun();
+
         }
-
-        /**
-         * Создаем директорию при отсутствии
-         */
-
-        if($filesystem->exists($uploadDir) === false)
-        {
-            $filesystem->mkdir($uploadDir);
-        }
-
-
-        $codes = $this->productSignByOrder
-            ->forOrder($OrderUid)
-            ->findAll();
-
-        if(empty($codes))
-        {
-            $Deduplicator->delete();
-            return;
-        }
-
-        /**
-         * Формируем запрос на генерацию PDF с массивом изображений
-         */
-
-        $Process[] = 'convert';
-
-        $projectDir = implode(DIRECTORY_SEPARATOR, [
-            $this->projectDir,
-            'public',
-            ''
-        ]);
-
-        foreach($codes as $code)
-        {
-            $Process[] = ($code['code_cdn'] === false ? $projectDir : '').$this->ImagePathExtension->imagePath($code['code_image'], $code['code_ext'], $code['code_cdn']);
-        }
-
-        $Process[] = $uploadFile;
-
-        $processCrop = new Process($Process);
-        $processCrop->mustRun();
 
         $Deduplicator->delete();
-
     }
 }

@@ -82,9 +82,8 @@ final class ProductSignByOrder implements ProductSignByOrderInterface
             $product = new ProductUid($product);
         }
 
-        if(!$product instanceof Product)
+        if($product instanceof Product)
         {
-
             $product = $product->getId();
         }
 
