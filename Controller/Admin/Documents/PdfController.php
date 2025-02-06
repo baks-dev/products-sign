@@ -33,6 +33,10 @@ use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Materials\Sign\Repository\MaterialSignByOrder\MaterialSignByOrderInterface;
 use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartInterface;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
@@ -57,12 +61,16 @@ final class PdfController extends AbstractController
 
     private ImagePathExtension $ImagePathExtension;
 
-    #[Route('/admin/product/sign/document/pdf/orders/{order}', name: 'document.pdf.orders', methods: ['GET'])]
+    #[Route('/admin/product/sign/document/pdf/orders/{order}/{product}/{offer}/{variation}/{modification}', name: 'document.pdf.orders', methods: ['GET'])]
     public function orders(
-        #[Autowire('%kernel.project_dir%')] $projectDir,
-        #[ParamConverter(OrderUid::class)] $order,
         ProductSignByOrderInterface $productSignByOrder,
         ImagePathExtension $ImagePathExtension,
+        #[Autowire('%kernel.project_dir%')] $projectDir,
+        #[ParamConverter(OrderUid::class)] OrderUid $order,
+        #[ParamConverter(ProductUid::class)] ?ProductUid $product = null,
+        #[ParamConverter(ProductOfferConst::class)] ?ProductOfferConst $offer = null,
+        #[ParamConverter(ProductVariationConst::class)] ?ProductVariationConst $variation = null,
+        #[ParamConverter(ProductModificationConst::class)] ?ProductModificationConst $modification = null,
     ): Response
     {
 
@@ -71,6 +79,11 @@ final class PdfController extends AbstractController
 
         $codes = $productSignByOrder
             ->forOrder($order)
+            ->product($product)
+            ->offer($offer)
+            ->variation($variation)
+            ->modification($modification)
+            //->withStatusDone()
             ->findAll();
 
         return $this->BinaryFileResponse((string) $order, $codes);

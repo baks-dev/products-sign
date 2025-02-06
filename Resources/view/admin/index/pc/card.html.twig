@@ -1,5 +1,6 @@
 {% trans_default_domain('products-sign.admin') %}
 
+
 <tr class="vertical-middle">
 
     <td class="text-nowrap">
@@ -155,9 +156,23 @@
                     {% set document_txt = path('products-sign:admin.txt.parts', { part: item.sign_part }) %}
                     {% set document_pdf = path('products-sign:document.pdf.parts', { part: item.sign_part }) %}
                 {% else %}
-                    {# {% set document_csv = path('products-sign:admin.csv.orders', { order: item.order_id }) %} #}
-                    {% set document_txt = path('products-sign:admin.txt.orders', { order: item.order_id }) %}
-                    {% set document_pdf = path('products-sign:document.pdf.orders', { order: item.order_id }) %}
+
+                    {% set document_txt = path('products-sign:admin.txt.orders', {
+                        order: item.order_id,
+                        product: item.product_id,
+                        offer: item.product_offer_const,
+                        variation: item.product_variation_const,
+                        modification: item.product_modification_const
+                    }) %}
+
+                    {% set document_pdf = path('products-sign:document.pdf.orders', {
+                        order: item.order_id,
+                        product: item.product_id,
+                        offer: item.product_offer_const,
+                        variation: item.product_variation_const,
+                        modification: item.product_modification_const
+                    }) %}
+
                 {% endif %}
 
                 {# <a

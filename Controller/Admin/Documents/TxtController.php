@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,10 @@ use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
@@ -41,15 +45,22 @@ use Symfony\Component\Routing\Attribute\Route;
 #[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
 final class TxtController extends AbstractController
 {
-    #[Route('/admin/product/sign/document/txt/orders/{order}', name: 'admin.txt.orders', methods: ['GET'])]
+    #[Route('/admin/product/sign/document/txt/orders/{order}/{product}/{offer}/{variation}/{modification}', name: 'admin.txt.orders', methods: ['GET'])]
     public function orders(
         ProductSignByOrderInterface $productSignByOrder,
-        #[ParamConverter(OrderUid::class)] $order,
+        #[ParamConverter(OrderUid::class)] OrderUid $order,
+        #[ParamConverter(ProductUid::class)] ?ProductUid $product = null,
+        #[ParamConverter(ProductOfferConst::class)] ?ProductOfferConst $offer = null,
+        #[ParamConverter(ProductVariationConst::class)] ?ProductVariationConst $variation = null,
+        #[ParamConverter(ProductModificationConst::class)] ?ProductModificationConst $modification = null,
     ): Response
     {
-
         $codes = $productSignByOrder
             ->forOrder($order)
+            ->product($product)
+            ->offer($offer)
+            ->variation($variation)
+            ->modification($modification)
             //->withStatusDone()
             ->findAll();
 
