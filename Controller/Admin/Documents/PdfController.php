@@ -29,9 +29,6 @@ use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Files\Resources\Twig\ImagePathExtension;
-use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
-use BaksDev\Materials\Sign\Repository\MaterialSignByOrder\MaterialSignByOrderInterface;
-use BaksDev\Materials\Sign\Repository\MaterialSignByPart\MaterialSignByPartInterface;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
@@ -61,10 +58,13 @@ final class PdfController extends AbstractController
 
     private ImagePathExtension $ImagePathExtension;
 
-    #[Route('/admin/product/sign/document/pdf/orders/{order}/{product}/{offer}/{variation}/{modification}', name: 'document.pdf.orders', methods: ['GET'])]
+    private string $article;
+
+    #[Route('/admin/product/sign/document/pdf/orders/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'document.pdf.orders', methods: ['GET'])]
     public function orders(
         ProductSignByOrderInterface $productSignByOrder,
         ImagePathExtension $ImagePathExtension,
+        string $article,
         #[Autowire('%kernel.project_dir%')] $projectDir,
         #[ParamConverter(OrderUid::class)] OrderUid $order,
         #[ParamConverter(ProductUid::class)] ?ProductUid $product = null,
@@ -76,6 +76,7 @@ final class PdfController extends AbstractController
 
         $this->projectDir = $projectDir;
         $this->ImagePathExtension = $ImagePathExtension;
+        $this->article = $article;
 
         $codes = $productSignByOrder
             ->forOrder($order)
@@ -114,12 +115,14 @@ final class PdfController extends AbstractController
     public function parts(
         #[Autowire('%kernel.project_dir%')] $projectDir,
         #[ParamConverter(ProductSignUid::class)] $part,
+        string $article,
         ProductSignByPartInterface $productSignByPart,
         ImagePathExtension $ImagePathExtension,
     ): Response
     {
         $this->projectDir = $projectDir;
         $this->ImagePathExtension = $ImagePathExtension;
+        $this->article = $article;
 
         $codes = $productSignByPart
             ->forPart($part)
@@ -208,7 +211,7 @@ final class PdfController extends AbstractController
         return new BinaryFileResponse($uploadFile, Response::HTTP_OK)
             ->setContentDisposition(
                 ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                'sign.pdf'
+                $this->article.'.pdf'
             );
 
     }

@@ -153,11 +153,12 @@
 
                 {% if item.sign_status == 'decommission' %}
                     {# {% set document_csv = path('products-sign:admin.csv.parts', { part: item.sign_part }) %} #}
-                    {% set document_txt = path('products-sign:admin.txt.parts', { part: item.sign_part }) %}
-                    {% set document_pdf = path('products-sign:document.pdf.parts', { part: item.sign_part }) %}
+                    {% set document_txt = path('products-sign:admin.txt.parts', { article: item.product_article, part: item.sign_part }) %}
+                    {% set document_pdf = path('products-sign:document.pdf.parts', { article: item.product_article, part: item.sign_part }) %}
                 {% else %}
 
                     {% set document_txt = path('products-sign:admin.txt.orders', {
+                        article: item.product_article,
                         order: item.order_id,
                         product: item.product_id,
                         offer: item.product_offer_const,
@@ -166,6 +167,7 @@
                     }) %}
 
                     {% set document_pdf = path('products-sign:document.pdf.orders', {
+                        article: item.product_article,
                         order: item.order_id,
                         product: item.product_id,
                         offer: item.product_offer_const,
@@ -243,7 +245,7 @@
                 </button>
 
                 <a
-                        href="{{ path('products-sign:admin.txt.parts', { part: item.sign_part }) }}"
+                        href="{{ path('products-sign:admin.txt.parts', { article: item.product_article, part: item.sign_part }) }}"
                         class='btn btn-sm btn-light d-flex gap-3'
                         title='Скачать TXT'
                 >
