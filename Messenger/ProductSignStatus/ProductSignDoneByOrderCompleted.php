@@ -45,7 +45,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(priority: -5)]
 final readonly class ProductSignDoneByOrderCompleted
 {
     public function __construct(

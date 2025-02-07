@@ -31,6 +31,7 @@ use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignDTO;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignHandler;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\Products\ProductStockDTO;
@@ -262,6 +263,13 @@ final readonly class ProductSignPdfHandler
                 //                        $ProductSignDTO->setStatus(ProductSignStatusError::class);
                 //                    }
                 //                }
+
+                if($decode->isError())
+                {
+                    $code = uniqid('error_', true);
+                    $ProductSignDTO->setStatus(ProductSignStatusError::class);
+                }
+
 
                 $decode->isError() ? ++$errors : ++$counter;
 

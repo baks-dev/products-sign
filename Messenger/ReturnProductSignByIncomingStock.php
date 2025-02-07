@@ -76,13 +76,13 @@ final readonly class ReturnProductSignByIncomingStock
         }
 
         /** Если Статус заявки не является Incoming «Приход на склад» */
-        if(false === $ProductStockEvent->getStatus()->equals(ProductStockStatusIncoming::class))
+        if(false === $ProductStockEvent->equalsProductStockStatus(ProductStockStatusIncoming::class))
         {
             return;
         }
 
         /** Идентификатор профиля склада при поступлении */
-        $UserProfileUid = $ProductStockEvent->getProfile();
+        $UserProfileUid = $ProductStockEvent->getStocksProfile();
 
         /** Получаем все знаки по идентификатору заказа со статусом Done «Выполнен» */
         $sign = $this

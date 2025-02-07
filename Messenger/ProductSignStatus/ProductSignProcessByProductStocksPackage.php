@@ -46,7 +46,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
+#[AsMessageHandler(priority: -5)]
 final readonly class ProductSignProcessByProductStocksPackage
 {
     public function __construct(
@@ -81,7 +81,7 @@ final readonly class ProductSignProcessByProductStocksPackage
             return;
         }
 
-        if(false === $ProductStockEvent->getStatus()->equals(ProductStockStatusPackage::class))
+        if(false === $ProductStockEvent->equalsProductStockStatus(ProductStockStatusPackage::class))
         {
             $dataLogs[0] = self::class.':'.__LINE__;
             $this->logger->notice('Не резервируем честный знак: Складская заявка не является Package «Упаковка»', $dataLogs);
@@ -100,7 +100,7 @@ final readonly class ProductSignProcessByProductStocksPackage
         /** Определяем пользователя профилю в заявке */
         $User = $this
             ->userByUserProfile
-            ->forProfile($ProductStockEvent->getProfile())
+            ->forProfile($ProductStockEvent->getStocksProfile())
             ->find();
 
         if(false === $User)
@@ -108,7 +108,7 @@ final readonly class ProductSignProcessByProductStocksPackage
             $dataLogs[0] = self::class.':'.__LINE__;
             $this->logger
                 ->critical(
-                    sprintf('products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ', $ProductStockEvent->getProfile()),
+                    sprintf('products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ', $ProductStockEvent->getStocksProfile()),
                     $dataLogs
                 );
 
@@ -175,7 +175,7 @@ final readonly class ProductSignProcessByProductStocksPackage
             {
                 $ProductSignEvent = $this->productSignNew
                     ->forUser($User)
-                    ->forProfile($ProductStockEvent->getProfile())
+                    ->forProfile($ProductStockEvent->getStocksProfile())
                     ->forProduct($product->getProduct())
                     ->forOfferConst($product->getOffer())
                     ->forVariationConst($product->getVariation())
@@ -187,7 +187,7 @@ final readonly class ProductSignProcessByProductStocksPackage
 
                     $dataLogs[0] = self::class.':'.__LINE__;
                     $dataLogs['usr'] = (string) $User;
-                    $dataLogs['profile'] = (string) $ProductStockEvent->getProfile();
+                    $dataLogs['profile'] = (string) $ProductStockEvent->getStocksProfile();
                     $dataLogs['product'] = (string) $product->getProduct();
                     $dataLogs['offer'] = (string) $product->getOffer();
                     $dataLogs['variation'] = (string) $product->getVariation();
@@ -198,7 +198,7 @@ final readonly class ProductSignProcessByProductStocksPackage
                     continue;
                 }
 
-                $ProductSignProcessDTO = new ProductSignProcessDTO($ProductStockEvent->getProfile(), $ProductStockEvent->getOrder());
+                $ProductSignProcessDTO = new ProductSignProcessDTO($ProductStockEvent->getStocksProfile(), $ProductStockEvent->getOrder());
                 $ProductSignInvariableDTO = $ProductSignProcessDTO->getInvariable();
                 $ProductSignInvariableDTO->setPart($ProductSignUid);
 
