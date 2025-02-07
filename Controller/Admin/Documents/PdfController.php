@@ -111,7 +111,7 @@ final class PdfController extends AbstractController
 
     }
 
-    #[Route('/admin/product/sign/document/pdf/parts/{part}', name: 'document.pdf.parts', methods: ['GET'])]
+    #[Route('/admin/product/sign/document/pdf/parts/{article}/{part}', name: 'document.pdf.parts', methods: ['GET'])]
     public function parts(
         #[Autowire('%kernel.project_dir%')] $projectDir,
         #[ParamConverter(ProductSignUid::class)] $part,
