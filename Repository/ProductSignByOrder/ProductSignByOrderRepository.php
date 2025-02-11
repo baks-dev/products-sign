@@ -46,7 +46,7 @@ use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use InvalidArgumentException;
 
-final class ProductSignByOrder implements ProductSignByOrderInterface
+final class ProductSignByOrderRepository implements ProductSignByOrderInterface
 {
     /** Фильтр по продукту */
 
