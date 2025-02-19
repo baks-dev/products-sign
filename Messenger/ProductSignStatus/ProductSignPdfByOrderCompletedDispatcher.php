@@ -40,8 +40,11 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Component\Process\Process;
 
-#[AsMessageHandler(priority: -10)]
-final readonly class ProductSignPdfByOrderCompleted
+/**
+ * Генерируем PDF честных знаков продукции если статус заказа Completed «Выполнен»
+ */
+#[AsMessageHandler(priority: -100)]
+final readonly class ProductSignPdfByOrderCompletedDispatcher
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $projectDir,

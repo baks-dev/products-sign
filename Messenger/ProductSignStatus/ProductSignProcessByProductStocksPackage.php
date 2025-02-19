@@ -46,6 +46,9 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+/**
+ * При статусе складской заявки Package «Упаковка» - резервируем честный знак в статус Process «В процессе»
+ */
 #[AsMessageHandler(priority: -5)]
 final readonly class ProductSignProcessByProductStocksPackage
 {
@@ -60,9 +63,7 @@ final readonly class ProductSignProcessByProductStocksPackage
         private DeduplicatorInterface $deduplicator,
     ) {}
 
-    /**
-     * При статусе складской заявки Package «Упаковка» - резервируем честный знак в статус Process «В процессе»
-     */
+
     public function __invoke(ProductStockMessage $message): void
     {
 

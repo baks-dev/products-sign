@@ -45,8 +45,11 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler(priority: -5)]
-final readonly class ProductSignDoneByOrderCompleted
+/**
+ * Делаем отметку Честный знак на продукцию Done «Выполнен» если статус заказа Completed «Выполнен»
+ */
+#[AsMessageHandler(priority: 10)]
+final readonly class ProductSignDoneByOrderCompletedDispatcher
 {
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
@@ -61,9 +64,6 @@ final readonly class ProductSignDoneByOrderCompleted
     ) {}
 
 
-    /**
-     * Делаем отметку Честный знак Done «Выполнен» если статус заказа Completed «Выполнен»
-     */
     public function __invoke(OrderMessage $message): void
     {
         $Deduplicator = $this->deduplicator

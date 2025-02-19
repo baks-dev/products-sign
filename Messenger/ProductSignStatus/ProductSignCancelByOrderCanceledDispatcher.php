@@ -37,8 +37,11 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler(priority: -5)]
-final readonly class ProductSignCancelByOrderCanceled
+/**
+ * Делаем отмену Честный знак на продукцию New «Новый» если статус заказа Canceled «Отменен»
+ */
+#[AsMessageHandler(priority: 80)]
+final readonly class ProductSignCancelByOrderCanceledDispatcher
 {
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
@@ -48,10 +51,6 @@ final readonly class ProductSignCancelByOrderCanceled
         private DeduplicatorInterface $deduplicator,
     ) {}
 
-
-    /**
-     * Делаем отмену Честный знак на New «Новый» если статус заказа Canceled «Отменен»
-     */
     public function __invoke(OrderMessage $message): void
     {
         $Deduplicator = $this->deduplicator
