@@ -28,7 +28,7 @@ namespace BaksDev\Products\Sign\Messenger\ProductSignStatus;
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Files\Resources\Twig\ImagePathExtension;
 use BaksDev\Orders\Order\Messenger\OrderMessage;
-use BaksDev\Orders\Order\Repository\OrderProducts\OrderProductRepositoryDTO;
+use BaksDev\Orders\Order\Repository\OrderProducts\OrderProductResultDTO;
 use BaksDev\Orders\Order\Repository\OrderProducts\OrderProductsInterface;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
@@ -98,7 +98,7 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
         $current = current($ref->getAttributes(Table::class));
         $dirName = $current->getArguments()['name'] ?? 'barcode';
 
-        /** @var OrderProductRepositoryDTO $product */
+        /** @var OrderProductResultDTO $product */
         foreach($products as $product)
         {
             $paths[] = $this->projectDir;
