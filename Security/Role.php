@@ -60,7 +60,7 @@ final class Role implements RoleInterface, MenuAdminInterface
     }
 
     /** Метод возвращает позицию, в которую располагается ссылка в секции меню */
-    public function getSortMenu(): int
+    public static function getSortMenu(): int
     {
         return 253;
     }
