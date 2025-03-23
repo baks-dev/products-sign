@@ -43,9 +43,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
 #[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
-final class TxtController extends AbstractController
+final class TxtSmallController extends AbstractController
 {
-    #[Route('/admin/product/sign/document/txt/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'admin.txt.orders', methods: ['GET'])]
+    #[Route('/admin/product/sign/document/small/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'admin.small.txt.orders', methods: ['GET'])]
     public function orders(
         ProductSignByOrderInterface $productSignByOrder,
         string $article,
@@ -106,9 +106,8 @@ final class TxtController extends AbstractController
             fclose($handle);
         });
 
-
         $response->headers->set('Content-Type', 'text/plain');
-        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'.txt"');
+        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'['.count($codes).'].small.txt"');
 
         return $response;
     }

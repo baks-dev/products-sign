@@ -42,9 +42,11 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
 #[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
-final class CsvController extends AbstractController
+final class TxtBigController extends AbstractController
 {
-    #[Route('/admin/product/sign/document/csv/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'admin.csv.orders', methods: ['GET'])]
+    private const string PATTERN = '/\((\d{2})\)/';
+
+    #[Route('/admin/product/sign/document/big/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'admin.big.txt.orders', methods: ['GET'])]
     public function orders(
         ProductSignByOrderInterface $productSignByOrder,
         string $article,
@@ -72,23 +74,29 @@ final class CsvController extends AbstractController
             return $this->redirectToReferer();
         }
 
-        $codes = array_column($codes, 'code');
+        $codes = array_column($codes, 'code_string');
 
         /** Удаляем круглые скобки */
+
         $codes = array_map(function($item) {
-            return preg_replace('/((d+))/', '$1', $item);
+            return preg_replace(self::PATTERN, '$1', $item);
         }, $codes);
 
         $response = new StreamedResponse(function() use ($codes) {
 
             $handle = fopen('php://output', 'w+');
-            fputcsv($handle, $codes);
+
+            foreach($codes as $code)
+            {
+                fwrite($handle, $code.PHP_EOL);
+            }
+
             fclose($handle);
 
         }, Response::HTTP_OK);
 
-        $response->headers->set('Content-Type', 'text/csv');
-        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'.csv"');
+        $response->headers->set('Content-Type', 'text/txt');
+        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'['.count($codes).'].big.txt"');
 
         return $response;
     }
