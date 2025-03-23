@@ -265,7 +265,9 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                 ->setParameter('profile', $this->profile, UserProfileUid::TYPE);
         }
 
-        $dbal->join(
+        $dbal
+            ->addSelect('main.id')
+            ->join(
             'event',
             ProductSign::class,
             'main',

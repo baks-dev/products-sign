@@ -1,17 +1,17 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
- *
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *
+ *  
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,40 +29,67 @@ use BaksDev\Core\Doctrine\ORMQueryBuilder;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use InvalidArgumentException;
 
 final class ProductSignCurrentEventRepository implements ProductSignCurrentEventInterface
 {
-    private ORMQueryBuilder $ORMQueryBuilder;
+    private ProductSignUid|false $sign;
 
-    public function __construct(ORMQueryBuilder $ORMQueryBuilder)
+    public function __construct(private readonly ORMQueryBuilder $ORMQueryBuilder) {}
+
+    public function forProductSign(ProductSign|ProductSignUid|string $sign): self
     {
-        $this->ORMQueryBuilder = $ORMQueryBuilder;
+        if(empty($sign))
+        {
+            $this->sign = false;
+            return $this;
+        }
+
+        if(is_string($sign))
+        {
+            $sign = new ProductSignUid($sign);
+        }
+
+        if($sign instanceof ProductSign)
+        {
+            $sign = $sign->getId();
+        }
+
+        $this->sign = $sign;
+
+        return $this;
     }
 
     /**
      * Возвращает активное событие
      */
-    public function findByProductSign(ProductSign|ProductSignUid|string $sign): ?ProductSignEvent
+    public function find(): ProductSignEvent|false
     {
-        $sign = is_string($sign) ? new ProductSignUid($sign) : $sign;
-        $sign = $sign instanceof ProductSign ? $sign->getId() : $sign;
+        if(false === ($this->sign instanceof ProductSignUid))
+        {
+            throw new InvalidArgumentException('Invalid Argument ProductSign');
+        }
 
-        $qb = $this->ORMQueryBuilder->createQueryBuilder(self::class);
+        $orm = $this->ORMQueryBuilder->createQueryBuilder(self::class);
 
-        $qb->select('event');
-
-        $qb
+        $orm
             ->from(ProductSign::class, 'main')
             ->where('main.id = :main')
-            ->setParameter('main', $sign, ProductSignUid::TYPE);
+            ->setParameter(
+                key: 'main',
+                value: $this->sign,
+                type: ProductSignUid::TYPE
+            );
 
-        $qb->join(
-            ProductSignEvent::class,
-            'event',
-            'WITH',
-            'event.id = main.event'
-        );
+        $orm
+            ->select('event')
+            ->join(
+                ProductSignEvent::class,
+                'event',
+                'WITH',
+                'event.id = main.event'
+            );
 
-        return $qb->getOneOrNullResult();
+        return $orm->getOneOrNullResult() ?: false;
     }
 }
