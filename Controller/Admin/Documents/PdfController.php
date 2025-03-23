@@ -60,12 +60,13 @@ final class PdfController extends AbstractController
 
     private string $article;
 
-    #[Route('/admin/product/sign/document/pdf/orders/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'document.pdf.orders', methods: ['GET'])]
+    #[Route('/admin/product/sign/document/pdf/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'document.pdf.orders', methods: ['GET'])]
     public function orders(
         ProductSignByOrderInterface $productSignByOrder,
         ImagePathExtension $ImagePathExtension,
         string $article,
         #[Autowire('%kernel.project_dir%')] $projectDir,
+        #[ParamConverter(ProductSignUid::class)] $part,
         #[ParamConverter(OrderUid::class)] OrderUid $order,
         #[ParamConverter(ProductUid::class)] ?ProductUid $product = null,
         #[ParamConverter(ProductOfferConst::class)] ?ProductOfferConst $offer = null,
@@ -79,12 +80,12 @@ final class PdfController extends AbstractController
         $this->article = $article;
 
         $codes = $productSignByOrder
+            ->forPart($part)
             ->forOrder($order)
             ->product($product)
             ->offer($offer)
             ->variation($variation)
             ->modification($modification)
-            //->withStatusDone()
             ->findAll();
 
         /**
@@ -102,6 +103,7 @@ final class PdfController extends AbstractController
         $paths[] = $dirName;
 
         $paths[] = (string) $order;
+        !$part ?: $paths[] = (string) $part;
         !$product ?: $paths[] = (string) $product;
         !$offer ?: $paths[] = (string) $offer;
         !$variation ?: $paths[] = (string) $variation;

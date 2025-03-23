@@ -112,7 +112,9 @@ final readonly class ProductSignPages
             }
 
             $process = new Process(['pdftk', $info->getRealPath(), 'burst', 'output', $info->getPath().DIRECTORY_SEPARATOR.uniqid('page_', true).'.%d.pdf']);
-            $process->mustRun();
+            $process
+                ->setTimeout(null)
+                ->mustRun();
 
             /** Удаляем после обработки основной файл PDF и doc_data.txt */
             $this->filesystem->remove($info->getRealPath());

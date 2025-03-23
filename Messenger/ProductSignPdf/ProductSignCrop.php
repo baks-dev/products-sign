@@ -117,7 +117,9 @@ final readonly class ProductSignCrop
 
             $cropFilename = $info->getPath().DIRECTORY_SEPARATOR.uniqid('crop_', true).'.pdf';
             $processCrop = new Process(['sudo', 'pdfcrop', '--margins', '1', $info->getRealPath(), $cropFilename]);
-            $processCrop->mustRun();
+            $processCrop
+                ->setTimeout(null)
+                ->mustRun();
 
             /** Удаляем после обработки основной файл PDF */
             $this->filesystem->remove($info->getRealPath());

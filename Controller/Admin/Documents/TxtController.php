@@ -45,10 +45,11 @@ use Symfony\Component\Routing\Attribute\Route;
 #[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
 final class TxtController extends AbstractController
 {
-    #[Route('/admin/product/sign/document/txt/orders/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'admin.txt.orders', methods: ['GET'])]
+    #[Route('/admin/product/sign/document/txt/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'admin.txt.orders', methods: ['GET'])]
     public function orders(
         ProductSignByOrderInterface $productSignByOrder,
         string $article,
+        #[ParamConverter(ProductSignUid::class)] $part,
         #[ParamConverter(OrderUid::class)] OrderUid $order,
         #[ParamConverter(ProductUid::class)] ?ProductUid $product = null,
         #[ParamConverter(ProductOfferConst::class)] ?ProductOfferConst $offer = null,
@@ -57,12 +58,12 @@ final class TxtController extends AbstractController
     ): Response
     {
         $codes = $productSignByOrder
+            ->forPart($part)
             ->forOrder($order)
             ->product($product)
             ->offer($offer)
             ->variation($variation)
             ->modification($modification)
-            //->withStatusDone()
             ->findAll();
 
         if($codes === false)

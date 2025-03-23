@@ -165,12 +165,13 @@ final readonly class ProductSignProcessByProductStocksPackage
          * @var ProductStockProduct $product
          */
 
-
+        $batch = 0;
         $ProductSignUid = new ProductSignUid();
 
         foreach($products as $product)
         {
             $total = $product->getTotal();
+            $batch += $total;
 
             for($i = 1; $i <= $total; $i++)
             {
@@ -220,12 +221,16 @@ final readonly class ProductSignProcessByProductStocksPackage
                     throw new InvalidArgumentException('Ошибка при обновлении статуса честного знака');
                 }
 
-
                 $dataLogs[0] = self::class.':'.__LINE__;
                 $dataLogs['ProductSignUid'] = (string) $ProductSignEvent->getMain();
 
                 $this->logger->info('Отметили Честный знак Process «В процессе»', $dataLogs);
 
+            }
+
+            if(($batch % 500) === 0)
+            {
+                $ProductSignUid = new ProductSignUid();
             }
         }
 

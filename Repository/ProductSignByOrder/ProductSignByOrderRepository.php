@@ -38,6 +38,7 @@ use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\ProductSign;
+use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
@@ -65,6 +66,8 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
     private UserProfileUid|false $profile = false;
 
     private ProductSignStatus $status;
+
+    private ProductSignUid|false $part = false;
 
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder)
@@ -165,6 +168,18 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
 
     }
 
+    public function forPart(ProductSignUid|string $part): self
+    {
+        if(is_string($part))
+        {
+            $part = new ProductSignUid($part);
+        }
+
+        $this->part = $part;
+
+        return $this;
+    }
+
     public function forOrder(Order|OrderUid|string $order): self
     {
         if($order instanceof Order)
@@ -201,6 +216,11 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
         if($this->order === false)
         {
             throw new InvalidArgumentException('Не передан обязательный параметр order через вызов метода ->forOrder(...)');
+        }
+
+        if($this->part === false)
+        {
+            throw new InvalidArgumentException('Invalid Argument Part');
         }
 
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
@@ -272,15 +292,21 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                     '
                     invariable.main = main.id AND 
                     invariable.product = :product AND
+                    invariable.part = :part AND
                     invariable.offer '.$offerParam.' AND
                     invariable.variation '.$variationParam.' AND
                     invariable.modification '.$modificationParam.'
                 '
                 )
                 ->setParameter(
-                    'product',
-                    $this->product,
-                    ProductUid::TYPE
+                    key: 'part',
+                    value: $this->part,
+                    type: ProductSignUid::TYPE
+                )
+                ->setParameter(
+                    key: 'product',
+                    value: $this->product,
+                    type: ProductUid::TYPE
                 );
         }
 

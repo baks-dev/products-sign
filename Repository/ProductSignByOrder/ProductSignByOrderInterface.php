@@ -30,11 +30,15 @@ use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
+use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 
 interface ProductSignByOrderInterface
 {
+    public function forPart(ProductSignUid|string $part): self;
+
+
     /** Фильтр по продукту */
 
     public function product(Product|ProductUid|string $product): self;
