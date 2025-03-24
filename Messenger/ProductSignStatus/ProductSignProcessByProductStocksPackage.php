@@ -165,11 +165,10 @@ final readonly class ProductSignProcessByProductStocksPackage
          * @var ProductStockProduct $product
          */
 
-
-        $ProductSignUid = new ProductSignUid();
-
         foreach($products as $product)
         {
+            $ProductSignUid = new ProductSignUid();
+
             $total = $product->getTotal();
 
             for($i = 1; $i <= $total; $i++)
