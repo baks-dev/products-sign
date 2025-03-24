@@ -85,7 +85,8 @@ final class IndexController extends AbstractController
                 type: ProductSignFilterForm::class,
                 data: $filterSign,
                 options: ['action' => $this->generateUrl('products-sign:admin.index'),]
-            )->handleRequest($request);
+            )
+            ->handleRequest($request);
 
 
         // Получаем список

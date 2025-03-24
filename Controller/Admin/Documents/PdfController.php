@@ -169,12 +169,7 @@ final class PdfController extends AbstractController
 
         if($filesystem->exists($uploadFile))
         {
-
-            return new BinaryFileResponse($uploadFile, Response::HTTP_OK)
-                ->setContentDisposition(
-                    ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                    $this->article.'.pdf'
-                );
+            $filesystem->remove($uploadFile);
         }
 
         /**

@@ -165,16 +165,20 @@ final readonly class ProductSignProcessByProductStocksPackage
          * @var ProductStockProduct $product
          */
 
-        $batch = 0;
+
         $ProductSignUid = new ProductSignUid();
 
         foreach($products as $product)
         {
             $total = $product->getTotal();
-            $batch += $total;
 
             for($i = 1; $i <= $total; $i++)
             {
+                if(($i % 500) === 0)
+                {
+                    $ProductSignUid = new ProductSignUid();
+                }
+
                 $ProductSignEvent = $this->productSignNew
                     ->forUser($User)
                     ->forProfile($ProductStockEvent->getStocksProfile())
@@ -186,7 +190,6 @@ final readonly class ProductSignProcessByProductStocksPackage
 
                 if(!$ProductSignEvent)
                 {
-
                     $dataLogs[0] = self::class.':'.__LINE__;
                     $dataLogs['usr'] = (string) $User;
                     $dataLogs['profile'] = (string) $ProductStockEvent->getStocksProfile();
@@ -226,11 +229,6 @@ final readonly class ProductSignProcessByProductStocksPackage
 
                 $this->logger->info('Отметили Честный знак Process «В процессе»', $dataLogs);
 
-            }
-
-            if(($batch % 500) === 0)
-            {
-                $ProductSignUid = new ProductSignUid();
             }
         }
 

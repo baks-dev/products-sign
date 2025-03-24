@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -107,11 +107,13 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             ->createQueryBuilder(self::class)
             ->bindLocal();
 
+        $dbal->addSelect("JSON_AGG( DISTINCT JSONB_BUILD_OBJECT (  'number', invariable.number  ) ) AS sign_number");
+
         $dbal
-            ->addSelect('COUNT(invariable.part) AS counter')
+            ->addSelect('COUNT(*) AS counter')
             ->addSelect('invariable.part AS sign_part')
             //->addSelect('invariable.event AS sign_event')
-            ->addSelect('invariable.number AS sign_number')
+            //->addSelect('invariable.number AS sign_number')
             ->from(
                 ProductSignInvariable::class,
                 'invariable'
@@ -520,6 +522,9 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             }
         }
 
+        $dbal
+            ->orderBy('invariable.part', 'DESC');
+
         /* Поиск */
         if($this->search?->getQuery())
         {
@@ -532,12 +537,16 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 ->addSearchLike('product_variation.article')
                 ->addSearchLike('product_offer.article')
                 ->addSearchLike('product_info.article');
+
+            $dbal
+                ->orderBy('product_modification.id')
+                ->addOrderBy('product_variation.id')
+                ->addOrderBy('product_offer.id')
+                ->addOrderBy('product.id')
+                ->addOrderBy('counter', 'DESC');
         }
 
-        $dbal->orderBy('invariable.part', 'DESC');
-
         $dbal->allGroupByExclude();
-
 
         return $this->paginator->fetchAllAssociative($dbal);
     }
