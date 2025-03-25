@@ -9,7 +9,8 @@
     </td>
 
     <td>
-        {{ item.sign_part|uuid_format_date('d.m.Y') }}
+        {# {{ item.sign_part|uuid_format_date('d.m.Y') }} #}
+        {{ item.mod_date|date('d.m.Y') }}
     </td>
 
     <td class="text-center">
@@ -167,7 +168,7 @@
                 {% else %}
 
                     {% set document_small_txt = path('products-sign:admin.small.txt.orders', {
-                        article: item.product_article,
+                        article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
                         part: item.sign_part,
                         order: item.order_id,
                         product: item.product_id,
@@ -177,7 +178,7 @@
                     }) %}
 
                     {% set document_big_txt = path('products-sign:admin.big.txt.orders', {
-                        article: item.product_article,
+                        article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
                         part: item.sign_part,
                         order: item.order_id,
                         product: item.product_id,
@@ -187,7 +188,7 @@
                     }) %}
 
                     {% set document_pdf = path('products-sign:document.pdf.orders', {
-                        article: item.product_article,
+                        article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
                         part: item.sign_part,
                         order: item.order_id,
                         product: item.product_id,

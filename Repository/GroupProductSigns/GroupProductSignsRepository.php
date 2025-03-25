@@ -168,6 +168,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
 
 
         $dbal
+            ->addSelect("DATE(modify.mod_date) AS mod_date")
             ->leftJoin(
                 'main',
                 ProductSignModify::class,
@@ -522,8 +523,10 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             }
         }
 
-        $dbal
-            ->orderBy('invariable.part', 'DESC');
+        $dbal->orderBy('DATE(modify.mod_date)', 'DESC');
+        //$dbal->addOrderBy('invariable.part', 'DESC');
+
+        //$dbal->orderBy('invariable.part', 'DESC');
 
         /* Поиск */
         if($this->search?->getQuery())
@@ -539,7 +542,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 ->addSearchLike('product_info.article');
 
             $dbal
-                ->orderBy('product_modification.id')
+                ->addOrderBy('product_modification.id')
                 ->addOrderBy('product_variation.id')
                 ->addOrderBy('product_offer.id')
                 ->addOrderBy('product.id')
@@ -550,6 +553,4 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
 
         return $this->paginator->fetchAllAssociative($dbal);
     }
-
-
 }
