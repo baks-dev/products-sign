@@ -266,7 +266,7 @@ final readonly class ProductSignPdfHandler
                 //                    }
                 //                }
 
-                if($decode->isError() || str_starts_with('(00)', $code))
+                if($decode->isError() || str_starts_with($code, '(00)'))
                 {
                     $code = uniqid('error_', true);
                     $ProductSignDTO->setStatus(ProductSignStatusError::class);

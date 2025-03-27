@@ -218,10 +218,10 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
             throw new InvalidArgumentException('Не передан обязательный параметр order через вызов метода ->forOrder(...)');
         }
 
-        if($this->part === false)
+        /*if($this->part === false)
         {
             throw new InvalidArgumentException('Invalid Argument Part');
-        }
+        }*/
 
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
 
@@ -294,24 +294,27 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                     '
                     invariable.main = main.id AND 
                     invariable.product = :product AND
-                    invariable.part = :part AND
                     invariable.offer '.$offerParam.' AND
                     invariable.variation '.$variationParam.' AND
                     invariable.modification '.$modificationParam.'
-                '
-                )
-                ->setParameter(
-                    key: 'part',
-                    value: $this->part,
-                    type: ProductSignUid::TYPE
+                '.($this->part ? ' AND invariable.part = :part' : '')
                 )
                 ->setParameter(
                     key: 'product',
                     value: $this->product,
                     type: ProductUid::TYPE
                 );
-        }
 
+            if($this->part)
+            {
+                $dbal->setParameter(
+                    key: 'part',
+                    value: $this->part,
+                    type: ProductSignUid::TYPE
+                );
+            }
+
+        }
 
         $dbal
             ->addSelect(

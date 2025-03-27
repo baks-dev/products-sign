@@ -208,7 +208,7 @@ final class PdfController extends AbstractController
         return new BinaryFileResponse($uploadFile, Response::HTTP_OK)
             ->setContentDisposition(
                 ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                $this->article.'.pdf'
+                $this->article.'['.count($codes).'].pdf'
             );
 
     }
