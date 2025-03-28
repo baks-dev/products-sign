@@ -26,13 +26,15 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Messenger\ProductSignStatus;
 
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
+use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Orders\Order\Entity\Event\OrderEvent;
 use BaksDev\Orders\Order\Messenger\OrderMessage;
 use BaksDev\Orders\Order\Repository\OrderEvent\OrderEventInterface;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\OrderStatusCanceled;
+use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignCancel\ProductSignCancelMessage;
 use BaksDev\Products\Sign\Repository\ProductSignProcessByOrder\ProductSignProcessByOrderInterface;
+use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusCancel;
-use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignCancelDTO;
-use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -45,10 +47,10 @@ final readonly class ProductSignCancelByOrderCanceledDispatcher
 {
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
-        private ProductSignStatusHandler $productSignStatusHandler,
         private OrderEventInterface $orderEventRepository,
         private ProductSignProcessByOrderInterface $productSignProcessByOrder,
         private DeduplicatorInterface $deduplicator,
+        private MessageDispatchInterface $MessageDispatch,
     ) {}
 
     public function __invoke(OrderMessage $message): void
@@ -73,7 +75,7 @@ final readonly class ProductSignCancelByOrderCanceledDispatcher
 
         $OrderEvent = $this->orderEventRepository->find($message->getEvent());
 
-        if(false === $OrderEvent)
+        if(false === ($OrderEvent instanceof OrderEvent))
         {
             $dataLogs[0] = self::class.':'.__LINE__;
             $this->logger->critical('products-sign: Не найдено событие Order', $dataLogs);
@@ -89,22 +91,26 @@ final readonly class ProductSignCancelByOrderCanceledDispatcher
             return;
         }
 
-        $this->logger->info('Делаем поиск и отмену всех «Честных знаков» при отмене заказа:');
+        $ProductSignEvents = $this->productSignProcessByOrder
+            ->forOrder($message->getId())
+            ->findAll();
 
-        $ProductSignEvents = $this->productSignProcessByOrder->findByOrder($message->getId());
-
-        foreach($ProductSignEvents as $event)
+        if(false === $ProductSignEvents)
         {
-            $ProductSignCancelDTO = new ProductSignCancelDTO($event->getProfile());
-            $event->getDto($ProductSignCancelDTO);
-            $this->productSignStatusHandler->handle($ProductSignCancelDTO);
+            return;
+        }
 
-            $this->logger->warning(
-                'Отменили «Честный знак» (возвращаем статус New «Новый»)',
-                [
-                    self::class.':'.__LINE__,
-                    'ProductSignUid' => $event->getMain()
-                ]
+        /** @var ProductSignEventUid $event */
+        foreach($ProductSignEvents as $ProductSignEventUid)
+        {
+            $ProductSignCancelMessage = new ProductSignCancelMessage(
+                $OrderEvent->getOrderProfile(),
+                $ProductSignEventUid
+            );
+
+            $this->MessageDispatch->dispatch(
+                message: $ProductSignCancelMessage,
+                transport: 'products-sign'
             );
         }
 

@@ -21,17 +21,42 @@
  *  THE SOFTWARE.
  */
 
-namespace BaksDev\Products\Sign\Repository\ProductSignProcessByOrder;
+declare(strict_types=1);
 
-use BaksDev\Orders\Order\Entity\Order;
-use BaksDev\Orders\Order\Type\Id\OrderUid;
+namespace BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignCancel;
 
-interface ProductSignProcessByOrderInterface
+use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+
+final class ProductSignCancelMessage
 {
-    public function forOrder(Order|OrderUid|string $order): self;
+    private string $profile;
+
+    private string $event;
+
+    public function __construct(
+        UserProfileUid|string $profile,
+        ProductSignEventUid|string $event
+    )
+    {
+        $this->profile = (string) $profile;
+        $this->event = (string) $event;
+    }
 
     /**
-     * Метод возвращает события Честный знак по заказу со статусом Process «В процессе»
+     * Profile
      */
-    public function findAll(): array|false;
+    public function getProfile(): UserProfileUid
+    {
+        return new UserProfileUid($this->profile);
+    }
+
+    /**
+     * Идентификатор события
+     */
+    public function getEvent(): ProductSignEventUid
+    {
+        return new ProductSignEventUid($this->event);
+    }
+
 }
