@@ -33,6 +33,7 @@ use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
+use Generator;
 use InvalidArgumentException;
 
 final class ProductSignProcessByOrderRepository implements ProductSignProcessByOrderInterface
@@ -68,7 +69,7 @@ final class ProductSignProcessByOrderRepository implements ProductSignProcessByO
     /**
      * Метод возвращает события всех Честных знаков по заказу со статусом Process «В процессе»
      */
-    public function findAll(): array|false
+    public function findAll(): Generator|false
     {
         if(false === ($this->order instanceof OrderUid))
         {
@@ -105,6 +106,6 @@ final class ProductSignProcessByOrderRepository implements ProductSignProcessByO
                 'main.event = event.id'
             );
 
-        return $dbal->fetchAllIndexHydrate(ProductSignEventUid::class);
+        return $dbal->fetchAllHydrate(ProductSignEventUid::class);
     }
 }

@@ -25,6 +25,7 @@ namespace BaksDev\Products\Sign\Repository\ProductSignProcessByOrder;
 
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use Generator;
 
 interface ProductSignProcessByOrderInterface
 {
@@ -33,5 +34,5 @@ interface ProductSignProcessByOrderInterface
     /**
      * Метод возвращает события Честный знак по заказу со статусом Process «В процессе»
      */
-    public function findAll(): array|false;
+    public function findAll(): Generator|false;
 }
