@@ -59,6 +59,7 @@ final readonly class ProductSignProcessMessage
         ProductModificationConst|string|null|false $modification,
     )
     {
+        $this->order = (string) $order;
         $this->part = (string) $part;
         $this->user = (string) $user;
         $this->profile = (string) $profile;
@@ -67,7 +68,7 @@ final readonly class ProductSignProcessMessage
         $this->offer = $offer ? (string) $offer : null;
         $this->variation = $variation ? (string) $variation : null;
         $this->modification = $modification ? (string) $modification : null;
-        $this->order = $order;
+
     }
 
     /**
