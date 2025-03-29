@@ -68,7 +68,6 @@ final readonly class ProductSignProcessMessage
         $this->offer = $offer ? (string) $offer : null;
         $this->variation = $variation ? (string) $variation : null;
         $this->modification = $modification ? (string) $modification : null;
-
     }
 
     /**
@@ -134,5 +133,4 @@ final readonly class ProductSignProcessMessage
     {
         return $this->modification ? new ProductModificationConst($this->modification) : null;
     }
-
 }
