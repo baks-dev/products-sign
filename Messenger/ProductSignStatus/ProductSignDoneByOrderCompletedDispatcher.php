@@ -48,7 +48,7 @@ final readonly class ProductSignDoneByOrderCompletedDispatcher
 {
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
-        private OrderEventInterface $orderEventRepository,
+        private OrderEventInterface $OrderEventRepository,
         private DeduplicatorInterface $deduplicator,
         private CurrentProductIdentifierInterface $CurrentProductIdentifier,
         private MessageDispatchInterface $MessageDispatch
@@ -71,7 +71,7 @@ final readonly class ProductSignDoneByOrderCompletedDispatcher
         }
 
         /** Получаем событие заказа */
-        $OrderEvent = $this->orderEventRepository->find($message->getEvent());
+        $OrderEvent = $this->OrderEventRepository->find($message->getEvent());
 
         if(false === ($OrderEvent instanceof OrderEvent))
         {
@@ -119,18 +119,18 @@ final readonly class ProductSignDoneByOrderCompletedDispatcher
              * Отмечаем честный знак о выполнении
              */
 
-            $total = $product->getTotal();
+            $ProductSignDoneMessage = new ProductSignDoneMessage(
+                $message->getId(),
+                $CurrentProductDTO->getProduct(),
+                $CurrentProductDTO->getOfferConst(),
+                $CurrentProductDTO->getVariationConst(),
+                $CurrentProductDTO->getModificationConst(),
+            );
 
-            for($i = 1; $i <= $total; $i++)
+            $productTotal = $product->getTotal();
+
+            for($i = 1; $i <= $productTotal; $i++)
             {
-                $ProductSignDoneMessage = new ProductSignDoneMessage(
-                    $message->getId(),
-                    $CurrentProductDTO->getProduct(),
-                    $CurrentProductDTO->getOfferConst(),
-                    $CurrentProductDTO->getVariationConst(),
-                    $CurrentProductDTO->getModificationConst(),
-                );
-
                 $this->MessageDispatch->dispatch(
                     message: $ProductSignDoneMessage,
                     transport: 'products-sign'

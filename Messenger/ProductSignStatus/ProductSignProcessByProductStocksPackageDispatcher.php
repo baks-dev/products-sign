@@ -34,8 +34,8 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess
 use BaksDev\Products\Stocks\Entity\Stock\Event\ProductStockEvent;
 use BaksDev\Products\Stocks\Entity\Stock\Products\ProductStockProduct;
 use BaksDev\Products\Stocks\Messenger\ProductStockMessage;
-use BaksDev\Products\Stocks\Repository\CurrentProductStocks\CurrentProductStocksInterface;
 use BaksDev\Products\Stocks\Repository\ProductStocksById\ProductStocksByIdInterface;
+use BaksDev\Products\Stocks\Repository\ProductStocksEvent\ProductStocksEventInterface;
 use BaksDev\Products\Stocks\Type\Event\ProductStockEventUid;
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusIncoming;
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusPackage;
@@ -55,8 +55,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
         private ProductStocksByIdInterface $productStocks,
-        private EntityManagerInterface $entityManager,
-        private CurrentProductStocksInterface $currentProductStocks,
+        private ProductStocksEventInterface $ProductStocksEventRepository,
         private UserByUserProfileInterface $userByUserProfile,
         private DeduplicatorInterface $deduplicator,
         private MessageDispatchInterface $MessageDispatch
@@ -77,7 +76,9 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
             return;
         }
 
-        $ProductStockEvent = $this->currentProductStocks->getCurrentEvent($message->getId());
+        $ProductStockEvent = $this->ProductStocksEventRepository
+            ->forEvent($message->getEvent())
+            ->find();
 
         if(false === ($ProductStockEvent instanceof ProductStockEvent))
         {
@@ -128,13 +129,12 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
 
         if($message->getLast() instanceof ProductStockEventUid)
         {
-            $lastProductStockEvent = $this
-                ->entityManager
-                ->getRepository(ProductStockEvent::class)
-                ->find($message->getLast());
+            $lastProductStockEvent = $this->ProductStocksEventRepository
+                ->forEvent($message->getLast())
+                ->find();
 
             /** Если предыдущая заявка на перемещение и совершается поступление по этой заявке - резерв уже был */
-            if($lastProductStockEvent === null || $lastProductStockEvent->equalsProductStockStatus(ProductStockStatusIncoming::class) === true)
+            if(false === ($lastProductStockEvent instanceof ProductStockEvent) || $lastProductStockEvent->equalsProductStockStatus(ProductStockStatusIncoming::class) === true)
             {
                 $this->logger->notice(
                     'Не резервируем честный знак: Складская заявка при поступлении на склад по заказу (резерв уже имеется)',
@@ -166,28 +166,21 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
 
         foreach($products as $product)
         {
-            $ProductSignUid = new ProductSignUid();
+            $ProductSignProcessMessage = new ProductSignProcessMessage(
+                order: $ProductStockEvent->getOrder(),
+                part: new ProductSignUid(),
+                user: $User->getId(),
+                profile: $ProductStockEvent->getStocksProfile(),
+                product: $product->getProduct(),
+                offer: $product->getOffer(),
+                variation: $product->getVariation(),
+                modification: $product->getModification()
+            );
 
-            $total = $product->getTotal();
+            $productTotal = $product->getTotal();
 
-            for($i = 1; $i <= $total; $i++)
+            for($i = 1; $i <= $productTotal; $i++)
             {
-                if(($i % 500) === 0)
-                {
-                    $ProductSignUid = new ProductSignUid();
-                }
-
-                $ProductSignProcessMessage = new ProductSignProcessMessage(
-                    order: $ProductStockEvent->getOrder(),
-                    part: $ProductSignUid,
-                    user: $User->getId(),
-                    profile: $ProductStockEvent->getStocksProfile(),
-                    product: $product->getProduct(),
-                    offer: $product->getOffer(),
-                    variation: $product->getVariation(),
-                    modification: $product->getModification()
-                );
-
                 $this->MessageDispatch
                     ->dispatch(
                         message: $ProductSignProcessMessage,
