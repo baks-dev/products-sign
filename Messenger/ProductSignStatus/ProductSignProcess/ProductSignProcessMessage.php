@@ -35,39 +35,41 @@ use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 
-final readonly class ProductSignProcessMessage
+final class ProductSignProcessMessage
 {
-    private string $order;
     private string $part;
-    private string $user;
-    private string $profile;
-    private string $product;
 
-    private ?string $offer;
-    private ?string $variation;
-    private ?string $modification;
+    private readonly string $order;
+    private readonly string $user;
+    private readonly string $profile;
+    private readonly string $product;
+
+    private readonly string|false $offer;
+    private readonly string|false $variation;
+    private readonly string|false $modification;
 
     public function __construct(
-        OrderUid|string $order,
-        ProductSignUid|string $part,
-        UserUid|string $user,
-        UserProfileUid|string $profile,
-        ProductUid|string $product,
+        OrderUid $order,
+        ProductSignUid $part,
+        UserUid $user,
+        UserProfileUid $profile,
+        ProductUid $product,
 
-        ProductOfferConst|string|null|false $offer,
-        ProductVariationConst|string|null|false $variation,
-        ProductModificationConst|string|null|false $modification,
+        ProductOfferConst|null|false $offer,
+        ProductVariationConst|null|false $variation,
+        ProductModificationConst|null|false $modification,
     )
     {
-        $this->order = (string) $order;
         $this->part = (string) $part;
+
+        $this->order = (string) $order;
         $this->user = (string) $user;
         $this->profile = (string) $profile;
         $this->product = (string) $product;
 
-        $this->offer = $offer ? (string) $offer : null;
-        $this->variation = $variation ? (string) $variation : null;
-        $this->modification = $modification ? (string) $modification : null;
+        $this->offer = empty($offer) ? false : (string) $offer;
+        $this->variation = empty($variation) ? false : (string) $variation;
+        $this->modification = empty($modification) ? false : (string) $modification;
     }
 
     /**
@@ -84,6 +86,13 @@ final readonly class ProductSignProcessMessage
     public function getPart(): ProductSignUid
     {
         return new ProductSignUid($this->part);
+    }
+
+    public function setPart(ProductSignUid $part): self
+    {
+        $this->part = (string) $part;
+
+        return $this;
     }
 
     /**
@@ -113,24 +122,24 @@ final readonly class ProductSignProcessMessage
     /**
      * Offer
      */
-    public function getOffer(): ?ProductOfferConst
+    public function getOffer(): ProductOfferConst|false
     {
-        return $this->offer ? new ProductOfferConst($this->offer) : null;
+        return $this->offer ? new ProductOfferConst($this->offer) : false;
     }
 
     /**
      * Variation
      */
-    public function getVariation(): ?ProductVariationConst
+    public function getVariation(): ProductVariationConst|false
     {
-        return $this->variation ? new ProductVariationConst($this->variation) : null;
+        return $this->variation ? new ProductVariationConst($this->variation) : false;
     }
 
     /**
      * Modification
      */
-    public function getModification(): ?ProductModificationConst
+    public function getModification(): ProductModificationConst|false
     {
-        return $this->modification ? new ProductModificationConst($this->modification) : null;
+        return $this->modification ? new ProductModificationConst($this->modification) : false;
     }
 }

@@ -41,7 +41,6 @@ use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusInc
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusPackage;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use BaksDev\Users\User\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -186,6 +185,13 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
                         message: $ProductSignProcessMessage,
                         transport: 'products-sign'
                     );
+
+                /** Разбиваем партии по 500 шт */
+
+                if(($i % 500) === 0)
+                {
+                    $ProductSignProcessMessage->setPart(new ProductSignUid());
+                }
             }
         }
 
