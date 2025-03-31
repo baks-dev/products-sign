@@ -34,6 +34,7 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess
 use BaksDev\Products\Stocks\Entity\Stock\Event\ProductStockEvent;
 use BaksDev\Products\Stocks\Entity\Stock\Products\ProductStockProduct;
 use BaksDev\Products\Stocks\Messenger\ProductStockMessage;
+use BaksDev\Products\Stocks\Repository\CurrentProductStocks\CurrentProductStocksInterface;
 use BaksDev\Products\Stocks\Repository\ProductStocksById\ProductStocksByIdInterface;
 use BaksDev\Products\Stocks\Repository\ProductStocksEvent\ProductStocksEventInterface;
 use BaksDev\Products\Stocks\Type\Event\ProductStockEventUid;
@@ -55,6 +56,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         #[Target('productsSignLogger')] private LoggerInterface $logger,
         private ProductStocksByIdInterface $productStocks,
         private ProductStocksEventInterface $ProductStocksEventRepository,
+        private CurrentProductStocksInterface $CurrentProductStocksInterface,
         private UserByUserProfileInterface $userByUserProfile,
         private DeduplicatorInterface $deduplicator,
         private MessageDispatchInterface $MessageDispatch
@@ -109,23 +111,6 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
             return;
         }
 
-        /** Определяем пользователя профилю в заявке */
-        $User = $this
-            ->userByUserProfile
-            ->forProfile($ProductStockEvent->getStocksProfile())
-            ->find();
-
-        if(false === ($User instanceof User))
-        {
-            $this->logger
-                ->critical(
-                    sprintf('products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ', $ProductStockEvent->getStocksProfile()),
-                    [var_export($message, true), self::class.':'.__LINE__]
-                );
-
-            return;
-        }
-
         if($message->getLast() instanceof ProductStockEventUid)
         {
             $lastProductStockEvent = $this->ProductStocksEventRepository
@@ -144,6 +129,19 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
             }
         }
 
+
+        /**
+         * Определяем пользователя профилю в заявке
+         */
+
+        $CurrentProductStockEvent = $this->CurrentProductStocksInterface
+            ->getCurrentEvent($message->getId());
+
+        if(false === ($CurrentProductStockEvent instanceof ProductStockEvent))
+        {
+            return;
+        }
+
         // Получаем всю продукцию в ордере со статусом Package (УПАКОВКА)
         $products = $this->productStocks->getProductsPackageStocks($message->getId());
 
@@ -153,6 +151,23 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
                 'Заявка на упаковку не имеет продукции в коллекции',
                 [var_export($message, true), self::class.':'.__LINE__]
             );
+
+            return;
+        }
+
+        $User = $this
+            ->userByUserProfile
+            ->forProfile($CurrentProductStockEvent->getStocksProfile())
+            ->find();
+
+
+        if(false === ($User instanceof User))
+        {
+            $this->logger
+                ->critical(
+                    sprintf('products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ', $ProductStockEvent->getStocksProfile()),
+                    [var_export($message, true), self::class.':'.__LINE__]
+                );
 
             return;
         }
