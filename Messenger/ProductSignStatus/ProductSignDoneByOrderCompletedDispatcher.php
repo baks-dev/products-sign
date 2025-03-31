@@ -99,7 +99,7 @@ final readonly class ProductSignDoneByOrderCompletedDispatcher
              */
 
             $CurrentProductDTO = $this->CurrentProductIdentifier
-                ->forEvent($product->getEvent())
+                ->forEvent($product->getProduct())
                 ->forOffer($product->getOffer())
                 ->forVariation($product->getVariation())
                 ->forModification($product->getModification())
