@@ -56,7 +56,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         #[Target('productsSignLogger')] private LoggerInterface $logger,
         private ProductStocksByIdInterface $productStocks,
         private ProductStocksEventInterface $ProductStocksEventRepository,
-        private CurrentProductStocksInterface $CurrentProductStocksInterface,
+        private CurrentProductStocksInterface $CurrentProductStocks,
         private UserByUserProfileInterface $userByUserProfile,
         private DeduplicatorInterface $deduplicator,
         private MessageDispatchInterface $MessageDispatch
@@ -130,18 +130,6 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         }
 
 
-        /**
-         * Определяем пользователя профилю в заявке
-         */
-
-        $CurrentProductStockEvent = $this->CurrentProductStocksInterface
-            ->getCurrentEvent($message->getId());
-
-        if(false === ($CurrentProductStockEvent instanceof ProductStockEvent))
-        {
-            return;
-        }
-
         // Получаем всю продукцию в ордере со статусом Package (УПАКОВКА)
         $products = $this->productStocks->getProductsPackageStocks($message->getId());
 
@@ -155,17 +143,34 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
             return;
         }
 
+
+        /**
+         * Определяем пользователя профилю в заявке
+         */
+
+        $CurrentProductStockEvent = $this->CurrentProductStocks
+            ->getCurrentEvent($message->getId());
+
+        if(false === ($CurrentProductStockEvent instanceof ProductStockEvent))
+        {
+            return;
+        }
+
+        $UserProfileUid = $CurrentProductStockEvent->getStocksProfile();
+
         $User = $this
             ->userByUserProfile
-            ->forProfile($CurrentProductStockEvent->getStocksProfile())
+            ->forProfile($UserProfileUid)
             ->find();
-
 
         if(false === ($User instanceof User))
         {
             $this->logger
                 ->critical(
-                    sprintf('products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ', $ProductStockEvent->getStocksProfile()),
+                    sprintf(
+                        'products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ',
+                        $UserProfileUid
+                    ),
                     [var_export($message, true), self::class.':'.__LINE__]
                 );
 
@@ -184,7 +189,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
                 order: $ProductStockEvent->getOrder(),
                 part: new ProductSignUid(),
                 user: $User->getId(),
-                profile: $ProductStockEvent->getStocksProfile(),
+                profile: $UserProfileUid,
                 product: $product->getProduct(),
                 offer: $product->getOffer(),
                 variation: $product->getVariation(),
