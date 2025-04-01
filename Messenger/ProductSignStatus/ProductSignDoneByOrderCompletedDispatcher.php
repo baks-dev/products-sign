@@ -109,7 +109,7 @@ final readonly class ProductSignDoneByOrderCompletedDispatcher
             {
                 $this->logger->critical(
                     'products-sign: Продукт не найден',
-                    [var_export($product, true), self::class.':'.__LINE__]
+                    [var_export($CurrentProductDTO, true), self::class.':'.__LINE__]
                 );
 
                 continue;
