@@ -47,7 +47,7 @@ final readonly class ProductSignCancelByOrderCanceledDispatcher
 {
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
-        private OrderEventInterface $orderEventRepository,
+        private OrderEventInterface $OrderEventRepository,
         private ProductSignProcessByOrderInterface $productSignProcessByOrder,
         private DeduplicatorInterface $deduplicator,
         private MessageDispatchInterface $MessageDispatch,
@@ -73,7 +73,8 @@ final readonly class ProductSignCancelByOrderCanceledDispatcher
         $dataLogs['OrderEventUid'] = (string) $message->getEvent();
         $dataLogs['LastOrderEventUid'] = (string) $message->getLast();
 
-        $OrderEvent = $this->orderEventRepository->find($message->getEvent());
+        $OrderEvent = $this->OrderEventRepository
+            ->find($message->getEvent());
 
         if(false === ($OrderEvent instanceof OrderEvent))
         {

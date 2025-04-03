@@ -32,8 +32,8 @@ use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Messenger\OrderMessage;
 use BaksDev\Orders\Order\Repository\OrderEvent\OrderEventInterface;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\OrderStatusCompleted;
-use BaksDev\Products\Product\Repository\CurrentProductByArticle\CurrentProductDTO;
 use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierInterface;
+use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierResult;
 use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignDone\ProductSignDoneMessage;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use Psr\Log\LoggerInterface;
@@ -71,7 +71,8 @@ final readonly class ProductSignDoneByOrderCompletedDispatcher
         }
 
         /** Получаем событие заказа */
-        $OrderEvent = $this->OrderEventRepository->find($message->getEvent());
+        $OrderEvent = $this->OrderEventRepository
+            ->find($message->getEvent());
 
         if(false === ($OrderEvent instanceof OrderEvent))
         {
@@ -98,18 +99,24 @@ final readonly class ProductSignDoneByOrderCompletedDispatcher
              * Получаем константы продукции по идентификаторам
              */
 
-            $CurrentProductDTO = $this->CurrentProductIdentifier
+            $CurrentProductIdentifier = $this->CurrentProductIdentifier
                 ->forEvent($product->getProduct())
                 ->forOffer($product->getOffer())
                 ->forVariation($product->getVariation())
                 ->forModification($product->getModification())
                 ->find();
 
-            if(false === ($CurrentProductDTO instanceof CurrentProductDTO))
+            if(false === ($CurrentProductIdentifier instanceof CurrentProductIdentifierResult))
             {
                 $this->logger->critical(
                     'products-sign: Продукт не найден',
-                    [var_export($CurrentProductDTO, true), self::class.':'.__LINE__]
+                    [
+                        'product' => (string) $product->getProduct(),
+                        'offer' => (string) $product->getOffer(),
+                        'variation' => (string) $product->getVariation(),
+                        'modification' => (string) $product->getModification(),
+                        self::class.':'.__LINE__
+                    ]
                 );
 
                 continue;
@@ -121,10 +128,10 @@ final readonly class ProductSignDoneByOrderCompletedDispatcher
 
             $ProductSignDoneMessage = new ProductSignDoneMessage(
                 $message->getId(),
-                $CurrentProductDTO->getProduct(),
-                $CurrentProductDTO->getOfferConst(),
-                $CurrentProductDTO->getVariationConst(),
-                $CurrentProductDTO->getModificationConst(),
+                $CurrentProductIdentifier->getProduct(),
+                $CurrentProductIdentifier->getOfferConst(),
+                $CurrentProductIdentifier->getVariationConst(),
+                $CurrentProductIdentifier->getModificationConst(),
             );
 
             $productTotal = $product->getTotal();
