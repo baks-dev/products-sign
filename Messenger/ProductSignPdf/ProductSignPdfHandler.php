@@ -37,6 +37,7 @@ use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignHandler;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\Products\ProductStockDTO;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockDTO;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockHandler;
+use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
 use Imagick;
@@ -60,6 +61,7 @@ final readonly class ProductSignPdfHandler
         private Filesystem $filesystem,
         private BarcodeRead $barcodeRead,
         private MessageDispatchInterface $messageDispatch,
+        private UserByUserProfileInterface $UserByUserProfileInterface
 
     ) {}
 
@@ -158,10 +160,25 @@ final readonly class ProductSignPdfHandler
             /** Создаем предварительно закупку для заполнения продукции */
             if($message->isPurchase() && $message->getProfile())
             {
-                $PurchaseProductStockDTO = new PurchaseProductStockDTO();
-                $PurchaseProductStockDTO->setProfile($message->getProfile());
-                $PurchaseNumber = number_format(microtime(true) * 100, 0, '.', '.');
-                $PurchaseProductStockDTO->setNumber($PurchaseNumber);
+
+                // Получаем идентификатор пользователя по профилю
+
+                $User = $this->UserByUserProfileInterface
+                    ->forProfile($message->getProfile())
+                    ->find();
+
+                if($User)
+                {
+                    $PurchaseNumber = number_format(microtime(true) * 100, 0, '.', '.');
+
+                    $PurchaseProductStockDTO = new PurchaseProductStockDTO();
+                    $PurchaseProductStocksInvariableDTO = $PurchaseProductStockDTO->getInvariable();
+
+                    $PurchaseProductStocksInvariableDTO
+                        ->setUsr($User->getId())
+                        ->setProfile($message->getProfile())
+                        ->setNumber($PurchaseNumber);
+                }
             }
 
             /** Директория загрузки файла с кодом */
@@ -242,40 +259,13 @@ final readonly class ProductSignPdfHandler
                 $decode = $this->barcodeRead->decode($fileMove);
                 $code = $decode->getText();
 
-                //                if($decode->isError())
-                //                {
-                //                    /** Пробуем обрезать изображение по углу и просканировать повторно */
-                //                    $cropWidth = 450;
-                //                    $cropHeight = 500;
-                //
-                //                    $x = 55; // Позиция по оси X
-                //                    $y = 200; // Позиция по оси Y
-                //
-                //                    // Обрезаем изображение
-                //                    $Imagick->cropImage($cropWidth, $cropHeight, $x, $y);
-                //                    $Imagick->writeImage($fileMove);
-                //
-                //                    /** Пробуем считать честный знак с обрезанного файла */
-                //                    $decode = $this->barcodeRead->decode($fileMove);
-                //                    $code = $decode->getText();
-                //
-                //                    if($decode->isError())
-                //                    {
-                //                        $code = uniqid('error_', true);
-                //                        $ProductSignDTO->setStatus(ProductSignStatusError::class);
-                //                    }
-                //                }
-
                 if($decode->isError() || str_starts_with($code, '(00)'))
                 {
                     $code = uniqid('error_', true);
                     $ProductSignDTO->setStatus(ProductSignStatusError::class);
                 }
 
-
                 $decode->isError() ? ++$errors : ++$counter;
-
-                //$cleanedString = preg_replace('/\((\d+)\)/', '$1', $code);
 
                 /** Присваиваем результат сканера */
 
@@ -320,30 +310,30 @@ final readonly class ProductSignPdfHandler
                 }
 
                 /** Создаем закупку */
-                if($message->isPurchase() && $message->getProfile())
+                if(isset($PurchaseProductStockDTO) && $message->isPurchase() && $message->getProfile())
                 {
                     /** Ищем в массиве такой продукт */
-                    $getPurchaseProduct = $PurchaseProductStockDTO->getProduct()->filter(function(
-                        ProductStockDTO $element
-                    ) use ($message) {
-                        return
-                            $message->getProduct()->equals($element->getProduct()) &&
-                            (
-                                ($message->getOffer() === null && $element->getOffer() === null) ||
-                                $message->getOffer()->equals($element->getOffer())
-                            ) &&
+                    $getPurchaseProduct = $PurchaseProductStockDTO
+                        ->getProduct()
+                        ->filter(function(ProductStockDTO $element) use ($message) {
+                            return
+                                $message->getProduct()->equals($element->getProduct()) &&
+                                (
+                                    ($message->getOffer() === null && $element->getOffer() === null) ||
+                                    $message->getOffer()->equals($element->getOffer())
+                                ) &&
 
-                            (
-                                ($message->getVariation() === null && $element->getVariation() === null) ||
-                                $message->getVariation()->equals($element->getVariation())
-                            ) &&
+                                (
+                                    ($message->getVariation() === null && $element->getVariation() === null) ||
+                                    $message->getVariation()->equals($element->getVariation())
+                                ) &&
 
-                            (
-                                ($message->getModification() === null && $element->getModification() === null) ||
-                                $message->getModification()->equals($element->getModification())
-                            );
+                                (
+                                    ($message->getModification() === null && $element->getModification() === null) ||
+                                    $message->getModification()->equals($element->getModification())
+                                );
 
-                    });
+                        });
 
                     $ProductStockDTO = $getPurchaseProduct->current();
 
@@ -366,7 +356,7 @@ final readonly class ProductSignPdfHandler
             }
 
             /** Сохраняем закупку */
-            if($message->isPurchase() && $message->getProfile() && !$PurchaseProductStockDTO->getProduct()->isEmpty())
+            if($message->isPurchase() && $message->getProfile() && (isset($PurchaseProductStockDTO) && false === $PurchaseProductStockDTO->getProduct()->isEmpty()))
             {
                 $this->purchaseProductStockHandler->handle($PurchaseProductStockDTO);
             }
