@@ -1,17 +1,17 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
- *
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *
+ *  
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,15 +26,15 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Entity\Modify;
 
 
-use BaksDev\Core\Type\Modify\Modify\ModifyActionNew;
-use BaksDev\Core\Type\Modify\Modify\ModifyActionUpdate;
-use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
-use BaksDev\Users\User\Entity\User;
-use BaksDev\Users\User\Type\Id\UserUid;
 use BaksDev\Core\Entity\EntityEvent;
 use BaksDev\Core\Entity\EntityState;
 use BaksDev\Core\Type\Ip\IpAddress;
+use BaksDev\Core\Type\Modify\Modify\ModifyActionNew;
+use BaksDev\Core\Type\Modify\Modify\ModifyActionUpdate;
 use BaksDev\Core\Type\Modify\ModifyAction;
+use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Users\User\Entity\User;
+use BaksDev\Users\User\Type\Id\UserUid;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -48,13 +48,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Index(columns: ['action'])]
 class ProductSignModify extends EntityEvent
 {
-    public const TABLE = 'product_sign_modify';
-
     /** ID события */
     #[Assert\NotBlank]
     #[Assert\Uuid]
     #[ORM\Id]
-    #[ORM\OneToOne(inversedBy: 'modify', targetEntity: ProductSignEvent::class)]
+    #[ORM\OneToOne(targetEntity: ProductSignEvent::class, inversedBy: 'modify')]
     #[ORM\JoinColumn(name: 'event', referencedColumnName: 'id')]
     private ProductSignEvent $event;
 
