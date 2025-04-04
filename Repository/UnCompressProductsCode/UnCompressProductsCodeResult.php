@@ -23,7 +23,7 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Repository\UnCompressMaterialsCode;
+namespace BaksDev\Products\Sign\Repository\UnCompressProductsCode;
 
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 

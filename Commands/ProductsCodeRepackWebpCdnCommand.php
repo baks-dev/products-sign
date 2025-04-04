@@ -29,8 +29,8 @@ namespace BaksDev\Products\Sign\Commands;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImage;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
-use BaksDev\Materials\Sign\Repository\UnCompressMaterialsCode\UnCompressMaterialsCodeResult;
-use BaksDev\Products\Sign\Repository\UnCompressMaterialsCode\UnCompressProductsCodeInterface;
+use BaksDev\Products\Sign\Repository\UnCompressProductsCode\UnCompressProductsCodeInterface;
+use BaksDev\Products\Sign\Repository\UnCompressProductsCode\UnCompressProductsCodeResult;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -97,8 +97,7 @@ class ProductsCodeRepackWebpCdnCommand extends Command
         $progressBar = new ProgressBar($output);
         $progressBar->start();
 
-        /** @var UnCompressMaterialsCodeResult $UnCompressMaterialsCodeResult */
-
+        /** @var UnCompressProductsCodeResult $UnCompressMaterialsCodeResult */
         foreach($images as $UnCompressMaterialsCodeResult)
         {
             if(false === class_exists($UnCompressMaterialsCodeResult->getEntity()))

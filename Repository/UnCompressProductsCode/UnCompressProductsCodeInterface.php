@@ -21,7 +21,7 @@
  *  THE SOFTWARE.
  */
 
-namespace BaksDev\Products\Sign\Repository\UnCompressMaterialsCode;
+namespace BaksDev\Products\Sign\Repository\UnCompressProductsCode;
 
 use Generator;
 
