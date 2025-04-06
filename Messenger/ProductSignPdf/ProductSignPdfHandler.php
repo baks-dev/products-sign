@@ -38,6 +38,7 @@ use BaksDev\Products\Stocks\UseCase\Admin\Purchase\Products\ProductStockDTO;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockDTO;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockHandler;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
+use DateTimeImmutable;
 use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
 use Imagick;
@@ -131,8 +132,7 @@ final readonly class ProductSignPdfHandler
         //        }
 
 
-        /** Генерируем идентификатор группы для отмены */
-        $part = new ProductSignUid();
+
 
 
         /** Обрабатываем страницы */
@@ -153,6 +153,9 @@ final readonly class ProductSignPdfHandler
             {
                 continue;
             }
+
+            /** Генерируем идентификатор группы для отмены */
+            $part = new ProductSignUid()->md5($SignFile->getPath().(new DateTimeImmutable('now')->format('Ymd')));
 
 
             $counter = 0;
