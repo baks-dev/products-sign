@@ -105,7 +105,7 @@ final readonly class ProductSignCropDispatcher
                 continue;
             }
 
-            if(false === file_exists($info->getRealPath()))
+            if(false === $info->getRealPath() || false === file_exists($info->getRealPath()))
             {
                 continue;
             }

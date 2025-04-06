@@ -106,7 +106,7 @@ final readonly class ProductSignPagesDispatcher
                 continue;
             }
 
-            if(false === file_exists($info->getRealPath()))
+            if(false === $info->getRealPath() || false === file_exists($info->getRealPath()))
             {
                 continue;
             }

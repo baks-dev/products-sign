@@ -149,7 +149,7 @@ final readonly class ProductSignPdfHandler
                 continue;
             }
 
-            if(false === file_exists($SignFile->getRealPath()))
+            if(false === $SignFile->getRealPath() || false === file_exists($SignFile->getRealPath()))
             {
                 continue;
             }
