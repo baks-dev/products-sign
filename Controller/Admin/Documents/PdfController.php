@@ -100,6 +100,7 @@ final class PdfController extends AbstractController
         $paths[] = $projectDir;
         $paths[] = 'public';
         $paths[] = 'upload';
+        $paths[] = 'products-sign';
         $paths[] = $dirName;
 
         $paths[] = (string) $order;
@@ -131,7 +132,6 @@ final class PdfController extends AbstractController
             ->withStatusDone()
             ->findAll();
 
-
         /**
          * Создаем путь для создания PDF файла
          */
@@ -144,6 +144,7 @@ final class PdfController extends AbstractController
         $paths[] = $projectDir;
         $paths[] = 'public';
         $paths[] = 'upload';
+        $paths[] = 'products-sign';
         $paths[] = $dirName;
 
         $paths[] = (string) $part;

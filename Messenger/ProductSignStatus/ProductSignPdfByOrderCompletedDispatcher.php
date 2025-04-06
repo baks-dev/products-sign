@@ -104,6 +104,7 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
             $paths[] = $this->projectDir;
             $paths[] = 'public';
             $paths[] = 'upload';
+            $paths[] = 'products-sign';
             $paths[] = $dirName;
             $paths[] = $OrderUid;
             $paths[] = (string) $product->getProduct();
@@ -111,7 +112,6 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
             !$product->getProductOfferConst() ?: $paths[] = (string) $product->getProductOfferConst();
             !$product->getProductVariationConst() ?: $paths[] = (string) $product->getProductVariationConst();
             !$product->getProductModificationConst() ?: $paths[] = (string) $product->getProductModificationConst();
-
 
             $uploadDir = implode(DIRECTORY_SEPARATOR, $paths);
             $uploadFile = $uploadDir.DIRECTORY_SEPARATOR.'output.pdf';

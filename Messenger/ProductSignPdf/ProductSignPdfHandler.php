@@ -73,6 +73,7 @@ final readonly class ProductSignPdfHandler
         $upload[] = 'public';
         $upload[] = 'upload';
         $upload[] = 'barcode';
+        $upload[] = 'products-sign';
 
         $upload[] = (string) $message->getUsr();
 
@@ -312,33 +313,23 @@ final readonly class ProductSignPdfHandler
                 /** Создаем закупку */
                 if(isset($PurchaseProductStockDTO) && $message->isPurchase() && $message->getProfile())
                 {
-                    /** Ищем в массиве такой продукт */
-                    $getPurchaseProduct = $PurchaseProductStockDTO
+                    // Найдем в коллекции DTO с совпадающими product, offer, variation, modification
+                    $findPurchaseProduct = $PurchaseProductStockDTO
                         ->getProduct()
-                        ->filter(function(ProductStockDTO $element) use ($message) {
-                            return
-                                $message->getProduct()->equals($element->getProduct()) &&
-                                (
-                                    ($message->getOffer() === null && $element->getOffer() === null) ||
-                                    $message->getOffer()->equals($element->getOffer())
-                                ) &&
+                        ->filter
+                        (
+                            function(ProductStockDTO $element) use ($message) {
+                                return
+                                    $element->getProduct()->equals($element->getProduct())
+                                    && ((is_null($element->getOffer()) === true && is_null($message->getOffer()) === true) || $element->getOffer()->equals($message->getOffer()))
+                                    && ((is_null($element->getVariation()) === true && is_null($message->getVariation()) === true) || $element->getVariation()->equals($message->getVariation()))
+                                    && ((is_null($element->getModification()) === true && is_null($message->getModification()) === true) || $element->getModification()->equals($message->getModification()));
+                            }
+                        );
 
-                                (
-                                    ($message->getVariation() === null && $element->getVariation() === null) ||
-                                    $message->getVariation()->equals($element->getVariation())
-                                ) &&
+                    $ProductStockDTO = $findPurchaseProduct->current();
 
-                                (
-                                    ($message->getModification() === null && $element->getModification() === null) ||
-                                    $message->getModification()->equals($element->getModification())
-                                );
-
-                        });
-
-                    $ProductStockDTO = $getPurchaseProduct->current();
-
-                    /* если продукта еще нет - добавляем */
-                    if(!$ProductStockDTO)
+                    if(false === ($ProductStockDTO instanceof ProductStockDTO))
                     {
                         $ProductStockDTO = new ProductStockDTO();
                         $ProductStockDTO->setProduct($message->getProduct());

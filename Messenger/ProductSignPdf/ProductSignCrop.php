@@ -38,8 +38,7 @@ final readonly class ProductSignCrop
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $upload,
-        private Filesystem $filesystem,
-        private BarcodeRead $barcodeRead,
+        private Filesystem $filesystem
     ) {}
 
     /**
@@ -51,6 +50,7 @@ final readonly class ProductSignCrop
         $upload[] = 'public';
         $upload[] = 'upload';
         $upload[] = 'barcode';
+        $upload[] = 'products-sign';
 
         $upload[] = (string) $message->getUsr();
 

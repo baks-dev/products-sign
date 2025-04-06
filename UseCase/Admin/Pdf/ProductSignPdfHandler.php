@@ -39,7 +39,7 @@ use Symfony\Component\Filesystem\Filesystem;
 final readonly class ProductSignPdfHandler
 {
     public function __construct(
-        #[Autowire('%kernel.project_dir%')] private string $upload,
+        #[Autowire('%kernel.project_dir%')] private string $project_dir,
         #[Target('productsSignLogger')] private LoggerInterface $logger,
         private MessageDispatchInterface $messageDispatch,
         private ValidatorCollectionInterface $validatorCollection,
@@ -52,10 +52,11 @@ final readonly class ProductSignPdfHandler
     ): string|bool
     {
 
-        $upload[] = $this->upload;
+        $upload[] = $this->project_dir;
         $upload[] = 'public';
         $upload[] = 'upload';
         $upload[] = 'barcode';
+        $upload[] = 'products-sign';
 
         $upload[] = (string) $command->getUsr();
 
@@ -97,7 +98,7 @@ final readonly class ProductSignPdfHandler
             {
                 $Filesystem->mkdir($uploadDir);
             }
-            catch(IOExceptionInterface $exception)
+            catch(IOExceptionInterface)
             {
                 $this->logger->critical(
                     'Ошибка при создании директории. Попробуйте применить комманду ',
@@ -123,18 +124,6 @@ final readonly class ProductSignPdfHandler
 
             /** Валидация файла  */
             $this->validatorCollection->add($file->pdf);
-
-
-            //            /**
-            //             * Для запуска pdfcrop от пользователя sudo:
-            //             * sudo visudo
-            //             * unit ALL=(ALL) NOPASSWD: /usr/bin/pdfcrop
-            //             * Ctrl+X -> Y
-            //             */
-            //
-            //            $process = new Process(['sudo', 'pdfcrop', $file->pdf->getRealPath(), $uploadDir.$name]);
-            //            $process->mustRun();
-
         }
 
         /** Валидация всех объектов */

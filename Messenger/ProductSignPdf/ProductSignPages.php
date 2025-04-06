@@ -51,6 +51,7 @@ final readonly class ProductSignPages
         $upload[] = 'public';
         $upload[] = 'upload';
         $upload[] = 'barcode';
+        $upload[] = 'products-sign';
 
         $upload[] = (string) $message->getUsr();
 

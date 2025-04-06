@@ -57,7 +57,7 @@ final readonly class ProductSignDoneDispatcher
 
         if(false === ($ProductSignEvent instanceof ProductSignEvent))
         {
-            $this->logger->critical(
+            $this->logger->warning(
                 'products-sign: Честный знак на продукцию на найден',
                 [var_export($message, true), self::class.':'.__LINE__]
             );
