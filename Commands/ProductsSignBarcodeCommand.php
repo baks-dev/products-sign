@@ -78,6 +78,8 @@ class ProductsSignBarcodeCommand extends Command
 
         $io = new SymfonyStyle($input, $output);
 
+        $isset = null;
+
         foreach($iterator as $info)
         {
             if($info->isFile() === false)
@@ -91,9 +93,20 @@ class ProductsSignBarcodeCommand extends Command
             }
 
             $dirPathName = str_replace($UPLOAD, '', $info->getPath());
+
+            $md5 = md5($dirPathName);
+            if(isset($isset[$md5]))
+            {
+                continue;
+            }
+            $isset[md5($dirPathName)] = $dirPathName;
+
+            /**
+             * Создаем DTO из названий директорий UID
+             */
+
             $arrDir = explode(DIRECTORY_SEPARATOR, $dirPathName);
 
-            /** Создаем DTO из названий директорий UID   */
             $ProductSignPdfMessage = new ProductSignPdfMessage(
                 isset($arrDir[0]) ? new UserUid($arrDir[0]) : null,
                 isset($arrDir[1]) ? new UserProfileUid($arrDir[1]) : null,
