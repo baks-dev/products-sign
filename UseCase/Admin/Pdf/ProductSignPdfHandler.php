@@ -47,11 +47,8 @@ final readonly class ProductSignPdfHandler
 
 
     /** @see ProductSign */
-    public function handle(
-        ProductSignPdfDTO $command
-    ): string|bool
+    public function handle(ProductSignPdfDTO $command): string|bool
     {
-
         $upload[] = $this->project_dir;
         $upload[] = 'public';
         $upload[] = 'upload';
