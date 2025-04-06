@@ -104,7 +104,6 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
             $paths[] = $this->projectDir;
             $paths[] = 'public';
             $paths[] = 'upload';
-            $paths[] = 'products-sign';
             $paths[] = $dirName;
             $paths[] = $OrderUid;
             $paths[] = (string) $product->getProduct();

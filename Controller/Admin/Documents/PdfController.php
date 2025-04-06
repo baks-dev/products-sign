@@ -100,7 +100,6 @@ final class PdfController extends AbstractController
         $paths[] = $projectDir;
         $paths[] = 'public';
         $paths[] = 'upload';
-        $paths[] = 'products-sign';
         $paths[] = $dirName;
 
         $paths[] = (string) $order;
@@ -144,7 +143,6 @@ final class PdfController extends AbstractController
         $paths[] = $projectDir;
         $paths[] = 'public';
         $paths[] = 'upload';
-        $paths[] = 'products-sign';
         $paths[] = $dirName;
 
         $paths[] = (string) $part;
