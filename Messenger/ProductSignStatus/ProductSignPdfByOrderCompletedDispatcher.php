@@ -80,7 +80,7 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
             ->order($OrderUid)
             ->findAllProducts();
 
-        if(false === ($products || $products->valid()))
+        if(false === $products || false === $products->valid())
         {
             return;
         }
