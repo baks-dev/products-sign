@@ -79,11 +79,11 @@ final class ProductSignDoneMessage
 
     public function getVariationConst(): ProductVariationConst|false
     {
-        return $this->offer ? new ProductVariationConst($this->variation) : false;
+        return $this->variation ? new ProductVariationConst($this->variation) : false;
     }
 
     public function getModificationConst(): ProductModificationConst|false
     {
-        return $this->offer ? new ProductModificationConst($this->modification) : false;
+        return $this->modification ? new ProductModificationConst($this->modification) : false;
     }
 }
