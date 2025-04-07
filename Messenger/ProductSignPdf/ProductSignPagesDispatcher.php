@@ -47,6 +47,7 @@ final readonly class ProductSignPagesDispatcher
      */
     public function __invoke(ProductSignPdfMessage $message): void
     {
+        $upload = null;
         $upload[] = $this->upload;
         $upload[] = 'public';
         $upload[] = 'upload';

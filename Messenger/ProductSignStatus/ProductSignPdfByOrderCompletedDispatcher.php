@@ -101,6 +101,7 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
         /** @var OrderProductResultDTO $product */
         foreach($products as $product)
         {
+            $paths = null;
             $paths[] = $this->projectDir;
             $paths[] = 'public';
             $paths[] = 'upload';

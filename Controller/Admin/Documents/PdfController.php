@@ -97,6 +97,7 @@ final class PdfController extends AbstractController
         $current = current($ref->getAttributes(Table::class));
         $dirName = $current->getArguments()['name'] ?? 'barcode';
 
+        $paths = null;
         $paths[] = $projectDir;
         $paths[] = 'public';
         $paths[] = 'upload';
@@ -140,6 +141,7 @@ final class PdfController extends AbstractController
         $current = current($ref->getAttributes(Table::class));
         $dirName = $current->getArguments()['name'] ?? 'barcode';
 
+        $paths = null;
         $paths[] = $projectDir;
         $paths[] = 'public';
         $paths[] = 'upload';

@@ -68,8 +68,7 @@ final readonly class ProductSignPdfHandler
 
     public function __invoke(ProductSignPdfMessage $message): void
     {
-        // public/upload/products-sign/
-
+        $upload = null;
         $upload[] = $this->upload;
         $upload[] = 'public';
         $upload[] = 'upload';
