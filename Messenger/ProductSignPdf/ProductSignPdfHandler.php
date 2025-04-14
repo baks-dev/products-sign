@@ -154,7 +154,7 @@ final readonly class ProductSignPdfHandler
             }
 
             /** Генерируем идентификатор группы для отмены */
-            $part = new ProductSignUid()->md5($SignFile->getPath().(new DateTimeImmutable('now')->format('Ymd')));
+            $part = new ProductSignUid()->stringToUuid($SignFile->getPath().(new DateTimeImmutable('now')->format('Ymd')));
 
             $counter = 0;
             $errors = 0;

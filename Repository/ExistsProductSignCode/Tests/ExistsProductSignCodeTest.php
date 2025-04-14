@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -89,7 +89,7 @@ class ExistsProductSignCodeTest extends KernelTestCase
         }
         else
         {
-            echo "В базе отсутствует «Честный знак»! ".self::class.':'.__LINE__.PHP_EOL;
+            echo PHP_EOL."В базе отсутствует «Честный знак» : ".self::class.':'.__LINE__.PHP_EOL;
             self::assertTrue(true);
         }
     }

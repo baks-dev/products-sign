@@ -162,7 +162,7 @@ final class ProductSignProcessByOrderProductRepository implements ProductSignPro
 
         if(false === ($this->product instanceof ProductUid))
         {
-            throw new InvalidArgumentException('Не определен обязательный параметр order');
+            throw new InvalidArgumentException('Invalid Argument Product');
         }
 
         $orm = $this->ORMQueryBuilder->createQueryBuilder(self::class);
