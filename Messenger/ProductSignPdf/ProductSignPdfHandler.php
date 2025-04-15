@@ -307,7 +307,7 @@ final readonly class ProductSignPdfHandler
                     /** Создаем комманду для отправки файла CDN */
                     $this->messageDispatch->dispatch(
                         new CDNUploadImageMessage($handle->getId(), ProductSignCode::class, $md5),
-                        transport: 'files-res'
+                        transport: 'files-res-low'
                     );
                 }
 
