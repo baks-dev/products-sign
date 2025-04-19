@@ -29,6 +29,7 @@ interface UnCompressProductsCodeInterface
 {
     /**
      * Метод возвращает идентификаторы изображений без CDN
+     * @return Generator{int, UnCompressProductsCodeResult}|false
      */
     public function findAll(): Generator|false;
 }

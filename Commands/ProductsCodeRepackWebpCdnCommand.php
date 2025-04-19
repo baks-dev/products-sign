@@ -97,23 +97,23 @@ class ProductsCodeRepackWebpCdnCommand extends Command
         $progressBar = new ProgressBar($output);
         $progressBar->start();
 
-        /** @var UnCompressProductsCodeResult $UnCompressMaterialsCodeResult */
-        foreach($images as $UnCompressMaterialsCodeResult)
+        /** @var UnCompressProductsCodeResult $UnCompressProductsCodeResult */
+        foreach($images as $UnCompressProductsCodeResult)
         {
-            if(false === class_exists($UnCompressMaterialsCodeResult->getEntity()))
+            if(false === class_exists($UnCompressProductsCodeResult->getEntity()))
             {
                 $io->writeln(sprintf(
                     '<fg=red>Ошибка при сжатии изображения: класс %s не найден</>',
-                    $UnCompressMaterialsCodeResult->getEntity()
+                    $UnCompressProductsCodeResult->getEntity()
                 ));
 
                 return Command::FAILURE;
             }
 
             $CDNUploadImageMessage = new CDNUploadImageMessage(
-                $UnCompressMaterialsCodeResult->getIdentifier(),
-                $UnCompressMaterialsCodeResult->getEntity(),
-                $UnCompressMaterialsCodeResult->getName()
+                $UnCompressProductsCodeResult->getIdentifier(),
+                $UnCompressProductsCodeResult->getEntity(),
+                $UnCompressProductsCodeResult->getName()
             );
 
             if($key === '0' || $key === 'Все')
@@ -124,8 +124,8 @@ class ProductsCodeRepackWebpCdnCommand extends Command
                 {
                     $io->writeln(sprintf(
                             '<fg=red>Ошибка при сжатии изображения %s: %s</>',
-                            $UnCompressMaterialsCodeResult->getEntity(),
-                            $UnCompressMaterialsCodeResult->getIdentifier())
+                            $UnCompressProductsCodeResult->getEntity(),
+                            $UnCompressProductsCodeResult->getIdentifier())
                     );
                 }
             }

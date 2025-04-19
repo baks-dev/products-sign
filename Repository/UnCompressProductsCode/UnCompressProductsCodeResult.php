@@ -25,7 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Repository\UnCompressProductsCode;
 
-use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
+use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 
 final readonly class UnCompressProductsCodeResult
 {
@@ -55,7 +55,7 @@ final readonly class UnCompressProductsCodeResult
      */
     public function getEntity(): string
     {
-        return MaterialSignCode::class;
+        return ProductSignCode::class;
     }
 
 }
