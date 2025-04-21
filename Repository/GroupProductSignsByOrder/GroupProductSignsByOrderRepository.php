@@ -32,6 +32,7 @@ use BaksDev\Products\Category\Entity\Offers\CategoryProductOffers;
 use BaksDev\Products\Category\Entity\Offers\Variation\CategoryProductVariation;
 use BaksDev\Products\Category\Entity\Offers\Variation\Modification\CategoryProductModification;
 use BaksDev\Products\Product\Entity\Event\ProductEvent;
+use BaksDev\Products\Product\Entity\Info\ProductInfo;
 use BaksDev\Products\Product\Entity\Offers\ProductOffer;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
 use BaksDev\Products\Product\Entity\Offers\Variation\ProductVariation;
@@ -41,6 +42,7 @@ use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\ProductSign;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use Generator;
 use InvalidArgumentException;
@@ -106,7 +108,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
             ->setParameter(
                 key: 'status',
                 value: ProductSignStatusProcess::class,
-                type: OrderUid::TYPE
+                type: ProductSignStatus::TYPE
             );
 
 
@@ -154,6 +156,14 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
             'product_event',
             'product_event.id = product.event'
         );
+
+        $dbal
+            ->leftJoin(
+                'product',
+                ProductInfo::class,
+                'product_info',
+                'product_info.product = product.id'
+            );
 
         $dbal
             ->addSelect('product_trans.name as product_name')
