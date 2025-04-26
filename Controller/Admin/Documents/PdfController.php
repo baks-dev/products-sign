@@ -25,6 +25,9 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Controller\Admin\Documents;
 
+use BaksDev\Barcode\Writer\BarcodeFormat;
+use BaksDev\Barcode\Writer\BarcodeType;
+use BaksDev\Barcode\Writer\BarcodeWrite;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
@@ -39,9 +42,11 @@ use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterf
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use Doctrine\ORM\Mapping\Table;
+use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
 use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -58,13 +63,19 @@ final class PdfController extends AbstractController
 
     private ImagePathExtension $ImagePathExtension;
 
+    private LoggerInterface $logger;
+
+    private BarcodeWrite $BarcodeWrite;
+
     private string $article;
 
     #[Route('/admin/product/sign/document/pdf/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'document.pdf.orders', methods: ['GET'])]
     public function orders(
         ProductSignByOrderInterface $productSignByOrder,
         ImagePathExtension $ImagePathExtension,
+        BarcodeWrite $BarcodeWrite,
         string $article,
+        #[Target('ordersOrderLogger')] LoggerInterface $logger,
         #[Autowire('%kernel.project_dir%')] $projectDir,
         #[ParamConverter(ProductSignUid::class)] $part,
         #[ParamConverter(OrderUid::class)] OrderUid $order,
@@ -75,6 +86,9 @@ final class PdfController extends AbstractController
     ): Response
     {
 
+
+        $this->BarcodeWrite = $BarcodeWrite;
+        $this->logger = $logger;
         $this->projectDir = $projectDir;
         $this->ImagePathExtension = $ImagePathExtension;
         $this->article = $article;
@@ -195,9 +209,37 @@ final class PdfController extends AbstractController
             ''
         ]);
 
-        foreach($codes as $code)
+
+        foreach($codes as $key => $code)
         {
-            $Process[] = ($code['code_cdn'] === false ? $projectDir : '').$this->ImagePathExtension->imagePath($code['code_image'], $code['code_ext'], $code['code_cdn']);
+            $url = ($code['code_cdn'] === false ? $projectDir : '').$this->ImagePathExtension->imagePath($code['code_image'], $code['code_ext'], $code['code_cdn']);
+            $headers = get_headers($url, true);
+
+            if($headers !== false && str_contains($headers[0], '200'))
+            {
+                $Process[] = ($code['code_cdn'] === false ? $projectDir : '').$this->ImagePathExtension->imagePath($code['code_image'], $code['code_ext'], $code['code_cdn']);
+                continue;
+            }
+
+            /**
+             * В случае отсутствия марки - генерируем из кода
+             */
+
+            $subChar = "";
+            preg_match_all('/\((\d{2})\)((?:(?!\(\d{2}\)).)*)/', $code['code_string'], $matches, PREG_SET_ORDER);
+            $codeString = $matches[0][1].$matches[0][2].$matches[1][1].$matches[1][2].$subChar.$matches[2][1].$matches[2][2].$subChar.$matches[3][1].$matches[3][2];
+
+            $this->BarcodeWrite
+                ->text($codeString)
+                ->type(BarcodeType::DataMatrix)
+                ->format(BarcodeFormat::PNG)
+                ->generate(filename: $code['id']);
+
+            $path = $this->BarcodeWrite->getPath();
+
+            $Process[] = $path.DIRECTORY_SEPARATOR.$code['id'].'.png';
+
+            $this->logger->critical(sprintf('Лист %s: ошибка изображения %s', $key, $url), $code);
         }
 
         $Process[] = $uploadFile;

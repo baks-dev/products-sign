@@ -26,7 +26,6 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Repository\ProductSignNew;
 
 use BaksDev\Core\Doctrine\ORMQueryBuilder;
-use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Entity\Product;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
@@ -46,8 +45,6 @@ use InvalidArgumentException;
 
 final class ProductSignNewRepository implements ProductSignNewInterface
 {
-    private ORMQueryBuilder $ORMQueryBuilder;
-
     private UserUid $user;
 
     private UserProfileUid $profile;
@@ -60,10 +57,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
 
     private ProductModificationConst|false $modification = false;
 
-    public function __construct(ORMQueryBuilder $ORMQueryBuilder)
-    {
-        $this->ORMQueryBuilder = $ORMQueryBuilder;
-    }
+    public function __construct(private readonly ORMQueryBuilder $ORMQueryBuilder) {}
 
     public function forUser(User|UserUid|string $user): self
     {
@@ -180,7 +174,6 @@ final class ProductSignNewRepository implements ProductSignNewInterface
             throw new InvalidArgumentException('Не определено обязательное свойство user, profile, либо product');
         }
 
-
         $orm = $this->ORMQueryBuilder->createQueryBuilder(self::class);
 
         $orm
@@ -188,19 +181,31 @@ final class ProductSignNewRepository implements ProductSignNewInterface
 
         $orm
             ->where('invariable.usr = :usr')
-            ->setParameter('usr', $this->user, UserUid::TYPE);
+            ->setParameter(
+                key: 'usr',
+                value: $this->user,
+                type: UserUid::TYPE
+            );
 
 
         $orm
             ->andWhere('invariable.product = :product')
-            ->setParameter('product', $this->product, ProductUid::TYPE);
+            ->setParameter(
+                key: 'product',
+                value: $this->product,
+                type: ProductUid::TYPE
+            );
 
 
         if($this->offer)
         {
             $orm
                 ->andWhere('invariable.offer = :offer OR invariable.offer IS NULL')
-                ->setParameter('offer', $this->offer, ProductOfferConst::TYPE);
+                ->setParameter(
+                    key: 'offer',
+                    value: $this->offer,
+                    type: ProductOfferConst::TYPE
+                );
         }
         else
         {
@@ -212,7 +217,11 @@ final class ProductSignNewRepository implements ProductSignNewInterface
         {
             $orm
                 ->andWhere('invariable.variation = :variation')
-                ->setParameter('variation', $this->variation, ProductVariationConst::TYPE);
+                ->setParameter(
+                    key: 'variation',
+                    value: $this->variation,
+                    type: ProductVariationConst::TYPE
+                );
         }
         else
         {
@@ -223,7 +232,11 @@ final class ProductSignNewRepository implements ProductSignNewInterface
         {
             $orm
                 ->andWhere('invariable.modification = :modification')
-                ->setParameter('modification', $this->modification, ProductModificationConst::TYPE);
+                ->setParameter(
+                    key: 'modification',
+                    value: $this->modification,
+                    type: ProductModificationConst::TYPE
+                );
         }
         else
         {
@@ -250,14 +263,14 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 event.status = :status
             ')
             ->setParameter(
-                'profile',
-                $this->profile,
-                UserProfileUid::TYPE
+                key: 'profile',
+                value: $this->profile,
+                type: UserProfileUid::TYPE
             )
             ->setParameter(
-                'status',
-                ProductSignStatusNew::class,
-                ProductSignStatus::TYPE
+                key: 'status',
+                value: ProductSignStatusNew::class,
+                type: ProductSignStatus::TYPE
             );
 
         $orm
