@@ -14,8 +14,8 @@
 			<div class="small">
 				
 				{% if isProducts %}
-					
-					<a href='{{ path('orders-order:user.truncate') }}'
+
+                    <a href='{{ path('orders-order:public.truncate') }}'
 							class="btn btn-sm btn-outline-light text-dark text-decoration-underline small shadow-sm text-muted rounded-3 pt-0">
 						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
 								class="bi bi-x me-1" viewBox="0 0 16 16">
@@ -146,16 +146,16 @@
 			
 			
 			{% if app.user is null %}
-				
-				<a href="{{ path('auth-email:user.login') }}"
+
+                <a href="{{ path('auth-email:public.login') }}"
 						class="btn btn-link lh-1 text-decoration-none modal-link disabled text-start"
 						data-bs-toggle="modal"
 						data-bs-target="#modal"
-						
-						title="{{ 'user.link.breadcrumb.page'|trans({}, 'user.login') }}"
-						aria-label="{{ 'user.link.breadcrumb.page'|trans({}, 'user.login') }}"
+
+                   title="{{ 'user.link.breadcrumb.page'|trans({}, 'public.login') }}"
+                   aria-label="{{ 'user.link.breadcrumb.page'|trans({}, 'public.login') }}"
 				>
-					{{ 'user.page'|trans({}, 'user.login') }}
+                    {{ 'user.page'|trans({}, 'public.login') }}
 				</a>
 			
 			{% endif %}

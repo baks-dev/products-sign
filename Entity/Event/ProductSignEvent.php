@@ -88,11 +88,15 @@ class ProductSignEvent extends EntityEvent
     #[ORM\Column(type: ProductSignStatus::TYPE)]
     private ProductSignStatus $status;
 
+
     /**
      * Профиль пользователя (null - общий)
+     * @deprecated переносится в ProductSignInvariable
+     * @see ProductSignInvariable
      */
     #[ORM\Column(type: UserProfileUid::TYPE, nullable: true)]
     private ?UserProfileUid $profile = null;
+
 
     /**
      * ID заказа

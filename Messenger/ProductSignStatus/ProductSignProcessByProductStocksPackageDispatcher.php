@@ -55,7 +55,6 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
         private ProductStocksEventInterface $ProductStocksEventRepository,
-        private CurrentProductStocksInterface $CurrentProductStocks,
         private UserByUserProfileInterface $userByUserProfile,
         private DeduplicatorInterface $deduplicator,
         private MessageDispatchInterface $MessageDispatch
@@ -142,23 +141,17 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
             return;
         }
 
-
-        /**
-         * Определяем пользователя профилю в заявке
-         */
-
-        if(false === ($ProductStockEvent->getStocksProfile() instanceof UserProfileUid))
+        if(false === $ProductStockEvent->isInvariable())
         {
-            $ProductStockEvent = $this->CurrentProductStocks
-                ->getCurrentEvent($message->getId());
+            $this->logger->warning(
+                'Заявка на упаковку не может определить ProductStocksInvariable',
+                [self::class.':'.__LINE__, var_export($message, true)]
+            );
 
-            if(false === ($ProductStockEvent instanceof ProductStockEvent))
-            {
-                return;
-            }
+            return;
         }
 
-        $UserProfileUid = $ProductStockEvent->getStocksProfile();
+        $UserProfileUid = $ProductStockEvent->getInvariable()?->getProfile();
 
         $User = $this
             ->userByUserProfile

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,7 @@ use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -60,6 +61,20 @@ class ProductSignInvariable extends EntityReadonly
     #[Assert\Uuid]
     #[ORM\Column(type: UserUid::TYPE)]
     private readonly UserUid $usr;
+
+    /**
+     * Владелец честного пользователя
+     */
+    #[ORM\Column(type: UserProfileUid::TYPE, nullable: true)]
+    private ?UserProfileUid $profile = null;
+
+    /**
+     * Продавец честного пользователя
+     */
+    #[ORM\Column(type: UserProfileUid::TYPE, nullable: true)]
+    private ?UserProfileUid $seller = null;
+
+
 
     /** Группа штрихкодов (для групповой отмены либо списания) */
     #[Assert\NotBlank]
