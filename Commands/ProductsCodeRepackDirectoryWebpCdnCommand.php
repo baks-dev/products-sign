@@ -101,6 +101,7 @@ class ProductsCodeRepackDirectoryWebpCdnCommand extends Command
         $current = current($ref->getAttributes(Table::class));
         $TABLE = $current->getArguments()['name'] ?? 'images';
 
+        $upload = null;
         $upload[] = $this->upload;
         $upload[] = 'public';
         $upload[] = 'upload';
