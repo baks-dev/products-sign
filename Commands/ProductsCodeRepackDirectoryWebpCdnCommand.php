@@ -29,12 +29,10 @@ namespace BaksDev\Products\Sign\Commands;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImage;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
-use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
+use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Repository\ProductSignCodeByDigest\ProductSignCodeByDigestInterface;
-use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
 use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 use ReflectionAttribute;
 use ReflectionClass;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -65,7 +63,6 @@ class ProductsCodeRepackDirectoryWebpCdnCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
-
 
         $helper = $this->getHelper('question');
 
@@ -98,7 +95,8 @@ class ProductsCodeRepackDirectoryWebpCdnCommand extends Command
         $progressBar->start();
 
         /** Выделяем из сущности название таблицы для директории файлов */
-        $ref = new ReflectionClass(MaterialSignCode::class);
+        $ref = new ReflectionClass(ProductSignCode::class);
+
         /** @var ReflectionAttribute $current */
         $current = current($ref->getAttributes(Table::class));
         $TABLE = $current->getArguments()['name'] ?? 'images';
@@ -111,11 +109,9 @@ class ProductsCodeRepackDirectoryWebpCdnCommand extends Command
         $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
 
         $directory = new RecursiveDirectoryIterator($uploadDir);
-        $iterator = new RecursiveIteratorIterator($directory);
 
-
-        /** @var DirectoryIterator $info */
-        foreach($iterator as $info)
+        /** @var RecursiveDirectoryIterator $info */
+        foreach($directory as $info)
         {
             if(false === $info->isDir())
             {
@@ -132,10 +128,9 @@ class ProductsCodeRepackDirectoryWebpCdnCommand extends Command
                 continue;
             }
 
-
             $CDNUploadImageMessage = new CDNUploadImageMessage(
                 $ProductSignCodeByDigest->getIdentifier(),
-                MaterialSignCode::class,
+                ProductSignCode::class,
                 $info->getFilename(),
             );
 
