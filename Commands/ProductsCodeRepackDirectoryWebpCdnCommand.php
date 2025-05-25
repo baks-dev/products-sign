@@ -30,7 +30,7 @@ use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImage;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
-use BaksDev\Produc\Sign\Repository\ProductSignCodeByDigest\ProductSignCodeByDigestInterface;
+use BaksDev\Products\Sign\Repository\ProductSignCodeByDigest\ProductSignCodeByDigestInterface;
 use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
 use RecursiveDirectoryIterator;
