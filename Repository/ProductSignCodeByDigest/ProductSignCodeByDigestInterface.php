@@ -21,7 +21,7 @@
  *  THE SOFTWARE.
  */
 
-namespace BaksDev\Produc\Sign\Repository\ProductSignCodeByDigest;
+namespace BaksDev\Products\Sign\Repository\ProductSignCodeByDigest;
 
 use Generator;
 

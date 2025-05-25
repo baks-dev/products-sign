@@ -23,9 +23,9 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Produc\Sign\Repository\ProductSignCodeByDigest;
+namespace BaksDev\Products\Sign\Repository\ProductSignCodeByDigest;
 
-use BaksDev\Materials\Sign\Type\Id\MaterialSignUid;
+use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 
 final readonly class ProductSignCodeByDigestResult
 {
@@ -33,8 +33,8 @@ final readonly class ProductSignCodeByDigestResult
         private string $main
     ) {}
 
-    public function getIdentifier(): MaterialSignUid
+    public function getIdentifier(): ProductSignUid
     {
-        return new MaterialSignUid($this->main);
+        return new ProductSignUid($this->main);
     }
 }

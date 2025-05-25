@@ -23,10 +23,9 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Produc\Sign\Repository\ProductSignCodeByDigest;
+namespace BaksDev\Products\Sign\Repository\ProductSignCodeByDigest;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
-use BaksDev\Materials\Sign\Entity\Code\MaterialSignCode;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 
 
