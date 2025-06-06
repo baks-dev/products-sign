@@ -32,9 +32,12 @@ use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Repository\ProductSignCodeByDigest\ProductSignCodeByDigestInterface;
 use Doctrine\ORM\Mapping\Table;
+use FilesystemIterator;
 use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 use ReflectionAttribute;
 use ReflectionClass;
+use SplFileInfo;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -109,23 +112,32 @@ class ProductsCodeRepackDirectoryWebpCdnCommand extends Command
 
         $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
 
-        $directory = new RecursiveDirectoryIterator($uploadDir);
+        $iterator = new RecursiveDirectoryIterator($uploadDir, FilesystemIterator::SKIP_DOTS);
 
-        /** @var RecursiveDirectoryIterator $info */
-        foreach($directory as $info)
+        /** @var SplFileInfo $info */
+        foreach(new RecursiveIteratorIterator($iterator) as $info)
         {
-            if(false === $info->isDir())
+            /** Удаляем, если в директории имеется файл output.pdf (файл документа) */
+
+            if($info->isFile() && $info->getFilename() === 'output.pdf')
             {
+                unlink($info->getRealPath()); // удаляем файл
+                rmdir($info->getPath()); // удаляем пустую директорию
+
                 continue;
             }
 
             /** Определяем файл в базе данных */
-
-            $ProductSignCodeByDigest = $this->ProductSignCodeByDigest->find($info->getFilename());
+            $name = basename(dirname($info->getRealPath()));
+            $ProductSignCodeByDigest = $this->ProductSignCodeByDigest->find($name);
 
             if(false === $ProductSignCodeByDigest)
             {
-                $io->warning(sprintf('Честный знак %s не найден в базе данных', $info->getFilename()));
+                $io->warning(sprintf('Честный знак %s не найден в базе данных', $name));
+
+                unlink($info->getRealPath()); // удаляем файл
+                rmdir($info->getPath());  // удаляем пустую директорию
+
                 continue;
             }
 
