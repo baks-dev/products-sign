@@ -49,7 +49,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 #[AsCommand(
     name: 'baks:products-sign:repack:code-directory-webp-cdn',
-    description: 'Сжатие стикеров сырья которые не пережаты в директории'
+    description: 'Запускает сканирование директорий на предмет не пережатых изображений честных знаков'
 )]
 class ProductsCodeRepackDirectoryWebpCdnCommand extends Command
 {
@@ -127,13 +127,13 @@ class ProductsCodeRepackDirectoryWebpCdnCommand extends Command
                 continue;
             }
 
-            /** Определяем файл в базе данных */
-            $name = basename(dirname($info->getRealPath()));
-            $ProductSignCodeByDigest = $this->ProductSignCodeByDigest->find($name);
+            /** Определяем файл в базе данных по названию директории */
+            $dirName = basename(dirname($info->getRealPath()));
+            $ProductSignCodeByDigest = $this->ProductSignCodeByDigest->find($dirName);
 
             if(false === $ProductSignCodeByDigest)
             {
-                $io->warning(sprintf('Честный знак %s не найден в базе данных', $name));
+                $io->warning(sprintf('Честный знак %s не найден в базе данных', $dirName));
 
                 unlink($info->getRealPath()); // удаляем файл
                 rmdir($info->getPath());  // удаляем пустую директорию
@@ -144,7 +144,7 @@ class ProductsCodeRepackDirectoryWebpCdnCommand extends Command
             $CDNUploadImageMessage = new CDNUploadImageMessage(
                 $ProductSignCodeByDigest->getIdentifier(),
                 ProductSignCode::class,
-                $info->getFilename(),
+                $dirName,
             );
 
             /**
