@@ -32,7 +32,7 @@ interface ProductSignProcessByOrderInterface
     public function forOrder(Order|OrderUid|string $order): self;
 
     /**
-     * Метод возвращает события Честный знак по заказу со статусом Process «В процессе»
+     * Метод возвращает события Честный знак по заказу со статусом Process «В резерве»
      */
     public function findAll(): Generator|false;
 }

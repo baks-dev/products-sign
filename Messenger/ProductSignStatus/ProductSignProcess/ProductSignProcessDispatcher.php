@@ -89,7 +89,7 @@ final readonly class ProductSignProcessDispatcher
         }
 
         $this->logger->info(
-            'Отметили Честный знак Process «В процессе»',
+            'Отметили Честный знак Process «В резерве»',
             [var_export($message, true), self::class.':'.__LINE__]
         );
     }

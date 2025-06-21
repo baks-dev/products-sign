@@ -47,7 +47,7 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
- * При статусе складской заявки Package «Упаковка» - резервируем честный знак в статус Process «В процессе»
+ * При статусе складской заявки Package «Упаковка» - резервируем честный знак в статус Process «В резерве»
  */
 #[AsMessageHandler(priority: -5)]
 final readonly class ProductSignProcessByProductStocksPackageDispatcher
@@ -173,7 +173,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         }
 
         /**
-         * Резервируем честный знак Process «В процессе»
+         * Резервируем честный знак Process «В резерве»
          *
          * @var ProductStockProduct $product
          */

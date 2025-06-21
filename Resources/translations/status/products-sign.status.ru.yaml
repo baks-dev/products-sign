@@ -3,7 +3,7 @@ decommission: 'Списание'
 done: 'Выполнен'
 error: 'Ошибка'
 cancel: 'Отменен'
-process: 'В процессе'
+process: 'В резерве'
 delete: 'Удален'
 
 

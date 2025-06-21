@@ -29,7 +29,7 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignSt
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 /**
- * Статус Process «В процессе»
+ * Статус Process «В резерве»
  */
 #[AutoconfigureTag('baks.product.sign.status')]
 class ProductSignStatusProcess implements ProductSignStatusInterface

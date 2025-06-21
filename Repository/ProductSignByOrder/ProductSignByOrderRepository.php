@@ -72,7 +72,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder)
     {
-        /** По умолчанию возвращаем знаки со статусом Process «В процессе» */
+        /** По умолчанию возвращаем знаки со статусом Process «В резерве» */
         $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
     }
 
@@ -209,7 +209,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
 
     /**
      * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
-     * По умолчанию возвращает знаки со статусом Process «В процессе»
+     * По умолчанию возвращает знаки со статусом Process «В резерве»
      */
     public function findAll(): array|false
     {

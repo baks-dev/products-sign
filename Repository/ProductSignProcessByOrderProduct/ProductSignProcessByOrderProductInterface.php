@@ -45,7 +45,7 @@ interface ProductSignProcessByOrderProductInterface
     public function forModificationConst(ProductModificationConst|string|null|false $modification): self;
 
     /**
-     * Метод возвращает Честный знак на продукцию по заказу со статусом Process «В процессе»
+     * Метод возвращает Честный знак на продукцию по заказу со статусом Process «В резерве»
      */
     public function find(): ProductSignEvent|false;
 }

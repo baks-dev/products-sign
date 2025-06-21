@@ -73,7 +73,7 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
         $this->profile = $profile;
         $this->ord = $ord;
 
-        /** Статус Process «В процессе» */
+        /** Статус Process «В резерве» */
         $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
         $this->invariable = new Invariable\ProductSignInvariableDTO();
 
