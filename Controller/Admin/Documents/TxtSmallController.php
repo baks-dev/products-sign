@@ -42,7 +42,6 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-#[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
 final class TxtSmallController extends AbstractController
 {
     #[Route('/admin/product/sign/document/small/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'admin.small.txt.orders', methods: ['GET'])]
@@ -73,6 +72,7 @@ final class TxtSmallController extends AbstractController
             return $this->redirectToReferer();
         }
 
+
         $response = new StreamedResponse(function() use ($codes) {
 
             $handle = fopen('php://output', 'w+');
@@ -80,31 +80,46 @@ final class TxtSmallController extends AbstractController
             // Запись данных
             foreach($codes as $data)
             {
-                /** Обрезаем честный знак до длины */
+                $code = explode('(91)EE10(92)', $data['code_string']);
 
-                // Позиция для третьей группы
-                $thirdGroupPos = -1;
+                // Преобразуем строку в массив символов
+                $chars = str_split(current($code));
 
-                preg_match_all('/\((\d{2})\)/', $data['code_string'], $matches, PREG_OFFSET_CAPTURE);
+                // Удаляем символы по указанным позициям (индексы начинаются с 0)
 
-                if(count($matches[0]) >= 3)
+                // 1 символ (индекс 0)
+                if($chars[0] === '(')
                 {
-                    $thirdGroupPos = $matches[0][2][1];
+                    unset($chars[0]);
                 }
 
-                // Если находимся на третьей группе, обрезаем строку
-                if($thirdGroupPos !== -1)
+                // 4 символ (индекс 3)
+                if($chars[3] === ')')
                 {
-                    $markingcode = substr($data['code_string'], 0, $thirdGroupPos);
-                    // Убираем круглые скобки
-                    $data['code_string'] = preg_replace('/\((\d{2})\)/', '$1', $markingcode);
+                    unset($chars[3]);
                 }
 
-                fwrite($handle, $data['code_string'].PHP_EOL);
+                // 19 символ (индекс 18)
+                if($chars[18] === '(')
+                {
+                    unset($chars[18]);
+                }
+
+                // 22 символ (индекс 21)
+                if($chars[21] === ')')
+                {
+                    unset($chars[21]);
+                }
+
+                // Собираем строку обратно
+                $result = implode('', $chars);
+
+                fwrite($handle, $result.PHP_EOL);
             }
 
             fclose($handle);
         });
+
 
         $response->headers->set('Content-Type', 'text/plain');
         $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'['.count($codes).'].small.txt"');
@@ -140,29 +155,41 @@ final class TxtSmallController extends AbstractController
             // Запись данных
             foreach($codes as $data)
             {
-                /** Обрезаем честный знак до длины */
+                $code = explode('(91)EE10(92)', $data['code_string']);
 
-                // Позиция для третьей группы
-                $thirdGroupPos = -1;
+                // Преобразуем строку в массив символов
+                $chars = str_split(current($code));
 
-                preg_match_all('/\((\d{2})\)/', $data['code_string'], $matches, PREG_OFFSET_CAPTURE);
+                // Удаляем символы по указанным позициям (индексы начинаются с 0)
 
-                if(count($matches[0]) >= 3)
+                // 1 символ (индекс 0)
+                if($chars[0] === '(')
                 {
-                    $thirdGroupPos = $matches[0][2][1];
+                    unset($chars[0]);
                 }
 
-                // Если находимся на третьей группе, обрезаем строку
-                if($thirdGroupPos !== -1)
+                // 4 символ (индекс 3)
+                if($chars[3] === ')')
                 {
-                    $markingcode = substr($data['code_string'], 0, $thirdGroupPos);
-
-                    // Убираем круглые скобки
-                    $data['code_string'] = preg_replace('/\((\d{2})\)/', '$1', $markingcode);
+                    unset($chars[3]);
                 }
 
-                fwrite($handle, $data['code_string'].PHP_EOL);
+                // 19 символ (индекс 18)
+                if($chars[18] === '(')
+                {
+                    unset($chars[18]);
+                }
 
+                // 22 символ (индекс 21)
+                if($chars[21] === ')')
+                {
+                    unset($chars[21]);
+                }
+
+                // Собираем строку обратно
+                $result = implode('', $chars);
+
+                fwrite($handle, $result.PHP_EOL);
             }
 
             fclose($handle);
