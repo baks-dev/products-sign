@@ -95,23 +95,33 @@
 
     </td>
 
-    <td class="text-center text-nowrap w-75">
-        {# {% if item.sign_status != 'new' %} #}
-
-        {# {% endif %} #}
-
+    <td class="text-center text-nowrap">
         {% if item.users_profile_username %}
             {{ item.users_profile_username }}
         {% else %}
-            <span class="badge badge-light text-dark">Общий</span>
+            <span class="badge text-bg-danger">Общий</span>
+        {% endif %}
+    </td>
+
+    <td class="text-center text-nowrap w-25">
+        {% if item.users_profile_username == item.seller_username %}
+            {{ item.seller_username }}
+        {% else %}
+
+            {% if item.sign_status == 'process' %}
+                <span class="badge text-bg-warning">{{ item.seller_username }}</span>
+            {% endif %}
+
+            {% if item.sign_status == 'done' or item.sign_status == 'decommission' %}
+                <span class="badge text-bg-warning">{{ item.seller_username }}</span>
+            {% endif %}
+
         {% endif %}
 
     </td>
 
-
     <td class="text-nowrap text-nowrap">
         <div class="d-flex gap-1">
-
 
             {% if (item.sign_status != 'new' and item.sign_status != 'error') and (is_granted('ROLE_PRODUCT_SIGN') or is_granted('ROLE_ADMIN')) %}
 

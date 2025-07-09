@@ -254,8 +254,6 @@ final readonly class ProductSignPdfHandler
                  * в случае ошибки сканирования - присваивается статус с ошибкой
                  */
                 $ProductSignDTO = new ProductSignDTO();
-                $ProductSignDTO->setProfile($message->getProfile());
-
 
                 /** Сканируем честный знак */
                 $decode = $this->barcodeRead->decode($fileMove);
@@ -279,6 +277,10 @@ final readonly class ProductSignPdfHandler
                 $ProductSignInvariableDTO = $ProductSignDTO->getInvariable();
                 $ProductSignInvariableDTO->setPart($part);
                 $ProductSignInvariableDTO->setUsr($message->getUsr());
+
+                $ProductSignInvariableDTO->setProfile($message->getProfile());
+                $ProductSignInvariableDTO->setSeller($message->isNotShare() ? $message->getProfile() : null);
+
                 $ProductSignInvariableDTO->setProduct($message->getProduct());
                 $ProductSignInvariableDTO->setOffer($message->getOffer());
                 $ProductSignInvariableDTO->setVariation($message->getVariation());

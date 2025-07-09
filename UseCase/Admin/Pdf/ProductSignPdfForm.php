@@ -69,8 +69,9 @@ final class ProductSignPdfForm extends AbstractType
 
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
-
         $builder->add('number', TextType::class);
+
+        $builder->add('share', CheckboxType::class, ['required' => false]);
 
         $builder->add('category', ChoiceType::class, [
             'choices' => $this->categoryChoice->findAll(),

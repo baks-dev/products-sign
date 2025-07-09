@@ -60,6 +60,8 @@ final class ProductSignDTO implements ProductSignEventInterface
 
     /**
      * Профиль пользователя
+     *
+     * @deprecated переносится в ProductSignInvariable
      */
     #[Assert\Uuid]
     private ?UserProfileUid $profile = null;
@@ -148,6 +150,8 @@ final class ProductSignDTO implements ProductSignEventInterface
 
     /**
      * Profile
+     *
+     * @deprecated переносится в ProductSignInvariable
      */
     public function setProfile(?UserProfileUid $profile): self
     {
@@ -155,6 +159,7 @@ final class ProductSignDTO implements ProductSignEventInterface
         return $this;
     }
 
+    /**  @deprecated переносится в ProductSignInvariable */
     public function getProfile(): ?UserProfileUid
     {
         return $this->profile;

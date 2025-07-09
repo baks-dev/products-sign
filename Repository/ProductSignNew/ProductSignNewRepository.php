@@ -45,11 +45,13 @@ use InvalidArgumentException;
 
 final class ProductSignNewRepository implements ProductSignNewInterface
 {
-    private UserUid $user;
+    private ?UserUid $user = null;
 
-    private UserProfileUid $profile;
+    private ?UserProfileUid $profile = null;
 
-    private ProductUid $product;
+    private ?ProductUid $product = null;
+
+    /** Продукция */
 
     private ProductOfferConst|false $offer = false;
 
@@ -61,6 +63,12 @@ final class ProductSignNewRepository implements ProductSignNewInterface
 
     public function forUser(User|UserUid|string $user): self
     {
+        if(empty($user))
+        {
+            $this->user = null;
+            return $this;
+        }
+
         if($user instanceof User)
         {
             $user = $user->getId();
@@ -78,6 +86,12 @@ final class ProductSignNewRepository implements ProductSignNewInterface
 
     public function forProfile(UserProfile|UserProfileUid|string $profile): self
     {
+        if(empty($profile))
+        {
+            $this->profile = null;
+            return $this;
+        }
+
         if($profile instanceof UserProfile)
         {
             $profile = $profile->getId();
@@ -95,6 +109,12 @@ final class ProductSignNewRepository implements ProductSignNewInterface
 
     public function forProduct(Product|ProductUid|string $product): self
     {
+        if(empty($product))
+        {
+            $this->product = null;
+            return $this;
+        }
+
         if($product instanceof Product)
         {
             $product = $product->getId();
@@ -196,6 +216,14 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 type: ProductUid::TYPE
             );
 
+        $orm
+            ->andWhere('(invariable.seller IS NULL OR invariable.seller = :seller)')
+            ->setParameter(
+                key: 'seller',
+                value: $this->profile,
+                type: UserProfileUid::TYPE,
+            );
+
 
         if($this->offer)
         {
@@ -259,19 +287,20 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 'WITH',
                 '
                 event.id = main.event AND 
-                (event.profile IS NULL OR event.profile = :profile) AND
                 event.status = :status
             ')
-            ->setParameter(
-                key: 'profile',
-                value: $this->profile,
-                type: UserProfileUid::TYPE
-            )
             ->setParameter(
                 key: 'status',
                 value: ProductSignStatusNew::class,
                 type: ProductSignStatus::TYPE
             );
+
+        //        // (event.profile IS NULL OR event.profile = :profile) AND
+        //        ->setParameter(
+        //        key: 'profile',
+        //        value: $this->profile,
+        //        type: UserProfileUid::TYPE
+        //    )
 
         $orm
             ->leftJoin(
@@ -281,9 +310,21 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 'modify.event = main.event'
             );
 
+        /**
+         *  Сортировка по профилю:
+         *  если у владельца имеется Честный знак - возвращает
+         *  если нет у владельца - берет у партнера
+         */
+        $orm
+            ->addOrderBy("CASE invariable.profile WHEN :profile THEN false ELSE true END")
+            ->setParameter(
+                key: 'profile',
+                value: $this->profile,
+                type: UserProfileUid::TYPE,
+            );
 
         /** Сортируем по дате, выбирая самый старый знак */
-        $orm->orderBy('event.profile');
+        //$orm->orderBy('event.profile');
         $orm->addOrderBy('modify.modDate');
 
         $orm->setMaxResults(1);

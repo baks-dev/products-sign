@@ -18,32 +18,42 @@
 
         <div class="modal-body" id="modal-body">
 
-            <div class="d-flex gap-3 align-items-center my-3">
-                <strong class="text-nowrap">Склад, за которым фиксируются честные знаки в PDF</strong>
-                <div class="w-100">
-                    <hr class="m-0">
-                </div>
+            <div class="w-100">
+                {{ form_row(form.profile, {
+                    label: 'Владелец',
+                    placeholder: 'Выберите владельца "Честного знака" из списка', attr: { 'data-select' : 'select2' }
+                }) }}
             </div>
 
-            <div class="w-100">
-
-
-                {% if form.profile is defined %}
-
-                    <div class=" alert alert-warning w-100 py-2 small" role="alert">
-                        Если в списке выбран Склад (профиль пользователя), все перечисленные в файле PDF штрихкоды будут
-                        доступны полько для фиксации заказов, пуступающие на указанный склад. Если оставить поле пустым,
-                        в таком случае штрихкод будет доступен для любого склада из указанного списка, и фиксироваться
-                        за ним при поступлении на упаковку.
+            <div class="clearfix mb-0 d-flex gap-3 align-items-center">
+                <div class="w-75">
+                    {{ form_row(form.number, {
+                        label: false, attr: { placeholder : 'Номер грузовой таможенной декларации (ГТД)' }
+                    }) }}
+                </div>
+                <div class="w-50">
+                    <div class="d-flex radio-buttons mb-3" data-buttons="true">
+                        <label class="btn p-0 border-dotted rounded-3 active">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-grow-1">
+                                <span class="h6">
+                                    <div class="form-check px-3 d-flex align-items-start">
+                                        {{ form_widget(form.share, { label: false }) }}
+                                        <span style="margin-top: 2px;">
+                                            {# {{ 'admin.form.label.active'|trans }} #}
+                                            Доступен только владелцу
+                                        </span>
+                                    </div>
+                                </span>
+                                </div>
+                            </div>
+                        </label>
                     </div>
 
-                    {{ form_widget(form.profile, {
-                        label: 'Склад', placeholder: 'Выберите склад из списка либо оставьте поле пустым если "Честный знак" общий', attr: { 'data-select' : 'select2' }
-                    }) }}
-
-
-
-                {% endif %}
+                    {# {{ form_row(form.share, {
+                        label: 'Доступен только владелцу',
+                    }) }} #}
+                </div>
             </div>
 
 
@@ -53,11 +63,6 @@
                     <hr class="m-0">
                 </div>
             </div>
-
-
-            {{ form_row(form.number, {
-                label: false, attr: { placeholder : 'Номер грузовой таможенной декларации (ГТД)' }
-            }) }}
 
 
             <div class="card-body pb-0" id='{{ form.files.vars.id }}-collection'>

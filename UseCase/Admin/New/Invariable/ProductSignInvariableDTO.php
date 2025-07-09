@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@ use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariableInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -41,6 +42,19 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
     #[Assert\NotBlank]
     #[Assert\Uuid]
     private UserUid $usr;
+
+    /**
+     * Владелец честного пользователя
+     */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private ?UserProfileUid $profile = null;
+
+    /**
+     * Продавец честного пользователя
+     */
+    private ?UserProfileUid $seller = null;
+
 
     /** Группа штрихкодов, для отмены  */
     #[Assert\NotBlank]
@@ -164,5 +178,25 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
         return $this;
     }
 
+    public function getProfile(): ?UserProfileUid
+    {
+        return $this->profile;
+    }
 
+    public function setProfile(?UserProfileUid $profile): self
+    {
+        $this->profile = $profile;
+        return $this;
+    }
+
+    public function getSeller(): ?UserProfileUid
+    {
+        return $this->seller;
+    }
+
+    public function setSeller(?UserProfileUid $seller): self
+    {
+        $this->seller = $seller;
+        return $this;
+    }
 }

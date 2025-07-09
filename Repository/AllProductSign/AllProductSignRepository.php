@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -115,7 +115,6 @@ final class AllProductSignRepository implements AllProductSignInterface
             ->andWhere('invariable.usr = :usr')
             ->setParameter('usr', $user, UserUid::TYPE);
 
-
         $dbal
             ->addSelect('main.id AS sign_id')
             ->addSelect('main.event AS sign_event')
@@ -154,14 +153,23 @@ final class AllProductSignRepository implements AllProductSignInterface
         {
             $dbal
                 ->andWhere('event.status = :status')
-                ->setParameter('status', $this->status->getStatus(), ProductSignStatus::TYPE);
+                ->setParameter(
+                    key: 'status',
+                    value: $this->status->getStatus(),
+                    type: ProductSignStatus::TYPE,
+                );
         }
 
 
         if($this->filter->getAll() === false)
         {
-            $dbal->andWhere('(event.profile IS NULL OR event.profile = :profile)')
-                ->setParameter('profile', $profile, UserProfileUid::TYPE);
+            $dbal
+                ->andWhere('(event.profile IS NULL OR event.profile = :profile)')
+                ->setParameter(
+                    key: 'profile',
+                    value: $profile,
+                    type: UserProfileUid::TYPE,
+                );
         }
 
 
@@ -475,7 +483,7 @@ final class AllProductSignRepository implements AllProductSignInterface
             );*/
 
 
-        /** Ответственное лицо */
+        /** Владелец честных знаков */
 
         $dbal
             ->leftJoin(

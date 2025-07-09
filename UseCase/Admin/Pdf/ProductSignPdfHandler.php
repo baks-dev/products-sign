@@ -148,6 +148,7 @@ final readonly class ProductSignPdfHandler
                 $command->getVariation(),
                 $command->getModification(),
                 $command->isPurchase(),
+                $command->isNotShare(),
                 $command->getNumber()
             ),
             transport: 'products-sign'

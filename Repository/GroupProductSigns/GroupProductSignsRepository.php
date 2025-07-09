@@ -121,6 +121,14 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             ->andWhere('invariable.usr = :usr')
             ->setParameter('usr', $user, UserUid::TYPE);
 
+
+        if($this->filter->getAll() === false)
+        {
+            //            $dbal
+            //                ->andWhere('(invariable.profile = :profile OR invariable.seller = :profile)')
+            //                ->setParameter('profile', $profile, UserProfileUid::TYPE);
+        }
+
         $dbal
             ->leftJoin(
                 'invariable',
@@ -475,27 +483,51 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             );
 
 
-
-        /** Ответственное лицо */
+        /**
+         * Владелец
+         */
 
         $dbal
             ->leftJoin(
-                'event',
+                'invariable',
                 UserProfile::class,
                 'users_profile',
-                'users_profile.id = event.profile'
+                'users_profile.id = invariable.profile',
             );
 
 
         $dbal
             ->addSelect('users_profile_personal.username AS users_profile_username')
-            ->addSelect('users_profile_personal.location AS users_profile_location')
             ->leftJoin(
                 'users_profile',
                 UserProfilePersonal::class,
                 'users_profile_personal',
                 'users_profile_personal.event = users_profile.event'
             );
+
+
+        /**
+         * Продавец
+         */
+
+        $dbal
+            ->leftJoin(
+                'invariable',
+                UserProfile::class,
+                'users_profile_seller',
+                'users_profile_seller.id = invariable.seller',
+            );
+
+
+        $dbal
+            ->addSelect('users_profile_personal_seller.username AS seller_username')
+            ->leftJoin(
+                'users_profile_seller',
+                UserProfilePersonal::class,
+                'users_profile_personal_seller',
+                'users_profile_personal_seller.event = users_profile_seller.event',
+            );
+
 
 
         /**
@@ -524,7 +556,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
         }
 
         $dbal->orderBy('DATE(modify.mod_date)', 'DESC');
-        //$dbal->addOrderBy('invariable.part', 'DESC');
+        $dbal->addOrderBy('invariable.part', 'DESC');
 
         //$dbal->orderBy('invariable.part', 'DESC');
 

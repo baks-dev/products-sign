@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -42,10 +42,15 @@ final class ProductSignPdfDTO
     private UserUid $usr;
 
     /**
-     * Профиль пользователя (null - общий)
+     * Профиль пользователя (Владельца)
      */
     #[Assert\Uuid]
     private ?UserProfileUid $profile = null;
+
+    /**
+     * Признак, что честными знаками может делиться с другими
+     */
+    private bool $share = false;
 
     #[Assert\Valid]
     private ArrayCollection $files;
@@ -233,6 +238,25 @@ final class ProductSignPdfDTO
     {
         $this->profile = $profile;
         return $this;
+    }
+
+    /**
+     * Share
+     */
+    public function getShare(): bool
+    {
+        return $this->share;
+    }
+
+    public function setShare(bool $share): self
+    {
+        $this->share = $share;
+        return $this;
+    }
+
+    public function isNotShare(): bool
+    {
+        return $this->share === true;
     }
 
 }
