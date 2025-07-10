@@ -74,13 +74,10 @@ class ProductSignInvariable extends EntityReadonly
     #[ORM\Column(type: UserProfileUid::TYPE, nullable: true)]
     private ?UserProfileUid $seller = null;
 
-
-
     /** Группа штрихкодов (для групповой отмены либо списания) */
     #[Assert\NotBlank]
-    #[Assert\Uuid]
-    #[ORM\Column(type: ProductSignUid::TYPE)]
-    private ProductSignUid $part;
+    #[ORM\Column(type: Types::STRING)]
+    private string $part;
 
     /** Грузовая таможенная декларация (номер) */
     #[ORM\Column(type: Types::STRING, nullable: true)]

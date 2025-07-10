@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,6 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\UseCase\Admin\Edit;
 
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariableInterface;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductSignInvariable */
@@ -34,8 +33,7 @@ final class EditProductSignDTO implements ProductSignInvariableInterface
 {
     /** Группа штрихкодов, для отмены  */
     #[Assert\NotBlank]
-    #[Assert\Uuid]
-    private ProductSignUid $part;
+    private string $part;
 
     /** Грузовая таможенная декларация (номер) */
     #[Assert\NotBlank]
@@ -45,14 +43,14 @@ final class EditProductSignDTO implements ProductSignInvariableInterface
     /**
      * Group
      */
-    public function getPart(): ProductSignUid
+    public function getPart(): string
     {
         return $this->part;
     }
 
-    public function setPart(ProductSignUid $part): self
+    public function setPart(mixed $part): self
     {
-        $this->part = $part;
+        $this->part = (string) $part;
         return $this;
     }
 

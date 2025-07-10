@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,6 @@ use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Core\Validator\ValidatorCollectionInterface;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 
 final readonly class EditProductSignHandler
 {
@@ -58,7 +57,7 @@ final readonly class EditProductSignHandler
         $dbal
             ->update(ProductSignInvariable::class)
             ->where('part = :part')
-            ->setParameter('part', $command->getPart(), ProductSignUid::TYPE)
+            ->setParameter('part', $command->getPart())
             ->set('number', ':number')
             ->setParameter('number', $command->getNumber());
 

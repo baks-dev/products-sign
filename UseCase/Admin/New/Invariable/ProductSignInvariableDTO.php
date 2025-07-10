@@ -30,7 +30,6 @@ use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariableInterface;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -58,8 +57,7 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
 
     /** Группа штрихкодов, для отмены  */
     #[Assert\NotBlank]
-    #[Assert\Uuid]
-    private ProductSignUid $part;
+    private string $part;
 
     /** Грузовая таможенная декларация (номер) */
     private ?string $number = null;
@@ -97,14 +95,14 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
     /**
      * Group
      */
-    public function getPart(): ProductSignUid
+    public function getPart(): string
     {
         return $this->part;
     }
 
-    public function setPart(ProductSignUid $part): self
+    public function setPart(mixed $part): self
     {
-        $this->part = $part;
+        $this->part = (string) $part;
         return $this;
     }
 
