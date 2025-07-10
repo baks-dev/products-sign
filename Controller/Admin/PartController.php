@@ -32,7 +32,6 @@ use BaksDev\Core\Form\Search\SearchForm;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Products\Sign\Repository\AllProductSignPart\AllProductSignPartInterface;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -44,9 +43,9 @@ final class PartController extends AbstractController
 {
     #[Route('/admin/product/sign/part/{part}/{page<\d+>}', name: 'admin.part', methods: ['GET', 'POST'])]
     public function index(
-        #[ParamConverter(ProductSignUid::class)] $part,
         Request $request,
         AllProductSignPartInterface $allProductSign,
+        string $part,
         int $page = 0,
     ): Response
     {

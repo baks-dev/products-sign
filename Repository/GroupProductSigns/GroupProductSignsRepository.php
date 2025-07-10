@@ -563,15 +563,40 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
         /* Поиск */
         if($this->search?->getQuery())
         {
-            $dbal
-                ->createSearchQueryBuilder($this->search)
-                ->addSearchLike('code.code')
-                ->addSearchLike('invariable.number')
-                ->addSearchLike('orders.number')
-                ->addSearchLike('product_modification.article')
-                ->addSearchLike('product_variation.article')
-                ->addSearchLike('product_offer.article')
-                ->addSearchLike('product_info.article');
+
+            if(str_starts_with($this->search->getQuery(), '(00)'))
+            {
+                $dbal
+                    ->createSearchQueryBuilder($this->search)
+                    ->addSearchLike('invariable.part');
+            }
+
+            elseif(str_starts_with($this->search->getQuery(), '(01)') || str_starts_with($this->search->getQuery(), '01'))
+            {
+                $dbal
+                    ->createSearchQueryBuilder($this->search)
+                    ->addSearchLike('code.code');
+            }
+
+            elseif(preg_match('/^\d{3}\.\d{3}\.\d{3}\.\d{3}$/', $this->search->getQuery()))
+            {
+
+                $dbal
+                    ->createSearchQueryBuilder($this->search)
+                    ->addSearchLike('orders.number');
+            }
+
+            else
+            {
+                $dbal
+                    ->createSearchQueryBuilder($this->search)
+                    ->addSearchLike('code.code')
+                    ->addSearchLike('product_modification.article')
+                    ->addSearchLike('product_variation.article')
+                    ->addSearchLike('product_offer.article')
+                    ->addSearchLike('product_info.article');
+            }
+
 
             $dbal
                 ->addOrderBy('product_modification.id')

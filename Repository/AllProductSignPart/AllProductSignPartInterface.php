@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -25,13 +25,12 @@ namespace BaksDev\Products\Sign\Repository\AllProductSignPart;
 
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Services\Paginator\PaginatorInterface;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 
 interface AllProductSignPartInterface
 {
     /** Метод возвращает пагинатор ProductSign */
-    public function findPaginator(ProductSignUid $part): PaginatorInterface;
+    public function findPaginator(string $part): PaginatorInterface;
 
     public function search(SearchDTO $search): self;
 }

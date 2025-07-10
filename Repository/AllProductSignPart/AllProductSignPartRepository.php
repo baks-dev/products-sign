@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -52,7 +52,6 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Users\Profile\UserProfile\Entity\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\User\Repository\UserTokenStorage\UserTokenStorageInterface;
@@ -83,7 +82,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
     }
 
     /** Метод возвращает пагинатор ProductSign */
-    public function findPaginator(ProductSignUid $part): PaginatorInterface
+    public function findPaginator(string $part): PaginatorInterface
     {
         $dbal = $this->DBALQueryBuilder
             ->createQueryBuilder(self::class)
@@ -98,7 +97,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
 
         $dbal
             ->andWhere('invariable.part = :part')
-            ->setParameter('part', $part, ProductSignUid::TYPE);
+            ->setParameter('part', $part);
 
         $dbal
             ->andWhere('invariable.usr = :usr')

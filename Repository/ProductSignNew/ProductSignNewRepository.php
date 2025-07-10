@@ -59,6 +59,8 @@ final class ProductSignNewRepository implements ProductSignNewInterface
 
     private ProductModificationConst|false $modification = false;
 
+    private string|false $part = false;
+
     public function __construct(private readonly ORMQueryBuilder $ORMQueryBuilder) {}
 
     public function forUser(User|UserUid|string $user): self
@@ -184,6 +186,11 @@ final class ProductSignNewRepository implements ProductSignNewInterface
         return $this;
     }
 
+    public function forPart(string|null|false $part): ProductSignNewInterface
+    {
+        $this->part = empty($part) ? false : $part;
+    }
+
     /**
      * Метод возвращает один Честный знак на указанную продукцию со статусом New «Новый»
      */
@@ -207,6 +214,15 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 type: UserUid::TYPE
             );
 
+        if($this->part !== false)
+        {
+            $orm
+                ->andWhere('invariable.part = :part')
+                ->setParameter(
+                    key: 'part',
+                    value: $this->part,
+                );
+        }
 
         $orm
             ->andWhere('invariable.product = :product')
@@ -331,6 +347,4 @@ final class ProductSignNewRepository implements ProductSignNewInterface
 
         return $orm->getOneOrNullResult() ?: false;
     }
-
-
 }
