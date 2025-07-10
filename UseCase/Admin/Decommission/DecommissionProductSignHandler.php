@@ -44,7 +44,8 @@ final class DecommissionProductSignHandler
         $ProductSignUid = new ProductSignUid();
 
         /** Получаем свободный честный знак для списания */
-        for($i = 1; $i <= $command->getTotal(); $i++)
+
+        for($i = 1; $i <= $command->getTotal();)
         {
             $ProductSignEvent = $this->productSignNew
                 ->forUser($command->getUsr())
@@ -58,6 +59,14 @@ final class DecommissionProductSignHandler
 
             if($ProductSignEvent === false)
             {
+                /** Пробуем найти честные знаки без партии */
+
+                if($command->getPart())
+                {
+                    $command->setPart(null);
+                    continue;
+                }
+
                 return 'Недостаточное количество честных знаков';
             }
 
@@ -74,6 +83,8 @@ final class DecommissionProductSignHandler
             {
                 return sprintf('%s: Ошибка при списании честных знаков', $handle);
             }
+
+            $i++;
         }
 
         return $ProductSignUid;

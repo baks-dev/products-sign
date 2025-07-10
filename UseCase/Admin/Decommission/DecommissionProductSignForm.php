@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -74,20 +74,21 @@ final class DecommissionProductSignForm extends AbstractType
 
         $builder->add('category', ChoiceType::class, [
             'choices' => $this->categoryChoice->findAll(),
-            'choice_value' => function (?CategoryProductUid $category) {
+            'choice_value' => function(?CategoryProductUid $category) {
                 return $category?->getValue();
             },
-            'choice_label' => function (CategoryProductUid $category) {
+            'choice_label' => function(CategoryProductUid $category) {
                 return $category->getOptions();
             },
             'label' => false,
             'required' => false,
         ]);
 
+        $builder->add('part', HiddenType::class);
 
         $builder->add(
             'product',
-            HiddenType::class
+            HiddenType::class,
         );
 
         /*$builder
@@ -111,7 +112,7 @@ final class DecommissionProductSignForm extends AbstractType
         /** Все профили пользователя */
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
-            function (FormEvent $event): void {
+            function(FormEvent $event): void {
 
                 /** @var DecommissionProductSignDTO $data */
                 $data = $event->getData();
@@ -128,14 +129,14 @@ final class DecommissionProductSignForm extends AbstractType
                 $form
                     ->add('profile', ChoiceType::class, [
                         'choices' => $profiles,
-                        'choice_value' => function (?UserProfileUid $profile) {
+                        'choice_value' => function(?UserProfileUid $profile) {
                             return $profile?->getValue();
                         },
-                        'choice_label' => function (UserProfileUid $profile) {
+                        'choice_label' => function(UserProfileUid $profile) {
                             return $profile->getAttr();
                         },
 
-                        'label' => false
+                        'label' => false,
                     ]);
 
 
@@ -158,16 +159,16 @@ final class DecommissionProductSignForm extends AbstractType
                         }
                     }
                 }
-            }
+            },
         );
 
 
         $builder->get('category')->addEventListener(
             FormEvents::POST_SUBMIT,
-            function (FormEvent $event) {
+            function(FormEvent $event) {
                 $category = $event->getForm()->getData();
                 $this->formProductModifier($event->getForm()->getParent(), $category);
-            }
+            },
         );
 
 
@@ -185,104 +186,107 @@ final class DecommissionProductSignForm extends AbstractType
 
         $builder->get('product')->addModelTransformer(
             new CallbackTransformer(
-                function ($product) {
+                function($product) {
                     return $product instanceof ProductUid ? $product->getValue() : $product;
                 },
-                function ($product) {
+                function($product) {
                     return $product ? new ProductUid($product) : null;
-                }
-            )
+                },
+            ),
         );
 
         /**
          * Торговые предложения
+         *
          * @var ProductOfferConst $offer
          */
 
         $builder->add(
             'offer',
-            HiddenType::class
+            HiddenType::class,
         );
 
         $builder->get('offer')->addModelTransformer(
             new CallbackTransformer(
-                function ($offer) {
+                function($offer) {
                     return $offer instanceof ProductOfferConst ? $offer->getValue() : $offer;
                 },
-                function ($offer) {
+                function($offer) {
                     return $offer ? new ProductOfferConst($offer) : null;
-                }
-            )
+                },
+            ),
         );
 
 
         $builder->get('product')->addEventListener(
             FormEvents::POST_SUBMIT,
-            function (FormEvent $event) {
+            function(FormEvent $event) {
                 $product = $event->getForm()->getData();
                 $this->formOfferModifier($event->getForm()->getParent(), $product);
-            }
+            },
         );
 
 
         /**
          * Множественный вариант торгового предложения
+         *
          * @var ProductVariationConst $variation
          */
 
 
         $builder->add(
             'variation',
-            HiddenType::class
+            HiddenType::class,
         );
 
         $builder->get('variation')->addModelTransformer(
             new CallbackTransformer(
-                function ($variation) {
+                function($variation) {
                     return $variation instanceof ProductVariationConst ? $variation->getValue() : $variation;
                 },
-                function ($variation) {
+                function($variation) {
                     return $variation ? new ProductVariationConst($variation) : null;
-                }
-            )
+                },
+            ),
         );
 
         $builder->get('offer')->addEventListener(
             FormEvents::POST_SUBMIT,
-            function (FormEvent $event) {
+            function(FormEvent $event) {
                 $offer = $event->getForm()->getData();
                 $this->formVariationModifier($event->getForm()->getParent(), $offer);
-            }
+            },
         );
 
 
         /**
          * Модификатор множественного варианта торгового предложения
+         *
          * @var ProductModificationConst $modification
          */
 
         $builder->add(
             'modification',
-            HiddenType::class
+            HiddenType::class,
         );
 
         $builder->get('modification')->addModelTransformer(
             new CallbackTransformer(
-                function ($modification) {
+                function($modification) {
                     return $modification instanceof ProductModificationConst ? $modification->getValue() : $modification;
                 },
-                function ($modification) {
+                function($modification) {
                     return $modification ? new ProductModificationConst($modification) : null;
-                }
-            )
+                },
+            ),
         );
 
         $builder->get('variation')->addEventListener(
             FormEvents::POST_SUBMIT,
-            function (FormEvent $event) {
+            function(FormEvent $event) {
                 $variation = $event->getForm()->getData();
                 $this->formModificationModifier($event->getForm()->getParent(), $variation);
-            }
+            },
         );
 
 
@@ -293,7 +297,7 @@ final class DecommissionProductSignForm extends AbstractType
         $builder->add(
             'product_sign_off',
             SubmitType::class,
-            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']]
+            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']],
         );
 
 
@@ -324,18 +328,18 @@ final class DecommissionProductSignForm extends AbstractType
         $form
             ->add('product', ChoiceType::class, [
                 'choices' => $this->productChoice->fetchAllProduct($category),
-                'choice_value' => function (?ProductUid $product) {
+                'choice_value' => function(?ProductUid $product) {
                     return $product?->getValue();
                 },
-                'choice_label' => function (ProductUid $product) {
+                'choice_label' => function(ProductUid $product) {
                     return $product->getAttr();
                 },
 
-                'choice_attr' => function (?ProductUid $product) {
+                'choice_attr' => function(?ProductUid $product) {
                     return $product?->getOption() ? ['data-filter' => '('.$product?->getOption().')'] : [];
                 },
 
-                'label' => false
+                'label' => false,
             ]);
     }
 
@@ -380,14 +384,14 @@ final class DecommissionProductSignForm extends AbstractType
         $form
             ->add('offer', ChoiceType::class, [
                 'choices' => $offer,
-                'choice_value' => function (?ProductOfferConst $offer) {
+                'choice_value' => function(?ProductOfferConst $offer) {
                     return $offer?->getValue();
                 },
-                'choice_label' => function (ProductOfferConst $offer) {
+                'choice_label' => function(ProductOfferConst $offer) {
                     return $offer->getAttr();
                 },
 
-                'choice_attr' => function (?ProductOfferConst $offer) {
+                'choice_attr' => function(?ProductOfferConst $offer) {
                     return $offer?->getCharacteristic() ? ['data-filter' => ' ('.$offer?->getCharacteristic().')'] : [];
                 },
 
@@ -438,13 +442,13 @@ final class DecommissionProductSignForm extends AbstractType
         $form
             ->add('variation', ChoiceType::class, [
                 'choices' => $variations,
-                'choice_value' => function (?ProductVariationConst $variation) {
+                'choice_value' => function(?ProductVariationConst $variation) {
                     return $variation?->getValue();
                 },
-                'choice_label' => function (ProductVariationConst $variation) {
+                'choice_label' => function(ProductVariationConst $variation) {
                     return $variation->getAttr();
                 },
-                'choice_attr' => function (?ProductVariationConst $variation) {
+                'choice_attr' => function(?ProductVariationConst $variation) {
                     return $variation?->getCharacteristic() ? ['data-filter' => ' ('.$variation?->getCharacteristic().')'] : [];
                 },
                 'label' => $label,
@@ -492,13 +496,13 @@ final class DecommissionProductSignForm extends AbstractType
         $form
             ->add('modification', ChoiceType::class, [
                 'choices' => $modifications,
-                'choice_value' => function (?ProductModificationConst $modification) {
+                'choice_value' => function(?ProductModificationConst $modification) {
                     return $modification?->getValue();
                 },
-                'choice_label' => function (ProductModificationConst $modification) {
+                'choice_label' => function(ProductModificationConst $modification) {
                     return $modification->getAttr();
                 },
-                'choice_attr' => function (?ProductModificationConst $modification) {
+                'choice_attr' => function(?ProductModificationConst $modification) {
                     return $modification?->getCharacteristic() ? ['data-filter' => ' ('.$modification?->getCharacteristic().')'] : [];
                 },
                 'label' => $label,
