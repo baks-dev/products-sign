@@ -42,6 +42,7 @@ use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterf
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use Doctrine\ORM\Mapping\Table;
+use Generator;
 use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -74,10 +75,10 @@ final class PdfController extends AbstractController
         ProductSignByOrderInterface $productSignByOrder,
         ImagePathExtension $ImagePathExtension,
         BarcodeWrite $BarcodeWrite,
+        string $part,
         string $article,
         #[Target('ordersOrderLogger')] LoggerInterface $logger,
         #[Autowire('%kernel.project_dir%')] $projectDir,
-        #[ParamConverter(ProductSignUid::class)] $part,
         #[ParamConverter(OrderUid::class)] OrderUid $order,
         #[ParamConverter(ProductUid::class)] ?ProductUid $product = null,
         #[ParamConverter(ProductOfferConst::class)] ?ProductOfferConst $offer = null,
@@ -85,7 +86,6 @@ final class PdfController extends AbstractController
         #[ParamConverter(ProductModificationConst::class)] ?ProductModificationConst $modification = null,
     ): Response
     {
-
 
         $this->BarcodeWrite = $BarcodeWrite;
         $this->logger = $logger;
@@ -131,7 +131,7 @@ final class PdfController extends AbstractController
     #[Route('/admin/product/sign/document/pdf/parts/{article}/{part}', name: 'document.pdf.parts', methods: ['GET'])]
     public function parts(
         #[Autowire('%kernel.project_dir%')] $projectDir,
-        #[ParamConverter(ProductSignUid::class)] $part,
+        string $part,
         string $article,
         ProductSignByPartInterface $productSignByPart,
         ImagePathExtension $ImagePathExtension,
@@ -141,6 +141,8 @@ final class PdfController extends AbstractController
         $this->ImagePathExtension = $ImagePathExtension;
         $this->article = $article;
 
+
+        // ProductSignByPartResult
         $codes = $productSignByPart
             ->forPart($part)
             ->withStatusDone()
@@ -169,8 +171,11 @@ final class PdfController extends AbstractController
     /**
      * Для файлов с большим количество требуется больше времени на генерацию
      * ~ на 1к честных знаков требуется +-1 мин (в веб-сервере нужен соответствующий лимит)
+     *
+     *
+     *
      */
-    private function BinaryFileResponse(array $paths, array $codes): BinaryFileResponse
+    private function BinaryFileResponse(array $paths, array|Generator $codes): BinaryFileResponse
     {
         $filesystem = new Filesystem();
 
@@ -212,6 +217,9 @@ final class PdfController extends AbstractController
 
         foreach($codes as $key => $code)
         {
+
+
+
             $url = ($code['code_cdn'] === false ? $projectDir : '').$this->ImagePathExtension->imagePath($code['code_image'], $code['code_ext'], $code['code_cdn']);
             $headers = get_headers($url, true);
 

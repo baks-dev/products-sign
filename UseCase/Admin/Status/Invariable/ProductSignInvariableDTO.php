@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\UseCase\Admin\Status\Invariable;
 
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariableInterface;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use ReflectionProperty;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -35,6 +36,20 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
     /** Группа штрихкодов (для групповой отмены либо списания) */
     #[Assert\NotBlank]
     private readonly string $part;
+
+    /**
+     * Владелец честного пользователя
+     */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private readonly UserProfileUid $profile;
+
+    /**
+     * Продавец честного пользователя
+     */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private readonly UserProfileUid $seller;
 
     /**
      * Part
@@ -54,5 +69,38 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
         return $this;
     }
 
+    public function getProfile(): ?UserProfileUid
+    {
+        return $this->profile;
+    }
 
+    public function setProfile(?UserProfileUid $profile): self
+    {
+        if(false === (new ReflectionProperty(self::class, 'profile')->isInitialized($this)))
+        {
+            $this->profile = $profile;
+        }
+
+        return $this;
+    }
+
+    public function getSeller(): ?UserProfileUid
+    {
+        return $this->seller;
+    }
+
+    public function setSeller(?UserProfileUid $seller): self
+    {
+        if(false === ($seller instanceof UserProfileUid))
+        {
+            return $this;
+        }
+
+        if(false === (new ReflectionProperty(self::class, 'seller')->isInitialized($this)))
+        {
+            $this->seller = $seller;
+        }
+
+        return $this;
+    }
 }

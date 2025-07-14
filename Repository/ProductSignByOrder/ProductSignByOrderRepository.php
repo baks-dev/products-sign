@@ -38,13 +38,13 @@ use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use BaksDev\Users\Profile\UserProfile\Entity\Event\UserProfileEvent;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use Generator;
 use InvalidArgumentException;
 
 final class ProductSignByOrderRepository implements ProductSignByOrderInterface
@@ -67,7 +67,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
 
     private ProductSignStatus $status;
 
-    private ProductSignUid|false $part = false;
+    private string|false $part = false;
 
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder)
@@ -168,13 +168,8 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
 
     }
 
-    public function forPart(ProductSignUid|string $part): self
+    public function forPart(string $part): self
     {
-        if(is_string($part))
-        {
-            $part = new ProductSignUid($part);
-        }
-
         $this->part = $part;
 
         return $this;
@@ -210,8 +205,10 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
     /**
      * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
      * По умолчанию возвращает знаки со статусом Process «В резерве»
+     *
+     * @return Generator<int, ProductSignByOrderResult>|false
      */
-    public function findAll(): array|false
+    public function findAll(): Generator|false
     {
         if($this->order === false)
         {
@@ -266,7 +263,8 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
         }
 
         $dbal
-            ->addSelect('main.id')
+            ->addSelect('main.id AS sign_id')
+            ->addSelect('main.event AS sign_event')
             ->join(
             'event',
             ProductSign::class,
@@ -310,7 +308,6 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                 $dbal->setParameter(
                     key: 'part',
                     value: $this->part,
-                    type: ProductSignUid::TYPE
                 );
             }
 
@@ -337,10 +334,9 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                 'code.main = main.id'
             );
 
+        $result = $dbal->fetchAllHydrate(ProductSignByOrderResult::class);
 
-        return $dbal
-            // ->enableCache('Namespace', 3600)
-            ->fetchAllAssociative() ?: false;
+        return $result->valid() ? $result : false;
     }
 
 

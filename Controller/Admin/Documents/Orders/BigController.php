@@ -23,7 +23,7 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Controller\Admin\Documents;
+namespace BaksDev\Products\Sign\Controller\Admin\Documents\Orders;
 
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
@@ -34,7 +34,6 @@ use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\AsController;
@@ -42,15 +41,17 @@ use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
 #[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
-final class TxtBigController extends AbstractController
+final class BigController extends AbstractController
 {
-    private const string PATTERN = '/\((\d{2})\)/';
-
-    #[Route('/admin/product/sign/document/big/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'admin.big.txt.orders', methods: ['GET'])]
-    public function orders(
+    #[Route(
+        path: '/admin/product/sign/document/big/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}',
+        name: 'admin.big.orders',
+        methods: ['GET'])
+    ]
+    public function big(
         ProductSignByOrderInterface $productSignByOrder,
         string $article,
-        #[ParamConverter(ProductSignUid::class)] $part,
+        string $part,
         #[ParamConverter(OrderUid::class)] OrderUid $order,
         #[ParamConverter(ProductUid::class)] ?ProductUid $product = null,
         #[ParamConverter(ProductOfferConst::class)] ?ProductOfferConst $offer = null,
@@ -67,28 +68,20 @@ final class TxtBigController extends AbstractController
             ->modification($modification)
             ->findAll();
 
-        if($codes === false)
+        if($codes === false || $codes->valid() === false)
         {
             $this->addFlash('danger', 'Честных знаков не найдено');
 
             return $this->redirectToReferer();
         }
 
-        $codes = array_column($codes, 'code_string');
-
-        /** Удаляем круглые скобки */
-
-        $codes = array_map(function($item) {
-            return preg_replace(self::PATTERN, '$1', $item);
-        }, $codes);
-
         $response = new StreamedResponse(function() use ($codes) {
 
-            $handle = fopen('php://output', 'w+');
+            $handle = fopen('php://output', 'wb+');
 
             foreach($codes as $code)
             {
-                fwrite($handle, $code.PHP_EOL);
+                fwrite($handle, $code->bigCodeBig().PHP_EOL);
             }
 
             fclose($handle);
@@ -96,8 +89,10 @@ final class TxtBigController extends AbstractController
         }, Response::HTTP_OK);
 
         $response->headers->set('Content-Type', 'text/txt');
-        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'['.count($codes).'].big.txt"');
+        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'['.$part.'].big.txt"');
 
         return $response;
     }
+
+
 }

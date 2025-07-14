@@ -30,13 +30,13 @@ use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use Generator;
 
 interface ProductSignByOrderInterface
 {
-    public function forPart(ProductSignUid|string $part): self;
+    public function forPart(string $part): self;
 
 
     /** Фильтр по продукту */
@@ -63,6 +63,8 @@ interface ProductSignByOrderInterface
     /**
      * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
      * По умолчанию возвращает знаки со статусом Process «В резерве»
+     *
+     * @return Generator<int, ProductSignByOrderResult>|false
      */
-    public function findAll(): array|false;
+    public function findAll(): Generator|false;
 }

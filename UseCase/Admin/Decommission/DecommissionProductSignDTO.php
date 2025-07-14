@@ -48,6 +48,14 @@ final class DecommissionProductSignDTO
     #[Assert\NotBlank]
     private ?UserProfileUid $profile = null;
 
+    /**
+     * Профиль пользователя (null - общий)
+     */
+    #[Assert\Uuid]
+    #[Assert\NotBlank]
+    private ?UserProfileUid $seller = null;
+
+
     /** Категория */
     #[Assert\NotBlank]
     #[Assert\Uuid]
@@ -175,6 +183,19 @@ final class DecommissionProductSignDTO
         $this->profile = $profile;
         return $this;
     }
+
+    public function getSeller(): ?UserProfileUid
+    {
+        return $this->seller;
+    }
+
+    public function setSeller(?UserProfileUid $seller): self
+    {
+        $this->seller = $seller;
+        return $this;
+    }
+
+
 
     /**
      * Total

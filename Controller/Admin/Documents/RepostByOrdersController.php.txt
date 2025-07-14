@@ -34,7 +34,6 @@ use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
-use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -42,13 +41,62 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-final class TxtSmallController extends AbstractController
+#[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
+final class RepostByOrdersController extends AbstractController
 {
-    #[Route('/admin/product/sign/document/small/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'admin.small.txt.orders', methods: ['GET'])]
-    public function orders(
+    #[Route('/admin/product/sign/document/big/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'admin.big.orders', methods: ['GET'])]
+    public function big(
         ProductSignByOrderInterface $productSignByOrder,
         string $article,
-        #[ParamConverter(ProductSignUid::class)] $part,
+        string $part,
+        #[ParamConverter(OrderUid::class)] OrderUid $order,
+        #[ParamConverter(ProductUid::class)] ?ProductUid $product = null,
+        #[ParamConverter(ProductOfferConst::class)] ?ProductOfferConst $offer = null,
+        #[ParamConverter(ProductVariationConst::class)] ?ProductVariationConst $variation = null,
+        #[ParamConverter(ProductModificationConst::class)] ?ProductModificationConst $modification = null,
+    ): Response
+    {
+        $codes = $productSignByOrder
+            ->forPart($part)
+            ->forOrder($order)
+            ->product($product)
+            ->offer($offer)
+            ->variation($variation)
+            ->modification($modification)
+            ->findAll();
+
+        if($codes === false || $codes->valid() === false)
+        {
+            $this->addFlash('danger', 'Честных знаков не найдено');
+
+            return $this->redirectToReferer();
+        }
+
+        $response = new StreamedResponse(function() use ($codes) {
+
+            $handle = fopen('php://output', 'wb+');
+
+            foreach($codes as $code)
+            {
+                fwrite($handle, $code->bigCodeBig().PHP_EOL);
+            }
+
+            fclose($handle);
+
+        }, Response::HTTP_OK);
+
+        $response->headers->set('Content-Type', 'text/txt');
+        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'['.$part.'].big.txt"');
+
+        return $response;
+    }
+
+
+    #[Route('/admin/product/sign/document/small/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}', name: 'admin.small.orders', methods: ['GET'])]
+    public function small(
+        ProductSignByOrderInterface $productSignByOrder,
+        string $article,
+        string $part,
         #[ParamConverter(OrderUid::class)] OrderUid $order,
         #[ParamConverter(ProductUid::class)] ?ProductUid $product = null,
         #[ParamConverter(ProductOfferConst::class)] ?ProductOfferConst $offer = null,
@@ -72,134 +120,23 @@ final class TxtSmallController extends AbstractController
             return $this->redirectToReferer();
         }
 
-
         $response = new StreamedResponse(function() use ($codes) {
 
-            $handle = fopen('php://output', 'w+');
+            $handle = fopen('php://output', 'wb+');
 
             // Запись данных
-            foreach($codes as $data)
+            foreach($codes as $code)
             {
-                $code = explode('(91)EE10(92)', $data['code_string']);
 
-                // Преобразуем строку в массив символов
-                $chars = str_split(current($code));
-
-                // Удаляем символы по указанным позициям (индексы начинаются с 0)
-
-                // 1 символ (индекс 0)
-                if($chars[0] === '(')
-                {
-                    unset($chars[0]);
-                }
-
-                // 4 символ (индекс 3)
-                if($chars[3] === ')')
-                {
-                    unset($chars[3]);
-                }
-
-                // 19 символ (индекс 18)
-                if($chars[18] === '(')
-                {
-                    unset($chars[18]);
-                }
-
-                // 22 символ (индекс 21)
-                if($chars[21] === ')')
-                {
-                    unset($chars[21]);
-                }
-
-                // Собираем строку обратно
-                $result = implode('', $chars);
-
-                fwrite($handle, $result.PHP_EOL);
-            }
-
-            fclose($handle);
-        });
-
-
-        $response->headers->set('Content-Type', 'text/plain');
-        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'['.count($codes).'].small.txt"');
-
-        return $response;
-    }
-
-    #[Route('/admin/product/sign/document/txt/parts/{article}/{part}', name: 'admin.txt.parts', methods: ['GET'])]
-    public function parts(
-        string $article,
-        ProductSignByPartInterface $productSignByPart,
-        #[ParamConverter(ProductSignUid::class)] $part,
-    ): Response
-    {
-
-        $codes = $productSignByPart
-            ->forPart($part)
-            ->withStatusNew()
-            ->withStatusDecommission()
-            ->findAll();
-
-        if($codes === false)
-        {
-            $this->addFlash('danger', 'Честных знаков не найдено');
-
-            return $this->redirectToReferer();
-        }
-
-        $response = new StreamedResponse(function() use ($codes) {
-
-            $handle = fopen('php://output', 'w+');
-
-            // Запись данных
-            foreach($codes as $data)
-            {
-                $code = explode('(91)EE10(92)', $data['code_string']);
-
-                // Преобразуем строку в массив символов
-                $chars = str_split(current($code));
-
-                // Удаляем символы по указанным позициям (индексы начинаются с 0)
-
-                // 1 символ (индекс 0)
-                if($chars[0] === '(')
-                {
-                    unset($chars[0]);
-                }
-
-                // 4 символ (индекс 3)
-                if($chars[3] === ')')
-                {
-                    unset($chars[3]);
-                }
-
-                // 19 символ (индекс 18)
-                if($chars[18] === '(')
-                {
-                    unset($chars[18]);
-                }
-
-                // 22 символ (индекс 21)
-                if($chars[21] === ')')
-                {
-                    unset($chars[21]);
-                }
-
-                // Собираем строку обратно
-                $result = implode('', $chars);
-
-                fwrite($handle, $result.PHP_EOL);
+                fwrite($handle, $code->getCodeSmall().PHP_EOL);
             }
 
             fclose($handle);
         });
 
         $response->headers->set('Content-Type', 'text/plain');
-        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'.txt"');
+        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'['.$part.'].small.txt"');
 
         return $response;
-
     }
-
 }

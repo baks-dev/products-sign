@@ -25,11 +25,11 @@ namespace BaksDev\Products\Sign\Repository\ProductSignByPart;
 
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use Generator;
 
 interface ProductSignByPartInterface
 {
-    public function forPart(ProductSignUid|string $part): self;
+    public function forPart(string $part): self;
 
     /**
      * Возвращает знаки со статусом Done «Выполнен»
@@ -55,6 +55,8 @@ interface ProductSignByPartInterface
     /**
      * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
      * По умолчанию возвращает знаки со статусом Process «В резерве»
+     *
+     * @return Generator<int, ProductSignByPartResult>|false
      */
-    public function findAll(): array|false;
+    public function findAll(): Generator|false;
 }

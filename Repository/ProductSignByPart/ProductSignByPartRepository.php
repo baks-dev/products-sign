@@ -30,17 +30,17 @@ use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDecommission;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
+use Generator;
 use InvalidArgumentException;
 
-final class ProductSignByPart implements ProductSignByPartInterface
+final class ProductSignByPartRepository implements ProductSignByPartInterface
 {
-    private ProductSignUid|false $part = false;
+    private string|false $part = false;
 
     private array $status;
 
@@ -52,13 +52,8 @@ final class ProductSignByPart implements ProductSignByPartInterface
         $this->status[] = new ProductSignStatus(ProductSignStatusDecommission::class);
     }
 
-    public function forPart(ProductSignUid|string $part): self
+    public function forPart(string $part): self
     {
-        if(is_string($part))
-        {
-            $part = new ProductSignUid($part);
-        }
-
         $this->part = $part;
 
         return $this;
@@ -105,8 +100,10 @@ final class ProductSignByPart implements ProductSignByPartInterface
     /**
      * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору артии
      * По умолчанию возвращает знаки со статусом Process «В резерве»
+     *
+     * @return Generator<int, ProductSignByPartResult>|false
      */
-    public function findAll(): array|false
+    public function findAll(): Generator|false
     {
         if($this->part === false)
         {
@@ -117,12 +114,12 @@ final class ProductSignByPart implements ProductSignByPartInterface
 
         $dbal->from(
             ProductSignInvariable::class,
-            'invariable'
+            'invariable',
         );
 
         $dbal
             ->where('invariable.part = :part')
-            ->setParameter('part', $this->part, ProductSignUid::TYPE);
+            ->setParameter('part', $this->part);
 
 
         $dbal
@@ -132,7 +129,7 @@ final class ProductSignByPart implements ProductSignByPartInterface
                 'invariable',
                 ProductSign::class,
                 'main',
-                'main.id = invariable.main'
+                'main.id = invariable.main',
             );
 
 
@@ -149,7 +146,7 @@ final class ProductSignByPart implements ProductSignByPartInterface
                     ->setParameter(
                         $key,
                         $status,
-                        ProductSignStatus::TYPE
+                        ProductSignStatus::TYPE,
                     );
             }
             $dbal
@@ -157,7 +154,7 @@ final class ProductSignByPart implements ProductSignByPartInterface
                     'invariable',
                     ProductSignEvent::class,
                     'event',
-                    sprintf('event.id = invariable.event AND (%s)', implode(' OR ', $condition))
+                    sprintf('event.id = invariable.event AND (%s)', implode(' OR ', $condition)),
                 );
 
         }
@@ -173,17 +170,16 @@ final class ProductSignByPart implements ProductSignByPartInterface
             ")
             ->addSelect("code.ext AS code_ext")
             ->addSelect("code.cdn AS code_cdn")
-            ->addSelect("code.event AS code_event")
             ->addSelect("code.code AS code_string")
             ->leftJoin(
                 'event',
                 ProductSignCode::class,
                 'code',
-                'code.main = main.id'
+                'code.main = main.id',
             );
 
-        return $dbal
-            // ->enableCache('Namespace', 3600)
-            ->fetchAllAssociative() ?: false;
+        $result = $dbal->fetchAllHydrate(ProductSignByPartResult::class);
+
+        return $result->valid() ? $result : false;
     }
 }

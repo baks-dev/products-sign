@@ -113,6 +113,7 @@ class ProductSignEvent extends EntityEvent
     {
         $this->id = new ProductSignEventUid();
         $this->modify = new ProductSignModify($this);
+        $this->invariable = new ProductSignInvariable($this);
     }
 
     /**

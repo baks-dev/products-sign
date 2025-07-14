@@ -30,14 +30,13 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Messenger\ProductSignMessage;
-use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use Doctrine\Common\Collections\Criteria;
 
 final class ProductSignStatusHandler extends AbstractHandler
 {
     public function handle(ProductSignEventInterface $command): string|ProductSign
     {
+
         $this
             ->setCommand($command)
             ->preEventPersistOrUpdate(ProductSign::class, ProductSignEvent::class);
@@ -49,23 +48,25 @@ final class ProductSignStatusHandler extends AbstractHandler
         }
 
         /** Если отмена заказа и возврат честных знаков  */
-        if(true === ($command->getEvent() instanceof ProductSignEventUid) && $command->getStatus()->equals(ProductSignStatusNew::class))
-        {
-            /** Удаляем все элементу без статуса NEW */
+        //        if(true === ($command->getEvent() instanceof ProductSignEventUid) && $command->getStatus()->equals(ProductSignStatusNew::class))
+        //        {
+        //            /** Удаляем все элементу без статуса NEW */
+        //
+        //            $criteria = Criteria::create()
+        //                ->where(Criteria::expr()?->eq('main', $this->main->getId()))
+        //                ->andWhere(Criteria::expr()?->neq('status', ProductSignStatusNew::STATUS));
+        //
+        //            $elements = $this
+        //                ->getRepository(ProductSignEvent::class)
+        //                ->matching($criteria);
+        //
+        //            foreach($elements as $ProductSignEvent)
+        //            {
+        //                $this->remove($ProductSignEvent);
+        //            }
+        //        }
 
-            $criteria = Criteria::create()
-                ->where(Criteria::expr()?->eq('main', $this->main->getId()))
-                ->andWhere(Criteria::expr()?->neq('status', ProductSignStatusNew::STATUS));
 
-            $elements = $this
-                ->getRepository(ProductSignEvent::class)
-                ->matching($criteria);
-
-            foreach($elements as $ProductSignEvent)
-            {
-                $this->remove($ProductSignEvent);
-            }
-        }
 
         $this->flush();
 

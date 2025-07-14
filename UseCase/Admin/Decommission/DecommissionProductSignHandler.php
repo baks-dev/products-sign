@@ -70,12 +70,19 @@ final class DecommissionProductSignHandler
                 return 'Недостаточное количество честных знаков';
             }
 
+
             /** Меняем статус и присваиваем идентификатор партии  */
             $ProductSignOffDTO = new ProductSignDecommissionDTO($command->getProfile());
-            $ProductSignInvariableDTO = $ProductSignOffDTO->getInvariable();
-            $ProductSignInvariableDTO->setPart($ProductSignUid);
-
             $ProductSignEvent->getDto($ProductSignOffDTO);
+
+
+
+            $ProductSignInvariableDTO = $ProductSignOffDTO->getInvariable();
+
+            $ProductSignInvariableDTO
+                ->setPart($ProductSignUid)
+                ->setSeller($command->getSeller());
+
 
             $handle = $this->productSignStatusHandler->handle($ProductSignOffDTO);
 

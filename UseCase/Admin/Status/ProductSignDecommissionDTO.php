@@ -1,17 +1,17 @@
 <?php
 /*
  *  Copyright 2025.  Baks.dev <admin@baks.dev>
- *
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *
+ *  
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,11 +29,12 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDecommission;
+use BaksDev\Products\Sign\UseCase\Admin\Status\Invariable\ProductSignInvariableDTO;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see MaterialSignEvent */
-final readonly class ProductSignDecommissionDTO implements ProductSignEventInterface
+final class ProductSignDecommissionDTO implements ProductSignEventInterface
 {
     /**
      * Идентификатор события
@@ -50,6 +51,8 @@ final readonly class ProductSignDecommissionDTO implements ProductSignEventInter
 
     /**
      * Профиль пользователя (null - общий)
+     *
+     * @deprecated переносится в ProductSignInvariable
      */
     #[Assert\Uuid]
     #[Assert\NotBlank]
@@ -57,14 +60,14 @@ final readonly class ProductSignDecommissionDTO implements ProductSignEventInter
 
 
     #[Assert\Valid]
-    private Invariable\ProductSignInvariableDTO $invariable;
+    private readonly ProductSignInvariableDTO $invariable;
 
 
     public function __construct(UserProfileUid $profile)
     {
         /** Статус Off «Списание» */
         $this->status = new ProductSignStatus(ProductSignStatusDecommission::class);
-        $this->invariable = new Invariable\ProductSignInvariableDTO();
+        $this->invariable = new ProductSignInvariableDTO();
         $this->profile = $profile;
     }
 
@@ -92,13 +95,15 @@ final readonly class ProductSignDecommissionDTO implements ProductSignEventInter
     /**
      * Invariable
      */
-    public function getInvariable(): Invariable\ProductSignInvariableDTO
+    public function getInvariable(): ProductSignInvariableDTO
     {
         return $this->invariable;
     }
 
     /**
      * Profile
+     *
+     * @deprecated переносится в ProductSignInvariable
      */
     public function getProfile(): UserProfileUid
     {

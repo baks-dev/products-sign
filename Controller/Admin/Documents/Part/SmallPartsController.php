@@ -23,56 +23,65 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Controller\Admin\Documents;
+namespace BaksDev\Products\Sign\Controller\Admin\Documents\Part;
 
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-#[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
-final class PrintController extends AbstractController
+final class SmallPartsController extends AbstractController
 {
-    #[Route('/admin/product/sign/document/print/orders/{order}', name: 'admin.print.orders', methods: ['GET'])]
-    public function orders(
-        ProductSignByOrderInterface $productSignByOrder,
-        #[ParamConverter(OrderUid::class)] $order,
-    ): Response
-    {
-
-        $codes = $productSignByOrder
-            ->forOrder($order)
-            ->findAll();
-
-        return $this->render(
-            ['codes' => $codes],
-            routingName: 'admin.print'
-        );
-    }
-
-
-    #[Route('/admin/product/sign/document/print/parts/{part}', name: 'admin.print.parts', methods: ['GET'])]
-    public function parts(
-        ProductSignByPartInterface $productSignByPart,
+    #[Route('/admin/product/sign/document/big/parts/{article}/{part}', name: 'admin.small.parts', methods: ['GET'])]
+    public function small(
+        string $article,
         string $part,
+        ProductSignByPartInterface $productSignByPart,
+
     ): Response
     {
 
         $codes = $productSignByPart
             ->forPart($part)
-            ->withStatusDone()
+            ->withStatusNew()
+            ->withStatusDecommission()
             ->findAll();
 
-        return $this->render(
-            ['codes' => $codes,],
-            routingName: 'admin.print'
-        );
+        if($codes === false)
+        {
+            $this->addFlash('danger', 'Честных знаков не найдено');
+
+            return $this->redirectToReferer();
+        }
+
+        $response = new StreamedResponse(function() use ($codes) {
+
+            $handle = fopen('php://output', 'wb+');
+
+            // Запись данных
+            foreach($codes as $code)
+            {
+                fwrite($handle, $code->getCodeSmall().PHP_EOL);
+            }
+
+            fclose($handle);
+        });
+
+        $response->headers->set('Content-Type', 'text/plain');
+        $response->headers->set('Content-Disposition', 'attachment; filename="'.$article.'['.$part.'].txt"');
+
+        return $response;
+
     }
 
 }

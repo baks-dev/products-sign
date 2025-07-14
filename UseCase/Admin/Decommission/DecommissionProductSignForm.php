@@ -35,16 +35,13 @@ use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
-use BaksDev\Users\Profile\UserProfile\Repository\UserProfileChoice\UserProfileChoiceInterface;
+use BaksDev\Users\Profile\UserProfile\Repository\UserProfileOrganizationChoice\UserProfileOrganizationInterface;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use BaksDev\Users\User\Repository\UserTokenStorage\UserTokenStorageInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\CallbackTransformer;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
@@ -53,7 +50,6 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Blank;
 
 final class DecommissionProductSignForm extends AbstractType
 {
@@ -64,8 +60,8 @@ final class DecommissionProductSignForm extends AbstractType
         private readonly ProductOfferChoiceInterface $productOfferChoice,
         private readonly ProductVariationChoiceInterface $productVariationChoice,
         private readonly ProductModificationChoiceInterface $modificationChoice,
-        private readonly UserProfileChoiceInterface $userProfileChoice,
         private readonly UserProfileTokenStorageInterface $userProfileTokenStorage,
+        private readonly UserProfileOrganizationInterface $UserProfileOrganizationRepository
     ) {}
 
 
@@ -118,22 +114,27 @@ final class DecommissionProductSignForm extends AbstractType
                 $data = $event->getData();
                 $form = $event->getForm();
 
+                /** Владелец */
+
                 $user = $this->userProfileTokenStorage->getUser();
                 $data->setUsr($user);
 
                 $profile = $this->userProfileTokenStorage->getProfile();
                 $data->setProfile($profile);
 
-                $profiles = $this->userProfileChoice->getActiveUserProfile($data->getUsr());
+                /** Продавец */
+
+                $sellers = $this->UserProfileOrganizationRepository->findAll();
 
                 $form
-                    ->add('profile', ChoiceType::class, [
-                        'choices' => $profiles,
-                        'choice_value' => function(?UserProfileUid $profile) {
-                            return $profile?->getValue();
+                    ->add('seller', ChoiceType::class, [
+                        'choices' => $sellers,
+                        'choice_value' => function(?UserProfileUid $seller) {
+                            return $seller?->getValue();
                         },
-                        'choice_label' => function(UserProfileUid $profile) {
-                            return $profile->getAttr();
+                        'choice_label' => function(UserProfileUid $seller) {
+                            $params = $seller->getParams();
+                            return $params->username ?? null;
                         },
 
                         'label' => false,

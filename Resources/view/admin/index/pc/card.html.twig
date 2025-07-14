@@ -166,38 +166,40 @@
 
             {% if (item.sign_status != 'new' and item.sign_status != 'error') and (is_granted('ROLE_PRODUCT_SIGN') or is_granted('ROLE_ADMIN')) %}
 
-                {# {% set document_big_txt = null %} #}
+
                 {% set document_small_txt = null %}
                 {% set document_big_txt = null %}
                 {% set document_pdf = null %}
 
                 {% if item.sign_status == 'decommission' %}
-                    {# {% set document_big_txt = path('products-sign:admin.csv.parts', { part: item.sign_part }) %} #}
-                    {% set document_small_txt = path('products-sign:admin.txt.parts', { article: item.product_article, part: item.sign_part }) %}
+
                     {% set document_pdf = path('products-sign:document.pdf.parts', { article: item.product_article, part: item.sign_part }) %}
+                    {% set document_small_txt = path('products-sign:admin.small.parts', { article: item.product_article, part: item.sign_part }) %}
+                    {% set document_big_txt = path('products-sign:admin.big.parts', { article: item.product_article, part: item.sign_part }) %}
+
                 {% else %}
 
-                    {% set document_small_txt = path('products-sign:admin.small.txt.orders', {
-                        article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
-                        part: item.sign_part,
-                        order: item.order_id,
-                        product: item.product_id,
-                        offer: item.product_offer_const,
-                        variation: item.product_variation_const,
-                        modification: item.product_modification_const
-                    }) %}
-
-                    {% set document_big_txt = path('products-sign:admin.big.txt.orders', {
-                        article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
-                        part: item.sign_part,
-                        order: item.order_id,
-                        product: item.product_id,
-                        offer: item.product_offer_const,
-                        variation: item.product_variation_const,
-                        modification: item.product_modification_const
-                    }) %}
-
                     {% set document_pdf = path('products-sign:document.pdf.orders', {
+                        article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
+                        part: item.sign_part,
+                        order: item.order_id,
+                        product: item.product_id,
+                        offer: item.product_offer_const,
+                        variation: item.product_variation_const,
+                        modification: item.product_modification_const
+                    }) %}
+
+                    {% set document_small_txt = path('products-sign:admin.small.orders', {
+                        article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
+                        part: item.sign_part,
+                        order: item.order_id,
+                        product: item.product_id,
+                        offer: item.product_offer_const,
+                        variation: item.product_variation_const,
+                        modification: item.product_modification_const
+                    }) %}
+
+                    {% set document_big_txt = path('products-sign:admin.big.orders', {
                         article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
                         part: item.sign_part,
                         order: item.order_id,
@@ -230,6 +232,7 @@
 
 
                 {% if document_small_txt %}
+
                     <a
                             href="{{ document_small_txt }}"
                             class='btn btn-sm btn-light d-flex gap-3'
@@ -244,10 +247,12 @@
                                   d="M14 4.5V14a2 2 0 0 1-2 2h-2v-1h2a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5zM1.928 15.849v-3.337h1.136v-.662H0v.662h1.134v3.337zm4.689-3.999h-.894L4.9 13.289h-.035l-.832-1.439h-.932l1.228 1.983-1.24 2.016h.862l.853-1.415h.035l.85 1.415h.907l-1.253-1.992zm1.93.662v3.337h-.794v-3.337H6.619v-.662h3.064v.662H8.546Z"/>
                         </svg>
                     </a>
+
                 {% endif %}
 
 
                 {% if document_big_txt %}
+
                     <a
                             href="{{ document_big_txt }}"
                             class='btn btn-sm btn-light d-flex gap-3'
@@ -262,6 +267,7 @@
                             <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>
                         </svg>
                     </a>
+
                 {% endif %}
 
             {% endif %}
@@ -292,7 +298,7 @@
                 </button>
 
                 <a
-                        href="{{ path('products-sign:admin.txt.parts', { article: item.product_article, part: item.sign_part }) }}"
+                        href="{{ path('products-sign:admin.big.parts', { article: item.product_article, part: item.sign_part }) }}"
                         class='btn btn-sm btn-light d-flex gap-3'
                         title='Скачать TXT'
                 >

@@ -64,7 +64,7 @@ final class DecommissionController extends AbstractController
         $OffProductSignDTO->setOffer($offer);
         $OffProductSignDTO->setVariation($variation);
         $OffProductSignDTO->setModification($modification);
-        $OffProductSignDTO->setPart($request->request->get('part'));
+        $OffProductSignDTO->setPart($request->get('part'));
 
         // Форма
         $form = $this

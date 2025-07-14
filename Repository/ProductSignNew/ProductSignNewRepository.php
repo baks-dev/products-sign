@@ -186,9 +186,10 @@ final class ProductSignNewRepository implements ProductSignNewInterface
         return $this;
     }
 
-    public function forPart(string|null|false $part): ProductSignNewInterface
+    public function forPart(string|null|false $part): self
     {
         $this->part = empty($part) ? false : $part;
+        return $this;
     }
 
     /**
