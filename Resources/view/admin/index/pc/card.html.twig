@@ -189,7 +189,7 @@
                         modification: item.product_modification_const
                     }) %}
 
-                    {% set document_small_txt = path('products-sign:admin.small.orders', {
+                    {% set document_small_txt = path('products-sign:document.small.orders', {
                         article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
                         part: item.sign_part,
                         order: item.order_id,
@@ -199,7 +199,7 @@
                         modification: item.product_modification_const
                     }) %}
 
-                    {% set document_big_txt = path('products-sign:admin.big.orders', {
+                    {% set document_big_txt = path('products-sign:document.big.orders', {
                         article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
                         part: item.sign_part,
                         order: item.order_id,

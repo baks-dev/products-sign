@@ -58,7 +58,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class PdfController extends AbstractController
 {
     #[Route(
-        path: '/admin/product/sign/document/pdf/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}',
+        path: '/document/product/sign/pdf/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}',
         name: 'admin.pdf.orders',
         methods: ['GET'])
     ]

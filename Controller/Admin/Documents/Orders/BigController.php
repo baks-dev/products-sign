@@ -44,8 +44,8 @@ use Symfony\Component\Routing\Attribute\Route;
 final class BigController extends AbstractController
 {
     #[Route(
-        path: '/admin/product/sign/document/big/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}',
-        name: 'admin.big.orders',
+        path: '/document/product/sign/big/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}',
+        name: 'document.big.orders',
         methods: ['GET'])
     ]
     public function big(

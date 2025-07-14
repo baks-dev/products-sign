@@ -44,8 +44,8 @@ use Symfony\Component\Routing\Attribute\Route;
 final class SmallController extends AbstractController
 {
     #[Route(
-        path: '/admin/product/sign/document/small/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}',
-        name: 'admin.small.orders',
+        path: '/document/product/sign/small/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}',
+        name: 'document.small.orders',
         methods: ['GET'])
     ]
     public function small(

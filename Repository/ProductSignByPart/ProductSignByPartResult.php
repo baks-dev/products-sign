@@ -82,39 +82,46 @@ final class ProductSignByPartResult
 
     public function getCodeSmall(): string
     {
-        $code = explode('(91)EE10(92)', $this->code_string);
+        preg_match('/^(.*?)\(\d{2}\).{4}\(\d{2}\)/', $this->code_string, $matches);
 
-        // Преобразуем строку в массив символов
-        $chars = str_split(current($code));
 
-        // Удаляем символы по указанным позициям (индексы начинаются с 0)
-
-        // 1 символ (индекс 0)
-        if($chars[0] === '(')
+        if(isset($matches[1]))
         {
-            unset($chars[0]);
+
+            // Преобразуем строку в массив символов
+            $chars = str_split($matches[1]);
+
+            // 1 символ (индекс 0)
+            if($chars[0] === '(')
+            {
+                unset($chars[0]);
+            }
+
+            // 4 символ (индекс 3)
+            if($chars[3] === ')')
+            {
+                unset($chars[3]);
+            }
+
+
+            // 19 символ (индекс 18)
+            if($chars[18] === '(')
+            {
+                unset($chars[18]);
+            }
+
+            // 22 символ (индекс 21)
+            if($chars[21] === ')')
+            {
+                unset($chars[21]);
+            }
+
+            return implode('', $chars);
+
         }
 
-        // 4 символ (индекс 3)
-        if($chars[3] === ')')
-        {
-            unset($chars[3]);
-        }
+        return $this->code_string;
 
-        // 19 символ (индекс 18)
-        if($chars[18] === '(')
-        {
-            unset($chars[18]);
-        }
-
-        // 22 символ (индекс 21)
-        if($chars[21] === ')')
-        {
-            unset($chars[21]);
-        }
-
-        // Собираем строку обратно
-        return implode('', $chars);
     }
 
 
