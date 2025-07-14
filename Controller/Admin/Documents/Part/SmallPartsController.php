@@ -71,7 +71,7 @@ final class SmallPartsController extends AbstractController
             // Запись данных
             foreach($codes as $code)
             {
-                fwrite($handle, $code->getCodeSmall().PHP_EOL);
+                fwrite($handle, $code->getSmallCode().PHP_EOL);
             }
 
             fclose($handle);

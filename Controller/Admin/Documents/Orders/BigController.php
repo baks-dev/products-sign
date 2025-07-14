@@ -40,7 +40,6 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-#[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
 final class BigController extends AbstractController
 {
     #[Route(
@@ -81,7 +80,7 @@ final class BigController extends AbstractController
 
             foreach($codes as $code)
             {
-                fwrite($handle, $code->bigCodeBig().PHP_EOL);
+                fwrite($handle, $code->getBigCode().PHP_EOL);
             }
 
             fclose($handle);

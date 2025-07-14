@@ -23,7 +23,7 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Controller\Admin\Documents;
+namespace BaksDev\Products\Sign\Controller\Admin\Documents\Part;
 
 use BaksDev\Barcode\Writer\BarcodeFormat;
 use BaksDev\Barcode\Writer\BarcodeType;
@@ -164,7 +164,7 @@ final class PdfPartsController extends AbstractController
              */
 
             $BarcodeWrite
-                ->text($code->bigCodeBig())
+                ->text($code->getBigCode())
                 ->type(BarcodeType::DataMatrix)
                 ->format(BarcodeFormat::PNG)
                 ->generate(filename: $code['id']);

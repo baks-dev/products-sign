@@ -130,7 +130,7 @@
                 {% if item.sign_status == 'decommission' %}
                     {% set print_path = path('products-sign:admin.print.parts', { part: item.sign_part }) %}
                 {% else %}
-                    {% set print_path = path('products-sign:admin.print.orders', { order: item.order_id }) %}
+                    {% set print_path = path('products-sign:document.print.orders', { order: item.order_id }) %}
                 {% endif %}
 
                 <a href="{{ print_path }}"

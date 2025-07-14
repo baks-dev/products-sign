@@ -54,12 +54,11 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-#[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
 final class PdfController extends AbstractController
 {
     #[Route(
         path: '/document/product/sign/pdf/orders/{part}/{article}/{order}/{product}/{offer}/{variation}/{modification}',
-        name: 'admin.pdf.orders',
+        name: 'document.pdf.orders',
         methods: ['GET'])
     ]
     public function pdf(
@@ -172,16 +171,16 @@ final class PdfController extends AbstractController
              */
 
             $BarcodeWrite
-                ->text($code->bigCodeBig())
+                ->text($code->getBigCode())
                 ->type(BarcodeType::DataMatrix)
                 ->format(BarcodeFormat::PNG)
-                ->generate(filename: (string) $code->getId());
+                ->generate(filename: (string) $code->getSignId());
 
             $path = $BarcodeWrite->getPath();
 
-            $Process[] = $path.DIRECTORY_SEPARATOR.$code->getId().'.png';
+            $Process[] = $path.DIRECTORY_SEPARATOR.$code->getSignId().'.png';
 
-            $logger->critical(sprintf('Лист %s: ошибка изображения %s', $key, $url), [$code->getId()]);
+            $logger->critical(sprintf('Лист %s: ошибка изображения %s', $key, $url), [$code->getSignId()]);
         }
 
         $Process[] = $uploadFile;

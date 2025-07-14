@@ -70,7 +70,7 @@ final class BigPartsController extends AbstractController
             // Запись данных
             foreach($codes as $code)
             {
-                fwrite($handle, $code->bigCodeBig().PHP_EOL);
+                fwrite($handle, $code->getBigCode().PHP_EOL);
             }
 
             fclose($handle);

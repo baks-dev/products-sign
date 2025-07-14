@@ -40,7 +40,6 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-#[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
 final class SmallController extends AbstractController
 {
     #[Route(
@@ -83,7 +82,7 @@ final class SmallController extends AbstractController
             foreach($codes as $code)
             {
 
-                fwrite($handle, $code->getCodeSmall().PHP_EOL);
+                fwrite($handle, $code->getSmallCode().PHP_EOL);
             }
 
             fclose($handle);

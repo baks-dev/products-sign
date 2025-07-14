@@ -57,30 +57,8 @@ final class ProductSignByPartResult
         return new ProductSignEventUid($this->sign_event);
     }
 
-    public function getCodeImage(): string
-    {
-        return $this->code_image;
-    }
 
-    public function getCodeExt(): string
-    {
-        return $this->code_ext;
-    }
-
-    public function isCodeCdn(): bool
-    {
-        return $this->code_cdn === true;
-    }
-
-    public function bigCodeBig(): string
-    {
-        $subChar = "";
-        preg_match_all('/\((\d{2})\)((?:(?!\(\d{2}\)).)*)/', $this->code_string, $matches, PREG_SET_ORDER);
-        return $matches[0][1].$matches[0][2].$matches[1][1].$matches[1][2].$subChar.$matches[2][1].$matches[2][2].$subChar.$matches[3][1].$matches[3][2];
-
-    }
-
-    public function getCodeSmall(): string
+    public function getSmallCode(): string
     {
         preg_match('/^(.*?)\(\d{2}\).{4}\(\d{2}\)/', $this->code_string, $matches);
 
@@ -124,5 +102,28 @@ final class ProductSignByPartResult
 
     }
 
+    public function getBigCode(): string
+    {
+        $subChar = "";
+        preg_match_all('/\((\d{2})\)((?:(?!\(\d{2}\)).)*)/', $this->code_string, $matches, PREG_SET_ORDER);
+        return $matches[0][1].$matches[0][2].$matches[1][1].$matches[1][2].$subChar.$matches[2][1].$matches[2][2].$subChar.$matches[3][1].$matches[3][2];
+
+    }
+
+
+    public function getCodeImage(): string
+    {
+        return $this->code_image;
+    }
+
+    public function getCodeExt(): string
+    {
+        return $this->code_ext;
+    }
+
+    public function isCodeCdn(): bool
+    {
+        return $this->code_cdn === true;
+    }
 
 }

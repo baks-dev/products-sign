@@ -47,17 +47,17 @@ final class ProductSignByOrderResult
 
     ) {}
 
-    public function getId(): ProductSignUid
+    public function getSignId(): ProductSignUid
     {
         return new ProductSignUid($this->sign_id);
     }
 
-    public function getCodeEvent(): ProductSignEventUid
+    public function getSignEvent(): ProductSignEventUid
     {
         return new ProductSignEventUid($this->sign_event);
     }
 
-    public function getCodeSmall(): string
+    public function getSmallCode(): string
     {
         preg_match('/^(.*?)\(\d{2}\).{4}\(\d{2}\)/', $this->code_string, $matches);
 
@@ -101,7 +101,7 @@ final class ProductSignByOrderResult
 
     }
 
-    public function bigCodeBig(): string
+    public function getBigCode(): string
     {
         $subChar = "";
         preg_match_all('/\((\d{2})\)((?:(?!\(\d{2}\)).)*)/', $this->code_string, $matches, PREG_SET_ORDER);
