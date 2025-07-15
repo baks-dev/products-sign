@@ -108,13 +108,13 @@
             {{ item.seller_username }}
         {% else %}
 
-            {% if item.sign_status == 'process' %}
+            {# {% if item.sign_status == 'process' %} #}
                 <span class="badge text-bg-warning">{{ item.seller_username }}</span>
-            {% endif %}
+            {# {% endif %}
 
             {% if item.sign_status == 'done' or item.sign_status == 'decommission' %}
                 <span class="badge text-bg-warning">{{ item.seller_username }}</span>
-            {% endif %}
+            {% endif %} #}
 
         {% endif %}
 

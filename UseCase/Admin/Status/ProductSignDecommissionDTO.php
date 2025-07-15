@@ -47,7 +47,7 @@ final class ProductSignDecommissionDTO implements ProductSignEventInterface
      * Статус
      */
     #[Assert\NotBlank]
-    private ProductSignStatus $status;
+    private readonly ProductSignStatus $status;
 
     /**
      * Профиль пользователя (null - общий)

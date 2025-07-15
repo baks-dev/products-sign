@@ -67,19 +67,19 @@ class ProductSignEvent extends EntityEvent
     /**
      * Код честного знака
      */
-    #[ORM\OneToOne(targetEntity: ProductSignCode::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
+    #[ORM\OneToOne(targetEntity: ProductSignCode::class, mappedBy: 'event', cascade: ['all'])]
     private ?ProductSignCode $code = null;
 
     /**
      * Постоянная величина
      */
-    #[ORM\OneToOne(targetEntity: ProductSignInvariable::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
+    #[ORM\OneToOne(targetEntity: ProductSignInvariable::class, mappedBy: 'event', cascade: ['all'])]
     private ?ProductSignInvariable $invariable;
 
     /**
      * Модификатор
      */
-    #[ORM\OneToOne(targetEntity: ProductSignModify::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
+    #[ORM\OneToOne(targetEntity: ProductSignModify::class, mappedBy: 'event', cascade: ['all'])]
     private ProductSignModify $modify;
 
     /**
@@ -113,7 +113,6 @@ class ProductSignEvent extends EntityEvent
     {
         $this->id = new ProductSignEventUid();
         $this->modify = new ProductSignModify($this);
-        $this->invariable = new ProductSignInvariable($this);
     }
 
     /**
