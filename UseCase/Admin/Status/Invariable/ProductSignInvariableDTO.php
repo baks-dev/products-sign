@@ -35,7 +35,7 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
 {
     /** Группа штрихкодов (для групповой отмены либо списания) */
     #[Assert\NotBlank]
-    private readonly string $part;
+    private string $part;
 
     /**
      * Владелец честного пользователя
@@ -61,10 +61,7 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
 
     public function setPart(mixed $part): self
     {
-        if(false === (new ReflectionProperty(self::class, 'part')->isInitialized($this)))
-        {
-            $this->part = (string) $part;
-        }
+        $this->part = (string) $part;
 
         return $this;
     }

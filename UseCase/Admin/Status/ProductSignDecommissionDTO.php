@@ -60,7 +60,7 @@ final class ProductSignDecommissionDTO implements ProductSignEventInterface
 
 
     #[Assert\Valid]
-    private readonly ProductSignInvariableDTO $invariable;
+    private ProductSignInvariableDTO $invariable;
 
 
     public function __construct(UserProfileUid $profile)

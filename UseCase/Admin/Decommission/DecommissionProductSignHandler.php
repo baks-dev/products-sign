@@ -72,19 +72,16 @@ final class DecommissionProductSignHandler
 
 
             /** Меняем статус и присваиваем идентификатор партии  */
-            $ProductSignOffDTO = new ProductSignDecommissionDTO($command->getProfile());
-            $ProductSignEvent->getDto($ProductSignOffDTO);
+            $ProductSignDecommissionDTO = new ProductSignDecommissionDTO($command->getProfile());
+            $ProductSignEvent->getDto($ProductSignDecommissionDTO);
 
+            $ProductSignInvariableDTO =
+                $ProductSignDecommissionDTO
+                    ->getInvariable()
+                    ->setPart($ProductSignUid) // присваиваем новый идентификатор партии
+                    ->setSeller($command->getSeller());
 
-
-            $ProductSignInvariableDTO = $ProductSignOffDTO->getInvariable();
-
-            $ProductSignInvariableDTO
-                ->setPart($ProductSignUid)
-                ->setSeller($command->getSeller());
-
-
-            $handle = $this->productSignStatusHandler->handle($ProductSignOffDTO);
+            $handle = $this->productSignStatusHandler->handle($ProductSignDecommissionDTO);
 
             if(false === ($handle instanceof ProductSign))
             {

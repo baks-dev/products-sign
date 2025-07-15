@@ -27,8 +27,6 @@ namespace BaksDev\Products\Sign\Controller\Admin\Documents\Part;
 
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
-use BaksDev\Core\Type\UidType\ParamConverter;
-use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\AsController;

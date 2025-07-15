@@ -26,13 +26,6 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Controller\Admin\Documents\Part;
 
 use BaksDev\Core\Controller\AbstractController;
-use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
-use BaksDev\Core\Type\UidType\ParamConverter;
-use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Products\Product\Type\Id\ProductUid;
-use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
-use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
-use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -42,7 +35,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[AsController]
 final class SmallPartsController extends AbstractController
 {
-    #[Route('/admin/product/sign/document/big/parts/{article}/{part}', name: 'admin.small.parts', methods: ['GET'])]
+    #[Route('/admin/product/sign/document/small/parts/{article}/{part}', name: 'admin.small.parts', methods: ['GET'])]
     public function small(
         string $article,
         string $part,

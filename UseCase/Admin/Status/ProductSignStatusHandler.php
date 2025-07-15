@@ -36,7 +36,6 @@ final class ProductSignStatusHandler extends AbstractHandler
 {
     public function handle(ProductSignEventInterface $command): string|ProductSign
     {
-
         $this
             ->setCommand($command)
             ->preEventPersistOrUpdate(ProductSign::class, ProductSignEvent::class);
@@ -65,7 +64,6 @@ final class ProductSignStatusHandler extends AbstractHandler
         //                $this->remove($ProductSignEvent);
         //            }
         //        }
-
 
 
         $this->flush();

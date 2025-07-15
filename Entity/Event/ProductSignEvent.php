@@ -74,7 +74,7 @@ class ProductSignEvent extends EntityEvent
      * Постоянная величина
      */
     #[ORM\OneToOne(targetEntity: ProductSignInvariable::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
-    private ?ProductSignInvariable $invariable = null;
+    private ?ProductSignInvariable $invariable;
 
     /**
      * Модификатор

@@ -26,7 +26,6 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Controller\Admin\Documents\Orders;
 
 use BaksDev\Core\Controller\AbstractController;
-use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Type\Id\ProductUid;
