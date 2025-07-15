@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,19 @@ use Symfony\Component\Validator\Constraints as Assert;
 final class ProductSignFileDTO
 {
     #[Assert\NotBlank]
-    #[Assert\File(maxSize: '100m', mimeTypes: ['application/pdf', 'application/x-pdf'])]
+    #[Assert\File(maxSize: '100m', mimeTypes: [
+
+        /** PDF */
+        'application/pdf',
+        'application/acrobat',
+        'application/nappdf',
+        'application/x-pdf',
+        'image/pdf',
+
+        /** XLSX */
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+
+    ])]
     public ?File $pdf = null;
 
 }

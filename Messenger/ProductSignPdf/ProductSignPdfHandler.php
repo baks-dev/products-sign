@@ -51,7 +51,7 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler(priority: 0)]
+#[AsMessageHandler(priority: 1)]
 final readonly class ProductSignPdfHandler
 {
     public function __construct(

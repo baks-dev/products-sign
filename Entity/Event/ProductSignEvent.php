@@ -162,6 +162,14 @@ class ProductSignEvent extends EntityEvent
     }
 
     /**
+     * Идентификатор владельца честного знака
+     */
+    public function getOwnerSignProfile(): UserProfileUid
+    {
+        return $this->invariable->getProfile();
+    }
+
+    /**
      * Status
      */
     public function getStatus(): ProductSignStatus

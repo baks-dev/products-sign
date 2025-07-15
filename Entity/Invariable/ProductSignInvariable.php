@@ -71,6 +71,9 @@ class ProductSignInvariable extends EntityReadonly
 
     /**
      * Продавец честного пользователя
+     *
+     * При реализации через маркетплейсы SELLER всегда должен быть NULL
+     * если указан SELLER - реализация только через корзину и собственную доставку
      */
     #[ORM\Column(type: UserProfileUid::TYPE, nullable: true)]
     private ?UserProfileUid $seller = null;
@@ -124,6 +127,11 @@ class ProductSignInvariable extends EntityReadonly
     {
         $this->event = $event;
         return $this;
+    }
+
+    public function getProfile(): ?UserProfileUid
+    {
+        return $this->profile;
     }
 
     public function getDto($dto): mixed

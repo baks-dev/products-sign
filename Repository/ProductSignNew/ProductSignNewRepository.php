@@ -233,14 +233,27 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 type: ProductUid::TYPE
             );
 
-        $orm
-            ->andWhere('(invariable.seller IS NULL OR invariable.seller = :seller)')
-            ->setParameter(
-                key: 'seller',
-                value: $this->profile,
-                type: UserProfileUid::TYPE,
-            );
 
+        /**
+         * Если передан тестовый идентификатор - поиск только по NULL
+         * при реализации через маркетплейсы SELLER всегда должен быть NULL
+         * если указан SELLER - реализация только через корзину и собственную доставку
+         */
+        if($this->profile->equals(UserProfileUid::TEST))
+        {
+            $orm
+                ->andWhere('invariable.seller IS NULL');
+        }
+        else
+        {
+            $orm
+                ->andWhere('(invariable.seller IS NULL OR invariable.seller = :seller)')
+                ->setParameter(
+                    key: 'seller',
+                    value: $this->profile,
+                    type: UserProfileUid::TYPE,
+                );
+        }
 
         if($this->offer)
         {
