@@ -57,7 +57,7 @@ use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Forms\ProductSignFilter\ProductSignFilterDTO;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
-use BaksDev\Users\Profile\UserProfile\Entity\Personal\UserProfilePersonal;
+use BaksDev\Users\Profile\UserProfile\Entity\Event\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;

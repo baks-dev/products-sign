@@ -47,6 +47,8 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
 
     /**
      * Профиль пользователя
+     *
+     * @depricate
      */
     #[Assert\NotBlank]
     #[Assert\Uuid]
@@ -76,6 +78,7 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
         /** Статус Process «В резерве» */
         $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
         $this->invariable = new Invariable\ProductSignInvariableDTO();
+        $this->invariable->setProfile($this->profile);
 
     }
 

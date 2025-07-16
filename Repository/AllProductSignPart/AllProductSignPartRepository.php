@@ -52,7 +52,7 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Users\Profile\UserProfile\Entity\Personal\UserProfilePersonal;
+use BaksDev\Users\Profile\UserProfile\Entity\Event\Personal\UserProfilePersonal;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\User\Repository\UserTokenStorage\UserTokenStorageInterface;
 use BaksDev\Users\User\Type\Id\UserUid;

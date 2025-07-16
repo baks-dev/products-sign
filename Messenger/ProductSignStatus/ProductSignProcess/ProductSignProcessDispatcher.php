@@ -133,7 +133,9 @@ final readonly class ProductSignProcessDispatcher
         );
 
         $ProductSignInvariableDTO = $ProductSignProcessDTO->getInvariable();
-        $ProductSignInvariableDTO->setPart($message->getPart());
+        $ProductSignInvariableDTO
+            ->setProfile($ProductSignEvent->getOwnerSignProfile())
+            ->setPart($message->getPart());
 
 
         /** Если тип заказа Wildberries, Озон, Яндекс, Озон - Присваиваем владельца в качестве продавца */
