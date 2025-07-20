@@ -30,7 +30,7 @@ interface ProductSignCodeByDigestInterface
     /**
      * Метод возвращает идентификатор файла изображения честного знака в директории
      *
-     * @return Generator{int, ProductSignCodeByDigestResult}|false
+     * @return Generator<int, ProductSignCodeByDigestResult>|false
      */
     public function find(string $name): ProductSignCodeByDigestResult|false;
 }

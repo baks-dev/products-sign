@@ -38,7 +38,8 @@ final readonly class UnCompressProductsCodeRepository implements UnCompressProdu
 
     /**
      * Метод возвращает идентификаторы изображений без CDN
-     * @return Generator{int, UnCompressProductsCodeResult}|false
+     *
+     * @return Generator<int, UnCompressProductsCodeResult>|false
      */
     public function findAll(): Generator|false
     {
