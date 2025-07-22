@@ -131,10 +131,9 @@ final readonly class ProductSignPdfHandler
         //        }
 
 
-
-
-
         /** Обрабатываем страницы */
+
+        $totalPurchase = 0;
 
         foreach(new DirectoryIterator($uploadDir) as $SignFile)
         {
@@ -159,29 +158,7 @@ final readonly class ProductSignPdfHandler
             $counter = 0;
             $errors = 0;
 
-            /** Создаем предварительно закупку для заполнения продукции */
-            if($message->isPurchase() && $message->getProfile())
-            {
 
-                // Получаем идентификатор пользователя по профилю
-
-                $User = $this->UserByUserProfileInterface
-                    ->forProfile($message->getProfile())
-                    ->find();
-
-                if($User)
-                {
-                    $PurchaseNumber = number_format(microtime(true) * 100, 0, '.', '.');
-
-                    $PurchaseProductStockDTO = new PurchaseProductStockDTO();
-                    $PurchaseProductStocksInvariableDTO = $PurchaseProductStockDTO->getInvariable();
-
-                    $PurchaseProductStocksInvariableDTO
-                        ->setUsr($User->getId())
-                        ->setProfile($message->getProfile())
-                        ->setNumber($PurchaseNumber);
-                }
-            }
 
             /** Директория загрузки файла с кодом */
 
@@ -289,7 +266,7 @@ final readonly class ProductSignPdfHandler
 
                 $handle = $this->productSignHandler->handle($ProductSignDTO);
 
-                if(!$handle instanceof ProductSign)
+                if(false === ($handle instanceof ProductSign))
                 {
                     if($handle === false)
                     {
@@ -311,52 +288,80 @@ final readonly class ProductSignPdfHandler
                         new CDNUploadImageMessage($handle->getId(), ProductSignCode::class, $md5),
                         transport: 'files-res-low'
                     );
+
+                    $totalPurchase++;
                 }
 
-                /** Создаем закупку */
-                if(isset($PurchaseProductStockDTO) && $message->isPurchase() && $message->getProfile())
-                {
-                    // Найдем в коллекции DTO с совпадающими product, offer, variation, modification
-                    $findPurchaseProduct = $PurchaseProductStockDTO
-                        ->getProduct()
-                        ->filter
-                        (
-                            function(ProductStockDTO $element) use ($message) {
-                                return
-                                    $element->getProduct()->equals($element->getProduct())
-                                    && ((is_null($element->getOffer()) === true && is_null($message->getOffer()) === true) || $element->getOffer()->equals($message->getOffer()))
-                                    && ((is_null($element->getVariation()) === true && is_null($message->getVariation()) === true) || $element->getVariation()->equals($message->getVariation()))
-                                    && ((is_null($element->getModification()) === true && is_null($message->getModification()) === true) || $element->getModification()->equals($message->getModification()));
-                            }
-                        );
-
-                    $ProductStockDTO = $findPurchaseProduct->current();
-
-                    if(false === ($ProductStockDTO instanceof ProductStockDTO))
-                    {
-                        $ProductStockDTO = new ProductStockDTO();
-                        $ProductStockDTO->setProduct($message->getProduct());
-                        $ProductStockDTO->setOffer($message->getOffer());
-                        $ProductStockDTO->setVariation($message->getVariation());
-                        $ProductStockDTO->setModification($message->getModification());
-                        $ProductStockDTO->setTotal(0);
-
-                        $PurchaseProductStockDTO->addProduct($ProductStockDTO);
-                    }
-
-                    $ProductStockTotal = $ProductStockDTO->getTotal() + 1;
-                    $ProductStockDTO->setTotal($ProductStockTotal);
-                }
-            }
-
-            /** Сохраняем закупку */
-            if($message->isPurchase() && $message->getProfile() && (isset($PurchaseProductStockDTO) && false === $PurchaseProductStockDTO->getProduct()->isEmpty()))
-            {
-                $this->purchaseProductStockHandler->handle($PurchaseProductStockDTO);
+                //                /** Создаем закупку */
+                //                if(isset($PurchaseProductStockDTO) && $message->isPurchase() && $message->getProfile())
+                //                {
+                //                    // Найдем в коллекции DTO с совпадающими product, offer, variation, modification
+                //                    $findPurchaseProduct = $PurchaseProductStockDTO
+                //                        ->getProduct()
+                //                        ->filter
+                //                        (
+                //                            function(ProductStockDTO $element) use ($message) {
+                //                                return
+                //                                    $element->getProduct()->equals($element->getProduct())
+                //                                    && ((is_null($element->getOffer()) === true && is_null($message->getOffer()) === true) || $element->getOffer()->equals($message->getOffer()))
+                //                                    && ((is_null($element->getVariation()) === true && is_null($message->getVariation()) === true) || $element->getVariation()->equals($message->getVariation()))
+                //                                    && ((is_null($element->getModification()) === true && is_null($message->getModification()) === true) || $element->getModification()->equals($message->getModification()));
+                //                            }
+                //                        );
+                //
+                //                    $ProductStockDTO = $findPurchaseProduct->current();
+                //
+                //                    if(false === ($ProductStockDTO instanceof ProductStockDTO))
+                //                    {
+                //                        $ProductStockDTO = new ProductStockDTO();
+                //                        $ProductStockDTO->setProduct($message->getProduct());
+                //                        $ProductStockDTO->setOffer($message->getOffer());
+                //                        $ProductStockDTO->setVariation($message->getVariation());
+                //                        $ProductStockDTO->setModification($message->getModification());
+                //                        $ProductStockDTO->setTotal(0);
+                //
+                //                        $PurchaseProductStockDTO->addProduct($ProductStockDTO);
+                //                    }
+                //
+                //                    $ProductStockTotal = $ProductStockDTO->getTotal() + 1;
+                //                    $ProductStockDTO->setTotal($ProductStockTotal);
+                //                }
             }
 
             $Imagick->clear();
-            $Imagick->destroy();
+        }
+
+        /** Сохраняем закупку */
+        if($message->isPurchase())
+        {
+            // Получаем идентификатор пользователя по профилю
+            $User = $this->UserByUserProfileInterface
+                ->forProfile($message->getProfile())
+                ->find();
+
+            if($User)
+            {
+                $PurchaseNumber = number_format(microtime(true) * 100, 0, '.', '.');
+
+                $PurchaseProductStockDTO = new PurchaseProductStockDTO();
+                $PurchaseProductStocksInvariableDTO = $PurchaseProductStockDTO->getInvariable();
+
+                $PurchaseProductStocksInvariableDTO
+                    ->setUsr($User->getId())
+                    ->setProfile($message->getProfile())
+                    ->setNumber($PurchaseNumber);
+
+                $ProductStockDTO = new ProductStockDTO();
+                $ProductStockDTO->setProduct($message->getProduct());
+                $ProductStockDTO->setOffer($message->getOffer());
+                $ProductStockDTO->setVariation($message->getVariation());
+                $ProductStockDTO->setModification($message->getModification());
+                $ProductStockDTO->setTotal($totalPurchase);
+
+                $PurchaseProductStockDTO->addProduct($ProductStockDTO);
+
+                $this->purchaseProductStockHandler->handle($PurchaseProductStockDTO);
+            }
         }
     }
 }

@@ -136,7 +136,7 @@ final class ProductSignPdfForm extends AbstractType
                         },
 
                         'label' => false,
-                        'required' => false,
+                        //'required' => false,
                     ]);
 
 
