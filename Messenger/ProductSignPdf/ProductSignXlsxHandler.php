@@ -125,8 +125,8 @@ final readonly class ProductSignXlsxHandler
                     // Получаем номер текущей строки
                     $rowIndex = $row->getRowIndex();
 
-                    // 1. Получаем первую ячейку (колонка A)
-                    $cellA = $worksheet->getCell('A'.$rowIndex);
+                    // 1. Получаем первую ячейку (колонка B) Код маркировки
+                    $cellA = $worksheet->getCell('B'.$rowIndex);
                     $valueA = $cellA->getValue(); // или getCalculatedValue() для формул
 
                     /**
@@ -153,9 +153,8 @@ final readonly class ProductSignXlsxHandler
                     }
 
 
-                    // 2. Получаем вторую ячейку (колонка B)
-
-                    $cellB = $worksheet->getCell('B'.$rowIndex);
+                    // 2. Получаем вторую ячейку (колонка D) Код упаковки
+                    $cellB = $worksheet->getCell('D'.$rowIndex);
                     $valueB = $cellB->getValue();
 
 

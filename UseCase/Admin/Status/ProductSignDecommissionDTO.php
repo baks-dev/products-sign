@@ -49,26 +49,17 @@ final class ProductSignDecommissionDTO implements ProductSignEventInterface
     #[Assert\NotBlank]
     private readonly ProductSignStatus $status;
 
-    /**
-     * Профиль пользователя (null - общий)
-     *
-     * @deprecated переносится в ProductSignInvariable
-     */
-    #[Assert\Uuid]
-    #[Assert\NotBlank]
-    private UserProfileUid $profile;
 
 
     #[Assert\Valid]
     private ProductSignInvariableDTO $invariable;
 
 
-    public function __construct(UserProfileUid $profile)
+    public function __construct()
     {
         /** Статус Off «Списание» */
         $this->status = new ProductSignStatus(ProductSignStatusDecommission::class);
         $this->invariable = new ProductSignInvariableDTO();
-        $this->profile = $profile;
     }
 
     /**
@@ -98,15 +89,5 @@ final class ProductSignDecommissionDTO implements ProductSignEventInterface
     public function getInvariable(): ProductSignInvariableDTO
     {
         return $this->invariable;
-    }
-
-    /**
-     * Profile
-     *
-     * @deprecated переносится в ProductSignInvariable
-     */
-    public function getProfile(): UserProfileUid
-    {
-        return $this->profile;
     }
 }

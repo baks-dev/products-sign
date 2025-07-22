@@ -38,13 +38,6 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
     private string $part;
 
     /**
-     * Владелец честного пользователя
-     */
-    #[Assert\NotBlank]
-    #[Assert\Uuid]
-    private readonly UserProfileUid $profile;
-
-    /**
      * Продавец честного пользователя
      */
     #[Assert\NotBlank]
@@ -66,20 +59,6 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
         return $this;
     }
 
-    public function getProfile(): ?UserProfileUid
-    {
-        return $this->profile;
-    }
-
-    public function setProfile(?UserProfileUid $profile): self
-    {
-        if(false === (new ReflectionProperty(self::class, 'profile')->isInitialized($this)))
-        {
-            $this->profile = $profile;
-        }
-
-        return $this;
-    }
 
     public function getSeller(): ?UserProfileUid
     {
