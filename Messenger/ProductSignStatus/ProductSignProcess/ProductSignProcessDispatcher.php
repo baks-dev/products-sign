@@ -75,6 +75,15 @@ final readonly class ProductSignProcessDispatcher
             ->forOrder($message->getOrder())
             ->find();
 
+        if(false === ($CurrentOrderEvent instanceof OrderEvent))
+        {
+            $this->logger->warning(
+                'Событие по идентификатору заказа не найдено',
+                [var_export($message, true), self::class.':'.__LINE__],
+            );
+
+            return;
+        }
 
         /**
          * Если тип заказа Wildberries, Озон, Яндекс, Авито
