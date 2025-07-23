@@ -35,7 +35,7 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/** @see MaterialSignEvent */
+/** @see ProductSignEvent */
 final readonly class ProductSignProcessDTO implements ProductSignEventInterface
 {
     /**
@@ -44,15 +44,6 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
     #[Assert\Uuid]
     #[Assert\NotBlank]
     private ProductSignEventUid $id;
-
-    /**
-     * Профиль пользователя
-     *
-     * @depricate
-     */
-    #[Assert\NotBlank]
-    #[Assert\Uuid]
-    private UserProfileUid $profile;
 
     /**
      * Статус
@@ -72,14 +63,11 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
 
     public function __construct(UserProfileUid $profile, OrderUid $ord)
     {
-        $this->profile = $profile;
         $this->ord = $ord;
 
         /** Статус Process «В резерве» */
         $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
         $this->invariable = new Invariable\ProductSignInvariableDTO();
-        $this->invariable->setProfile($this->profile);
-
     }
 
     /**
