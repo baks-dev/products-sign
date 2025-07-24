@@ -101,8 +101,8 @@ final readonly class ProductSignPdfHandler
                 $this->logger->critical(
                     'Ошибка при создании директории. Попробуйте применить комманду ',
                     [
-                        'chown -R unit:unit '.$uploadDir
-                    ]
+                        'chown -R unit:unit '.$uploadDir,
+                    ],
                 );
 
                 return 'Ошибка при создании директории.';
@@ -115,7 +115,29 @@ final readonly class ProductSignPdfHandler
         /** @var ProductSignFileDTO $file */
         foreach($command->getFiles() as $file)
         {
-            $name = uniqid('original_', true).'.pdf';
+            $name = null;
+
+            if(
+                in_array($file->pdf->getMimeType(), ['application/pdf',
+                    'application/acrobat',
+                    'application/nappdf',
+                    'application/x-pdf',
+                    'image/pdf',])
+            )
+            {
+                $name = uniqid('original_', true).'.pdf';
+            }
+
+            if('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' === $file->pdf->getMimeType())
+            {
+                $name = uniqid('original_', true).'.xlsx';
+            }
+
+            if(empty($name))
+            {
+                continue;
+            }
+
             $filename[] = $name;
 
             $file->pdf->move($uploadDir, $name);
@@ -149,9 +171,9 @@ final readonly class ProductSignPdfHandler
                 $command->getModification(),
                 $command->isPurchase(),
                 $command->isNotShare(),
-                $command->getNumber()
+                $command->getNumber(),
             ),
-            transport: 'products-sign'
+            transport: 'products-sign',
         );
 
         return true;

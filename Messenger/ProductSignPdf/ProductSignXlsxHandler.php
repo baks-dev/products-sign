@@ -148,7 +148,7 @@ final readonly class ProductSignXlsxHandler
 
                     if(empty($main))
                     {
-                        $this->logger->critical(sprintf("products-sign: Код честного знака не найден: %s", $valueA));
+                        $this->logger->warning(sprintf("products-sign: Код честного знака не найден: %s", $valueA));
                         continue;
                     }
 
