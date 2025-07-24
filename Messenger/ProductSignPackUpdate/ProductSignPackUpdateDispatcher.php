@@ -49,7 +49,7 @@ final class ProductSignPackUpdateDispatcher
     {
         $Deduplicator = $this->deduplicator
             ->namespace('products-sign')
-            ->deduplication([$message]);
+            ->deduplication([$message, self::class]);
 
         if($Deduplicator->isExecuted())
         {
