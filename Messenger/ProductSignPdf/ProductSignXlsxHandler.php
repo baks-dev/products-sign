@@ -29,8 +29,7 @@ use BaksDev\Barcode\Reader\BarcodeRead;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
-use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
-use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
+use BaksDev\Products\Sign\Messenger\ProductSignPackUpdate\ProductSignPackUpdateMessage;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\Products\ProductStockDTO;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockDTO;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockHandler;
@@ -49,9 +48,8 @@ final readonly class ProductSignXlsxHandler
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $upload,
-        #[Target('productsSignLogger')] private LoggerInterface $logger,
-        private DBALQueryBuilder $DBALQueryBuilder,
-
+        private MessageDispatchInterface $MessageDispatch,
+        private Filesystem $filesystem,
     ) {}
 
     public function __invoke(ProductSignPdfMessage $message): void
@@ -94,14 +92,14 @@ final readonly class ProductSignXlsxHandler
 
         /** Обрабатываем файлы EXEL */
 
-        foreach(new DirectoryIterator($uploadDir) as $SignFile)
+        foreach(new DirectoryIterator($uploadDir) as $SignFileExel)
         {
-            if($SignFile->getExtension() !== 'xlsx')
+            if($SignFileExel->getExtension() !== 'xlsx')
             {
                 continue;
             }
 
-            if(false === $SignFile->getRealPath() || false === file_exists($SignFile->getRealPath()))
+            if(false === $SignFileExel->getRealPath() || false === file_exists($SignFileExel->getRealPath()))
             {
                 continue;
             }
@@ -111,14 +109,11 @@ final readonly class ProductSignXlsxHandler
              * IOFactory автоматически определит тип файла (XLSX, XLS, CSV и т.д.)
              * и выберет соответствующий ридер.
              */
-            $spreadsheet = IOFactory::load($SignFile->getRealPath());
+            $spreadsheet = IOFactory::load($SignFileExel->getRealPath());
 
-
-            // 1. Получаем итератор для всех листов в книге
+            // Получаем итератор для всех листов в книге
             foreach($spreadsheet->getAllSheets() as $worksheet)
             {
-                $this->logger->info(sprintf("Читаем лист XLSX: %s", $worksheet->getTitle()));
-
                 // Итерируемся по всем строкам листа с помощью итератора
                 foreach($worksheet->getRowIterator() as $row)
                 {
@@ -126,57 +121,33 @@ final readonly class ProductSignXlsxHandler
                     $rowIndex = $row->getRowIndex();
 
                     // 1. Получаем первую ячейку (колонка B) Код маркировки
-                    $cellA = $worksheet->getCell('B'.$rowIndex);
-                    $valueA = $cellA->getValue(); // или getCalculatedValue() для формул
-
-                    /**
-                     * Определяем по коду честный знак
-                     */
-
-                    $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
-
-                    $dbal
-                        ->select('code.main')
-                        ->from(ProductSignCode::class, 'code')
-                        ->where('code.code LIKE :code')
-                        ->setParameter(
-                            key: 'code',
-                            value: $valueA.'%', // поиск по началу кода
-                        );
-
-                    $main = $dbal->fetchOne();
-
-                    if(empty($main))
-                    {
-                        $this->logger->warning(sprintf("products-sign: Код честного знака не найден: %s", $valueA));
-                        continue;
-                    }
-
+                    $cellCode = $worksheet->getCell('B'.$rowIndex);
+                    $valueCode = $cellCode->getValue(); // или getCalculatedValue() для формул
 
                     // 2. Получаем вторую ячейку (колонка D) Код упаковки
-                    $cellB = $worksheet->getCell('D'.$rowIndex);
-                    $valueB = $cellB->getValue();
-
+                    $cellPack = $worksheet->getCell('D'.$rowIndex);
+                    $valuePack = $cellPack->getValue();
 
                     /**
-                     * Присваиваем мешок коду честного знака
+                     * Отправляем обновление упаковки в асинхронный транспорт
                      */
 
-                    $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
+                    $ProductSignPackUpdateMessage = new ProductSignPackUpdateMessage(
+                        code: $valueCode,
+                        pack: $valuePack,
+                    );
 
-                    $dbal
-                        ->update(ProductSignInvariable::class)
-                        ->where('main = :main')
-                        ->setParameter('main', $main)
-                        ->set('part', ':part')
-                        ->setParameter('part', $valueB);
-
-                    $dbal->executeStatement();
-
-                    $this->logger->info(sprintf('%s => %s', $main, $valueB));
-
+                    $this->MessageDispatch->dispatch(
+                        message: $ProductSignPackUpdateMessage,
+                        transport: 'async',
+                    );
                 }
             }
+
+            /** Удаляем после обработки файл EXEL */
+            $this->filesystem->remove($SignFileExel->getRealPath());
         }
+
+
     }
 }
