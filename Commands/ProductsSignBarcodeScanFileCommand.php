@@ -48,7 +48,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
     name: 'baks:products:sign:barcode',
     description: 'Запускает сканирование директорий на предмет необработанных PDF'
 )]
-class ProductsSignBarcodeCommand extends Command
+class ProductsSignBarcodeScanFileCommand extends Command
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private readonly string $project_dir,
@@ -70,7 +70,7 @@ class ProductsSignBarcodeCommand extends Command
                 'public',
                 'upload',
                 'barcode',
-                'products-sign'
+                'products-sign',
             ]).DIRECTORY_SEPARATOR;
 
         $directory = new RecursiveDirectoryIterator($UPLOAD);
@@ -87,7 +87,7 @@ class ProductsSignBarcodeCommand extends Command
                 continue;
             }
 
-            if($info->getExtension() !== 'pdf')
+            if(false === in_array($info->getExtension(), ['pdf', 'xlsx']))
             {
                 continue;
             }
@@ -116,18 +116,18 @@ class ProductsSignBarcodeCommand extends Command
                 isset($arrDir[5]) ? new ProductModificationConst($arrDir[5]) : null,
                 false,
                 false,
-                'Восстановлен'
+                'Восстановлен',
             );
 
             /* Отправляем сообщение в шину для обработки файлов */
             $this->MessageDispatch->dispatch(
                 message: $ProductSignPdfMessage,
-                transport: 'products-sign'
+                transport: 'products-sign',
             );
 
             $io->writeln(sprintf(
                 '<fg=red>Добавили директорию сканирования: %s</>',
-                $dirPathName
+                $dirPathName,
             ));
         }
 

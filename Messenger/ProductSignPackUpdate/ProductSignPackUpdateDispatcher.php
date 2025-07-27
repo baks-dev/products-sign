@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Messenger\ProductSignPackUpdate;
 
 
+use BaksDev\Core\Cache\AppCacheInterface;
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Products\Sign\Repository\ProductSignByLikeCode\ProductSignByLikeCodeInterface;
 use BaksDev\Products\Sign\Repository\UpdateProductSignPack\UpdateProductSignPackInterface;
@@ -43,6 +44,7 @@ final class ProductSignPackUpdateDispatcher
         private readonly ProductSignByLikeCodeInterface $ProductSignByLikeCodeRepository,
         private readonly UpdateProductSignPackInterface $UpdateProductSignPackRepository,
         private readonly DeduplicatorInterface $deduplicator,
+        private readonly AppCacheInterface $cache
     ) {}
 
     public function __invoke(ProductSignPackUpdateMessage $message): void
@@ -80,6 +82,8 @@ final class ProductSignPackUpdateDispatcher
                 $ProductSignUid,
                 $message->getCode(),
             ));
+
+            $this->cache->init('products-sign')->clear();
 
             return;
         }
