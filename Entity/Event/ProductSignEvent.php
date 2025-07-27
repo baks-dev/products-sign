@@ -34,6 +34,7 @@ use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -91,6 +92,7 @@ class ProductSignEvent extends EntityEvent
 
     /**
      * Профиль пользователя (null - общий)
+     *
      * @deprecated переносится в ProductSignInvariable
      * @see ProductSignInvariable
      */
@@ -132,6 +134,11 @@ class ProductSignEvent extends EntityEvent
     public function getId(): ProductSignEventUid
     {
         return $this->id;
+    }
+
+    public function cancel()
+    {
+        $this->status = new ProductSignStatus(ProductSignStatusNew::class);
     }
 
     /**

@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Messenger\ProductSignPdf;
 
 use BaksDev\Barcode\Reader\BarcodeRead;
+use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
@@ -47,8 +48,10 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final readonly class ProductSignXlsxHandler
 {
     public function __construct(
+        #[Target('productsSignLogger')] private LoggerInterface $logger,
         #[Autowire('%kernel.project_dir%')] private string $upload,
         private MessageDispatchInterface $MessageDispatch,
+        private DeduplicatorInterface $deduplicator,
         private Filesystem $filesystem,
     ) {}
 
@@ -124,9 +127,32 @@ final readonly class ProductSignXlsxHandler
                     $cellCode = $worksheet->getCell('B'.$rowIndex);
                     $valueCode = $cellCode->getValue(); // или getCalculatedValue() для формул
 
+                    if(empty($valueCode))
+                    {
+                        $this->logger->critical(sprintf('products-sign: Код маркировки в строке B:%s не найден', $rowIndex));
+                        continue;
+                    }
+
+                    $Deduplicator = $this->deduplicator
+                        ->namespace('products-sign')
+                        ->expiresAfter('1 day')
+                        ->deduplication([$valueCode]);
+
+                    // Код добавлен в список обработки (либо уже обработан)
+                    if($Deduplicator->isExecuted())
+                    {
+                        continue;
+                    }
+
                     // 2. Получаем вторую ячейку (колонка D) Код упаковки
                     $cellPack = $worksheet->getCell('D'.$rowIndex);
                     $valuePack = $cellPack->getValue();
+
+                    if(empty($valuePack))
+                    {
+                        $this->logger->critical(sprintf('products-sign: Код упаковки в строке D:%s не найден ', $rowIndex));
+                        continue;
+                    }
 
                     /**
                      * Отправляем обновление упаковки в асинхронный транспорт
@@ -141,13 +167,19 @@ final readonly class ProductSignXlsxHandler
                         message: $ProductSignPackUpdateMessage,
                         transport: 'async',
                     );
+
+                    /**
+                     * Сохраняем дудубликатор кода, чтобы избежать повторной обработки
+                     * Если код не будет найден в базе - он будет удален из дедубликатора для следующего сканера
+                     *
+                     * @see ProductSignPackUpdateDispatcher
+                     */
+                    $Deduplicator->save();
                 }
             }
 
             /** Удаляем после обработки файл EXEL */
             $this->filesystem->remove($SignFileExel->getRealPath());
         }
-
-
     }
 }

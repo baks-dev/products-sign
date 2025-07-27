@@ -40,7 +40,6 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
     /**
      * Продавец честного пользователя
      */
-    #[Assert\NotBlank]
     #[Assert\Uuid]
     private readonly ?UserProfileUid $seller;
 

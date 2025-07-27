@@ -1,0 +1,126 @@
+{% trans_default_domain('products-sign.admin') %}
+
+<div class="modal-dialog modal-dialog-centered" style="max-width: 800px;">
+    {{ form_start(form) }}
+    <div class="modal-content p-3 border-bottom border-5 border-primary">
+        <div class="modal-header align-items-center">
+
+            <h5 class="modal-title">
+                {# Заголовок модального окна #}
+                {{ 'Скачать отчет честных знаков для вывода из оборота'|trans }}:
+            </h5>
+
+            <div class="btn btn-icon btn-sm btn-active-light-primary ms-2" data-bs-dismiss="modal" title="Close">
+                <span class="svg-icon svg-icon-2x"></span>
+            </div>
+        </div>
+
+        <div class="modal-body" id="modal-body">
+
+            {# <div class=" alert alert-warning w-100 py-2 small" role="alert">
+                Указанные честный знаки при списании не будут учавствовать в ....
+            </div> #}
+
+            <div class="d-flex gap-3 align-items-center my-3 clearfix">
+                <strong class="text-nowrap">Фильтр, по которому строиться отчет</strong>
+                <div class="w-100">
+                    <hr class="m-0">
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 clearfix">
+
+                <div class="w-100">
+                    {{ form_row(form.category, {
+                        label: 'Категория',
+                        placeholder: 'Выберите категорию из списка...',
+                        attr: { 'data-select' : 'select2' } }) }}
+                </div>
+
+
+                {# <div class="w-100 {{ form.material.vars.data ?: 'd-none' }}" id="material">
+                    {{ form_row(form.material, {
+                        label: 'Продукт',
+                        placeholder: 'Выберите продукцию из списка...',
+                        attr: { 'data-select' : 'select2' }
+                    }) }}
+                </div> #}
+
+                {# <div id="offer" class="w-100 {{ form.offer.vars.data ?: 'd-none' }}">
+                    {{ form_row(form.offer) }}
+                </div> #}
+
+                {# <div id="variation" class="w-100 {{ form.variation.vars.data ?: 'd-none' }}">
+                    {{ form_row(form.variation) }}
+                </div> #}
+
+                {# <div id="modification" class="w-100 {{ form.modification.vars.data ?: 'd-none' }}">
+                    <div>{{ form_row(form.modification) }}</div>
+                </div> #}
+
+            </div>
+
+            {# <div id="________offer" class="d-flex gap-3 w-100">
+            #}{# <div class="w-50">{{ form_row(form.offer) }}</div> #}{#
+            <div id="_______variation" class="d-flex w-100 gap-3">
+            #}{# <div class="w-100">{{ form_row(form.variation) }}</div> #}{#
+            <div id="_______modification" class="w-100">
+            #}{# <div>{{ form_row(form.modification) }}</div> #}{#
+            </div>
+        </div>
+
+    </div> #}
+
+            <div class="d-flex gap-3 align-items-center my-3">
+
+                <div class="w-100">
+                    <hr class="m-0">
+                </div>
+            </div>
+
+
+            <div class="d-flex gap-3 align-items-center my-3">
+                <div class="w-100 d-flex gap-3">
+
+                    <div class="w-25">
+                        {{ form_row(form.from, { label: 'Дата начала' }) }}
+                    </div>
+
+                    <div class="w-25">
+                        {{ form_row(form.to, { label: 'Дата окончания' }) }}
+                    </div>
+
+                    <div class="w-100">
+                        {{ form_row(form.seller, {
+                            label: 'Продавец', placeholder: 'Выберите продавца "Честного знака" из списка', attr: { 'data-select' : 'select2' }
+                        }) }}
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+
+        <div class="modal-footer">
+
+            <div class="d-flex gap-3">
+                {# Отмена #}
+
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                    {{ 'btn.cancel'|trans({}, 'core.btn') }}
+                </button>
+
+                {# Удалить #}
+                {{ form_widget(form.product_sign_report, { label: '
+				<span>'~ 'btn.save'|trans({}, 'core.btn') ~'</span>
+			'}) }}
+
+                {# <span class="spinner-border spinner-border-sm vertical-middle d-none"></span> #}
+            </div>
+        </div>
+    </div>
+    {{ form_end(form) }}
+</div>
+
+

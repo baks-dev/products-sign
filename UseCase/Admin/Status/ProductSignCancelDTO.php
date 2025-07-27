@@ -1,17 +1,17 @@
 <?php
 /*
  *  Copyright 2025.  Baks.dev <admin@baks.dev>
- *
+ *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
  *  in the Software without restriction, including without limitation the rights
  *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  copies of the Software, and to permit persons to whom the Software is furnished
  *  to do so, subject to the following conditions:
- *
+ *  
  *  The above copyright notice and this permission notice shall be included in all
  *  copies or substantial portions of the Software.
- *
+ *  
  *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  FITNESS FOR A PARTICULAR PURPOSE AND NON INFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,11 +29,12 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
+use BaksDev\Products\Sign\UseCase\Admin\Status\Invariable\ProductSignInvariableDTO;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see MaterialSignEvent */
-final readonly class ProductSignCancelDTO implements ProductSignEventInterface
+final class ProductSignCancelDTO implements ProductSignEventInterface
 {
     /**
      * Идентификатор события
@@ -43,34 +44,30 @@ final readonly class ProductSignCancelDTO implements ProductSignEventInterface
     private ProductSignEventUid $id;
 
     /**
-     * Профиль пользователя
-     */
-    #[Assert\NotBlank]
-    #[Assert\Uuid]
-    private UserProfileUid $profile;
-
-    /**
      * Статус
      */
     #[Assert\NotBlank]
-    private ProductSignStatus $status;
+    private readonly ProductSignStatus $status;
 
     /**
      * ID продукции в заказ
      */
 
-    private null $ord;
+    private readonly null $ord;
 
+    #[Assert\Valid]
+    private readonly ProductSignInvariableDTO $invariable;
 
-    public function __construct(UserProfileUid $profile)
+    public function __construct()
     {
-        $this->profile = $profile;
-
         /** В случае отмены всегда присваиваем статус New «Новый» и сбрасываем идентификтор продукции в заказе */
         $this->status = new ProductSignStatus(ProductSignStatusNew::class);
 
         /** Всегда сбрасываем идентификатор заказа */
         $this->ord = null;
+
+        /** Сбрасываем продавца */
+        $this->invariable = new ProductSignInvariableDTO()->setNullSeller();
     }
 
     /**
@@ -81,9 +78,10 @@ final readonly class ProductSignCancelDTO implements ProductSignEventInterface
         return $this->id;
     }
 
-    public function setId(ProductSignEventUid $id): void
+    public function setId(ProductSignEventUid $id): self
     {
         $this->id = $id;
+        return $this;
     }
 
     /**
@@ -95,14 +93,6 @@ final readonly class ProductSignCancelDTO implements ProductSignEventInterface
     }
 
     /**
-     * Profile
-     */
-    public function getProfile(): UserProfileUid
-    {
-        return $this->profile;
-    }
-
-    /**
      * Ord
      */
     public function getOrd(): null
@@ -110,5 +100,9 @@ final readonly class ProductSignCancelDTO implements ProductSignEventInterface
         return $this->ord;
     }
 
+    public function getInvariable(): ProductSignInvariableDTO
+    {
+        return $this->invariable;
+    }
 
 }

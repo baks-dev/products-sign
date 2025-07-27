@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,6 @@ use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\UseCase\Admin\Delete\ProductSignDeleteDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Delete\ProductSignDeleteForm;
 use BaksDev\Products\Sign\UseCase\Admin\Delete\ProductSignDeleteHandler;
@@ -47,7 +46,7 @@ final class DeleteController extends AbstractController
     #[Route('/admin/product/sign/delete/{part}', name: 'admin.delete', methods: ['GET', 'POST'])]
     public function delete(
         Request $request,
-        #[ParamConverter(ProductSignUid::class)] $part,
+        string $part,
         ProductSignByPartInterface $ProductSignByPart,
         ProductSignDeleteHandler $ProductSignDeleteHandler,
     ): Response

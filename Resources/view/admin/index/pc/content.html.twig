@@ -78,7 +78,96 @@
             {% endif %}
 
 
+            <div class="dropdown">
 
+                {# <button
+                        class="btn btn-warning dropdown-toggle "
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                >
+                    Документы
+                </button> #}
+
+                <button
+                        {# data-href="{{ path('materials-sign:admin.report') }}"
+                        class='btn btn-outline-success d-flex align-items-center gap-3 disabled'
+                        data-bs-toggle="modal"
+                        data-bs-target="#modal"
+                        title='Скачать отчет' #}
+
+                        class="btn btn-outline-success d-flex gap-2 align-items-center dropdown-toggle "
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+
+                >
+                    <div class="d-flex gap-1 align-items-center">
+                        {{ 'Очет'|trans({}, 'core.btn') }}
+
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor"
+                             class="bi bi-file-earmark-bar-graph-fill" viewBox="0 0 16 16">
+                            <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1m.5 10v-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5m-2.5.5a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5zm-3 0a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5z"/>
+                        </svg>
+                    </div>
+
+                </button>
+
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="{{ path('products-sign:admin.transfer') }}"
+                           class="dropdown-item"
+                           data-bs-toggle="modal"
+                           data-bs-target="#modal"
+                        >
+                            Передача юр. лицу
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ path('products-sign:admin.report') }}"
+                           class="dropdown-item"
+                           data-bs-toggle="modal"
+                           data-bs-target="#modal"
+                        >
+                            Вывод из оборота
+                        </a>
+                    </li>
+
+                    {# {% if constant('BaksDev\\Products\\Sign\\BaksDevProductsSignBundle::NAMESPACE') is defined %} #}
+
+
+                    {# <li>
+                                <hr class="dropdown-divider">
+                            </li> #}
+
+                    {# <li><h6 class="dropdown-header">Честный знак</h6></li> #}
+
+                    {# <li>
+                                <a href="{{ path('products-sign:admin.print.orders', {  order : order.order_id }) }}"
+                                   class="dropdown-item prnt"
+                                   data-bs-toggle="modal"
+                                   data-bs-target="#modal"
+                                >
+                                    Печать честных знаков
+                                </a>
+                            </li> #}
+
+                    {# <li>
+                                <a href="{{ path('products-sign:admin.txt.orders', { article: order.order_number, order : order.order_id }) }}"
+                                   class="dropdown-item"
+                                   target="_sign"
+                                >
+                                    Скачать список маркировок (.txt)
+                                </a>
+                            </li> #}
+
+
+                    {# {% endif %} #}
+
+
+                </ul>
+            </div>
 
 
         </div>

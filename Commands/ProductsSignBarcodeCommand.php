@@ -115,6 +115,7 @@ class ProductsSignBarcodeCommand extends Command
                 isset($arrDir[4]) ? new ProductVariationConst($arrDir[4]) : null,
                 isset($arrDir[5]) ? new ProductModificationConst($arrDir[5]) : null,
                 false,
+                false,
                 'Восстановлен'
             );
 

@@ -1,0 +1,163 @@
+{% trans_default_domain('user.order') %}
+
+{# Обязательные поля формы для заполнения #}
+
+<h5>Данные получателя</h5>
+
+<div class="d-flex justify-content-between">
+    <div class="w-50"><label>Пип профиля: *</label></div>
+    <div class="w-75 d-flex gap-3">
+        {{ form_row(form.users.userProfile.type) }}
+    </div>
+</div>
+
+
+<div class="d-flex flex-column gap-3" id='user_profile'>
+
+    {% set section = null %}
+
+
+    {% for value in form.users.userProfile.value %}
+
+        {% if section != value.vars.data.section %}
+            {% set section = value.vars.data.section %}
+
+            {# Закрываем секцию, eсли она не первая в цикле #}
+            {# {% if loop.first != true %}
+			</div></div>
+		{% endif %} #}
+
+
+            {# Открываем новую секцию #}
+
+            <div class="card-header border-light bg-body">
+                <div class="card-title">
+                    <h5>
+                        {# Название секции #}
+                        {{ value.vars.data.sectionName }}
+                    </h5>
+                </div>
+            </div>
+
+
+        {% endif %}
+
+
+
+        {# РЕНДЕР ПОЛЕЙ #}
+        {# {{ render_field(value.vars.data.type, value.value) }} #}
+        {# {{ render_field(value.vars.data.type, value.value) }} #}
+
+
+        {% if value.value is  defined %}
+
+            <div>
+                <div class="w-100 d-flex gap-2">
+
+                    {# {% if value.value.vars.help %}
+					
+					<div
+							class="btn btn-link btn-sm h-25 lh-1 text-decoration-none"
+							id="{{ value.value.vars.id }}"
+							data-bs-container="body"
+							data-bs-toggle="popover"
+							data-bs-placement="bottom"
+							data-bs-trigger_="onfocus"
+							data-bs-trigger="click"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg"
+								width="16" height="16"
+								fill="currentColor"
+								class="text-muted mb-1" viewBox="0 0 16 16"
+						>
+							<path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.496 6.033h.825c.138 0 .248-.113.266-.25.09-.656.54-1.134 1.342-1.134.686 0 1.314.343 1.314 1.168 0 .635-.374.927-.965 1.371-.673.489-1.206 1.06-1.168 1.987l.003.217a.25.25 0 0 0 .25.246h.811a.25.25 0 0 0 .25-.25v-.105c0-.718.273-.927 1.01-1.486.609-.463 1.244-.977 1.244-2.056 0-1.511-1.276-2.241-2.673-2.241-1.267 0-2.655.59-2.75 2.286a.237.237 0 0 0 .241.247zm2.325 6.443c.61 0 1.029-.394 1.029-.927 0-.552-.42-.94-1.029-.94-.584 0-1.009.388-1.009.94 0 .533.425.927 1.01.927z"/>
+						</svg>
+						
+					</div>
+						
+						<div id="{{ value.value.vars.id }}-content" class="d-none">
+							{{ value.value.vars.help }}
+						</div>
+
+					{% endif %} #}
+
+                    {{ form_label(value.value) }}
+
+                </div>
+
+                <div class="w-100">
+                    {{ form_widget(value.value, { attr: { class : 'rounded-4' }}) }}
+                </div>
+            </div>
+
+
+
+        {% endif %}
+
+
+
+
+        {# {% if value %}
+		<div class="d-flex justify-content-between">
+			<div class="w-50">
+				{{ form_label(value.value) }}
+			</div>
+			
+			
+			<div class="w-50">
+				{{ form_widget(value.value, { attr: { class : 'rounded-4' }}) }}
+			</div>
+		</div>
+	{% endif %} #}
+
+
+
+        {# <div class="d-flex justify-content-between">
+		<div class="w-50">
+			{{ form_label(value.value) }}
+		</div>
+		
+		
+		<div class="w-50">
+			{{ form_widget(value.value, { attr: { class : 'rounded-4' }}) }}
+		</div>
+	</div> #}
+
+
+    {% endfor %}
+
+
+</div>
+
+
+{#
+<div class="d-flex justify-content-between">
+	<div class="w-50">
+		<label for="fio">ФИО получателя: *</label>
+	</div>
+	<div class="w-50">
+		<input class="form-control rounded-4" type="text" id="fio" required="">
+	</div>
+</div>
+
+
+<div class="d-flex justify-content-between">
+	<div class="w-50">
+		<label for="phone">Контактный телефон: *</label>
+	</div>
+	<div class="w-50">
+		<input class="form-control rounded-4" type="text" id="phone" required="">
+	</div>
+</div>
+
+
+<div class="d-flex justify-content-between">
+	<div class="w-50">
+		<label for="email">Контактный Email:</label>
+	</div>
+	<div class="w-50">
+		<input class="form-control rounded-4"
+				type="email" id="email"
+				aria-label="Email">
+	</div>
+</div> #}

@@ -30,17 +30,17 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Messenger\ProductSignMessage;
+use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use Doctrine\Common\Collections\Criteria;
 
 final class ProductSignStatusHandler extends AbstractHandler
 {
     public function handle(ProductSignEventInterface $command): string|ProductSign
     {
-
         $this
             ->setCommand($command)
             ->preEventPersistOrUpdate(ProductSign::class, ProductSignEvent::class);
-
 
         /** Валидация всех объектов */
         if($this->validatorCollection->isInvalid())
@@ -48,27 +48,22 @@ final class ProductSignStatusHandler extends AbstractHandler
             return $this->validatorCollection->getErrorUniqid();
         }
 
-        /** Если отмена заказа и возврат честных знаков  */
-        //        if(true === ($command->getEvent() instanceof ProductSignEventUid) && $command->getStatus()->equals(ProductSignStatusNew::class))
-        //        {
-        //            /** Удаляем все элементу без статуса NEW */
-        //
-        //            $criteria = Criteria::create()
-        //                ->where(Criteria::expr()?->eq('main', $this->main->getId()))
-        //                ->andWhere(Criteria::expr()?->neq('status', ProductSignStatusNew::STATUS));
-        //
-        //            $elements = $this
-        //                ->getRepository(ProductSignEvent::class)
-        //                ->matching($criteria);
-        //
-        //            foreach($elements as $ProductSignEvent)
-        //            {
-        //                $this->remove($ProductSignEvent);
-        //            }
-        //        }
-
-
         $this->flush();
+
+        /** Если отмена честных знаков  */
+        if(true === ($command->getEvent() instanceof ProductSignEventUid) && $command->getStatus()->equals(ProductSignStatusNew::class))
+        {
+            /** Получаем предыдущее событие для удаления */
+            $lastProductSignEvent = $this
+                ->getRepository(ProductSignEvent::class)
+                ->find($command->getEvent());
+
+            if($lastProductSignEvent instanceof ProductSignEvent)
+            {
+                $lastProductSignEvent->cancel();
+                $this->flush();
+            }
+        }
 
         /* Отправляем сообщение в шину */
         $this->messageDispatch->dispatch(

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2024.  Baks.dev <admin@baks.dev>
+ *  Copyright 2025.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,6 @@ use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignCancelDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignCancelForm;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
@@ -47,27 +46,33 @@ final class CancelController extends AbstractController
     #[Route('/admin/product/sign/cancel/{part}', name: 'admin.cancel', methods: ['GET', 'POST'])]
     public function edit(
         Request $request,
-        #[ParamConverter(ProductSignUid::class)] $part,
+        string $part,
         ProductSignByPartInterface $ProductSignByPart,
         ProductSignStatusHandler $ProductSignStatusHandler,
     ): Response
     {
 
-        $ProductSignStatusDTO = new ProductSignCancelDTO($this->getProfileUid());
-        $ProductSignStatusDTO->setId(new ProductSignEventUid());
+        $ProductSignStatusDTO = new ProductSignCancelDTO()
+            ->setId(new ProductSignEventUid()); // Временно генерируем ID события
+        $ProductSignStatusDTO->getInvariable()
+            ->setPart($part);
+
 
         // Форма
         $form = $this
-            ->createForm(ProductSignCancelForm::class, $ProductSignStatusDTO, [
-                'action' => $this->generateUrl('products-sign:admin.cancel', ['part' => $part]),
-            ])
+            ->createForm(
+                type: ProductSignCancelForm::class,
+                data: $ProductSignStatusDTO,
+                options: ['action' => $this->generateUrl('products-sign:admin.cancel', ['part' => $part])],
+            )
             ->handleRequest($request);
+
 
         if($form->isSubmitted() && $form->isValid() && $form->has('product_sign_cancel'))
         {
             $this->refreshTokenForm($form);
 
-            /** Получаем все честные знаки по партии */
+            /** Получаем для отмены все честные знаки по указанной партии */
             $signs = $ProductSignByPart
                 ->forPart($part)
                 ->withStatusDecommission()
@@ -79,17 +84,22 @@ final class CancelController extends AbstractController
                     'page.cancel',
                     'danger.cancel',
                     'products-sign.admin',
-                    'Группы не найдено'
+                    'Группы не найдено',
                 );
 
                 return $this->redirectToRoute('products-sign:admin.index');
             }
 
 
-            foreach($signs as $sign)
+            foreach($signs as $ProductSignByPartResult)
             {
-                $ProductSignStatusDTO = new ProductSignCancelDTO($this->getProfileUid());
-                $ProductSignStatusDTO->setId(new ProductSignEventUid($sign['sign_event']));
+
+                //$ProductSignStatusDTO = new ProductSignCancelDTO();
+                //$ProductSignStatusDTO->setId($ProductSignByPartResult->getSignEvent()['sign_event']);
+                //                $ProductSignStatusDTO = new ProductSignCancelDTO()
+                //                    ->setId($ProductSignByPartResult->getSignEvent());
+
+                $ProductSignStatusDTO->setId($ProductSignByPartResult->getSignEvent());
 
                 $handle = $ProductSignStatusHandler->handle($ProductSignStatusDTO);
 
@@ -99,7 +109,7 @@ final class CancelController extends AbstractController
                 'page.cancel',
                 $handle instanceof ProductSign ? 'success.cancel' : 'danger.cancel',
                 'products-sign.admin',
-                $handle
+                $handle,
             );
 
             return $this->redirectToRoute('products-sign:admin.index');

@@ -49,7 +49,7 @@ final class ProductSignPackUpdateDispatcher
     {
         $Deduplicator = $this->deduplicator
             ->namespace('products-sign')
-            ->deduplication([$message, self::class]);
+            ->deduplication([$message->getCode()]);
 
         if($Deduplicator->isExecuted())
         {
@@ -81,7 +81,10 @@ final class ProductSignPackUpdateDispatcher
                 $message->getCode(),
             ));
 
-            $Deduplicator->save();
+            return;
         }
+
+        /** Удаляем дедубликатор для другого сканирования PDF */
+        $Deduplicator->delete();
     }
 }
