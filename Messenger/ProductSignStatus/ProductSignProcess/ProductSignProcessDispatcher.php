@@ -32,6 +32,8 @@ use BaksDev\Orders\Order\Repository\CurrentOrderEvent\CurrentOrderEventInterface
 use BaksDev\Ozon\Orders\BaksDevOzonOrdersBundle;
 use BaksDev\Ozon\Orders\Type\DeliveryType\TypeDeliveryDbsOzon;
 use BaksDev\Ozon\Orders\Type\DeliveryType\TypeDeliveryFbsOzon;
+use BaksDev\Ozon\Orders\Type\PaymentType\TypePaymentDbsOzon;
+use BaksDev\Ozon\Orders\Type\PaymentType\TypePaymentFbsOzon;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Repository\ProductSignNew\ProductSignNewInterface;
@@ -46,9 +48,14 @@ use BaksDev\Wildberries\Orders\BaksDevWildberriesOrdersBundle;
 use BaksDev\Wildberries\Orders\Type\DeliveryType\TypeDeliveryDbsWildberries;
 use BaksDev\Wildberries\Orders\Type\DeliveryType\TypeDeliveryFboWildberries;
 use BaksDev\Wildberries\Orders\Type\DeliveryType\TypeDeliveryFbsWildberries;
+use BaksDev\Wildberries\Orders\Type\PaymentType\TypePaymentDbsWildberries;
+use BaksDev\Wildberries\Orders\Type\PaymentType\TypePaymentFboWildberries;
+use BaksDev\Wildberries\Orders\Type\PaymentType\TypePaymentFbsWildberries;
 use BaksDev\Yandex\Market\Orders\BaksDevYandexMarketOrdersBundle;
 use BaksDev\Yandex\Market\Orders\Type\DeliveryType\TypeDeliveryDbsYaMarket;
 use BaksDev\Yandex\Market\Orders\Type\DeliveryType\TypeDeliveryFbsYaMarket;
+use BaksDev\Yandex\Market\Orders\Type\PaymentType\TypePaymentDbsYaMarket;
+use BaksDev\Yandex\Market\Orders\Type\PaymentType\TypePaymentFbsYandex;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -141,8 +148,9 @@ final readonly class ProductSignProcessDispatcher
             $message->getOrder(),
         );
 
-        $ProductSignInvariableDTO = $ProductSignProcessDTO->getInvariable();
-        $ProductSignInvariableDTO->setPart($message->getPart());
+        $ProductSignInvariableDTO = $ProductSignProcessDTO
+            ->getInvariable()
+            ->setPart($message->getPart());
 
 
         /** Если тип заказа Wildberries, Озон, Яндекс, Озон - Присваиваем владельца в качестве продавца */
@@ -195,7 +203,7 @@ final readonly class ProductSignProcessDispatcher
 
         $handle = $this->ProductSignStatusHandler->handle($ProductSignProcessDTO);
 
-        if(!$handle instanceof ProductSign)
+        if(false === ($handle instanceof ProductSign))
         {
             $this->logger->critical(
                 sprintf('%s: Ошибка при обновлении статуса честного знака', $handle),
@@ -218,11 +226,15 @@ final readonly class ProductSignProcessDispatcher
         if(class_exists(BaksDevYandexMarketOrdersBundle::class))
         {
             if(
-                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsYaMarket::class) ||
-                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsYaMarket::class)
+                // Способ доставки Yandex
+                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsYaMarket::class)
+                || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsYaMarket::class)
+
+                // Способ оплаты Yandex
+                || $CurrentOrderEvent->isDeliveryTypeEquals(TypePaymentFbsYandex::class)
+                || $CurrentOrderEvent->isDeliveryTypeEquals(TypePaymentDbsYaMarket::class)
             )
             {
-
                 return true;
             }
         }
@@ -231,11 +243,16 @@ final readonly class ProductSignProcessDispatcher
         if(class_exists(BaksDevOzonOrdersBundle::class))
         {
             if(
-                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsOzon::class) ||
-                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsOzon::class)
+                // Способ доставки Ozon
+                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsOzon::class)
+                || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsOzon::class)
+
+                // Способ оплаты Ozon
+                || $CurrentOrderEvent->isPaymentTypeEquals(TypePaymentDbsOzon::TYPE)
+                || $CurrentOrderEvent->isPaymentTypeEquals(TypePaymentFbsOzon::class)
+
             )
             {
-
                 return true;
             }
         }
@@ -243,12 +260,17 @@ final readonly class ProductSignProcessDispatcher
         if(class_exists(BaksDevWildberriesOrdersBundle::class))
         {
             if(
-                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsWildberries::class) ||
-                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsWildberries::class) ||
-                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFboWildberries::class)
+                // Способ доставки Wildberries
+                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsWildberries::class)
+                || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsWildberries::class)
+                || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFboWildberries::class)
+
+                // Способ оплаты Wildberries
+                || $CurrentOrderEvent->isDeliveryTypeEquals(TypePaymentDbsWildberries::class)
+                || $CurrentOrderEvent->isDeliveryTypeEquals(TypePaymentFbsWildberries::class)
+                || $CurrentOrderEvent->isDeliveryTypeEquals(TypePaymentFboWildberries::class)
             )
             {
-
                 return true;
             }
         }
