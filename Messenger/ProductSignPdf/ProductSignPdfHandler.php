@@ -244,11 +244,30 @@ final readonly class ProductSignPdfHandler
 
                 $decode->isError() ? ++$errors : ++$counter;
 
+                /**
+                 * Переименовываем директорию по коду честного знака (для уникальности)
+                 */
+
+                $scanDirName = md5($code);
+                $renameDir = $dirCode.$scanDirName.DIRECTORY_SEPARATOR;
+
+                if($this->filesystem->exists($renameDir) === true)
+                {
+                    // Удаляем директорию если уже имеется
+                    $this->filesystem->remove($dirMove);
+                }
+                else
+                {
+                    // переименовываем директорию если не существует
+                    $this->filesystem->rename($dirMove, $renameDir);
+                }
+
+
                 /** Присваиваем результат сканера */
 
                 $ProductSignCodeDTO = $ProductSignDTO->getCode();
                 $ProductSignCodeDTO->setCode($code);
-                $ProductSignCodeDTO->setName($md5);
+                $ProductSignCodeDTO->setName($scanDirName);
                 $ProductSignCodeDTO->setExt('png');
 
                 $ProductSignInvariableDTO = $ProductSignDTO->getInvariable();
