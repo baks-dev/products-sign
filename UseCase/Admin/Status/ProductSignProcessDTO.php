@@ -61,7 +61,7 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
     private Invariable\ProductSignInvariableDTO $invariable;
 
 
-    public function __construct(UserProfileUid $profile, OrderUid $ord)
+    public function __construct(OrderUid $ord)
     {
         $this->ord = $ord;
 
