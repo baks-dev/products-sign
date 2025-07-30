@@ -78,7 +78,7 @@ class ProductsCodeRepackDirectoryWebpCdnCommand extends Command
         $questions['-'] = 'Выйти';
 
         $question = new ChoiceQuestion(
-            question: 'Сжатие стикеров Честных знаков продукции (Ctrl+C чтобы выйти)',
+            question: 'Cканирование директорий на предмет не пережатых стикеров Честных знаков продукции (Ctrl+C чтобы выйти)',
             choices: $questions,
             default: '0',
         );
