@@ -586,6 +586,14 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                     ->addSearchLike('orders.number');
             }
 
+            // поиск по номеру ГТД формата 10702070/190725/5247456
+            elseif(preg_match('/^\d{8}\/\d{6}\/\d{7}$/', $this->search->getQuery()))
+            {
+                $dbal
+                    ->createSearchQueryBuilder($this->search)
+                    ->addSearchLike('invariable.number');
+            }
+
             else
             {
                 $dbal
