@@ -582,6 +582,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 preg_match('/^\d{3}\.\d{3}\.\d{3}\.\d{3}$/', $this->search->getQuery())
                 || str_starts_with($this->search->getQuery(), 'o-')
                 || str_starts_with($this->search->getQuery(), 'y-')
+                || str_starts_with($this->search->getQuery(), 'w-')
             )
             {
 
@@ -604,6 +605,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                     ->createSearchQueryBuilder($this->search)
                     ->addSearchLike('code.code')
                     ->addSearchLike('orders.number')
+                    ->addSearchLike('invariable.number')
                     ->addSearchLike('product_modification.article')
                     ->addSearchLike('product_variation.article')
                     ->addSearchLike('product_offer.article')
