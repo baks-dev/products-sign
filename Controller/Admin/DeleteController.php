@@ -30,7 +30,6 @@ use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Core\Type\UidType\ParamConverter;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
-use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\UseCase\Admin\Delete\ProductSignDeleteDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Delete\ProductSignDeleteForm;
 use BaksDev\Products\Sign\UseCase\Admin\Delete\ProductSignDeleteHandler;
@@ -74,7 +73,7 @@ final class DeleteController extends AbstractController
                 ->withStatusNew()
                 ->findAll();
 
-            if(false === $signs)
+            if(false === $signs || false === $signs->valid())
             {
                 $this->addFlash(
                     'page.cancel',
@@ -87,10 +86,10 @@ final class DeleteController extends AbstractController
             }
 
 
-            foreach($signs as $sign)
+            foreach($signs as $ProductSignByPartResult)
             {
                 $ProductSignDeleteDTO = new ProductSignDeleteDTO($this->getProfileUid());
-                $ProductSignDeleteDTO->setId(new ProductSignEventUid($sign['sign_event']));
+                $ProductSignDeleteDTO->setId($ProductSignByPartResult->getSignEvent());
                 $handle = $ProductSignDeleteHandler->handle($ProductSignDeleteDTO);
             }
 
