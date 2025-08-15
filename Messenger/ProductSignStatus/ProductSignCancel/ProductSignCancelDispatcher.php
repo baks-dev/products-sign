@@ -42,8 +42,8 @@ final class ProductSignCancelDispatcher
 
     public function __invoke(ProductSignCancelMessage $message): void
     {
-        $ProductSignCancelDTO = new ProductSignCancelDTO($message->getProfile());
-        $ProductSignCancelDTO->setId($message->getEvent());
+        $ProductSignCancelDTO = new ProductSignCancelDTO()
+            ->setId($message->getEvent());
 
         $this->productSignStatusHandler->handle($ProductSignCancelDTO);
 
@@ -51,8 +51,8 @@ final class ProductSignCancelDispatcher
             'Отменили «Честный знак» (возвращаем статус New «Новый»)',
             [
                 self::class.':'.__LINE__,
-                'ProductSignUid' => $message->getEvent()
-            ]
+                'ProductSignUid' => $message->getEvent(),
+            ],
         );
     }
 }

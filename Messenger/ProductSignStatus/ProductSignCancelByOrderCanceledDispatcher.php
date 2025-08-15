@@ -96,6 +96,7 @@ final readonly class ProductSignCancelByOrderCanceledDispatcher
             ->forOrder($message->getId())
             ->findAll();
 
+
         if(false === $ProductSignEvents || $ProductSignEvents->valid() === false)
         {
             return;

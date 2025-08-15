@@ -40,11 +40,12 @@ final class ProductSignProcessByOrderRepository implements ProductSignProcessByO
 {
     private OrderUid|false $order = false;
 
+    private bool $onlyProcess = false;
+
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder) {}
 
     public function forOrder(Order|OrderUid|string $order): self
     {
-
         if(empty($order))
         {
             $this->order = false;
@@ -65,6 +66,12 @@ final class ProductSignProcessByOrderRepository implements ProductSignProcessByO
 
         return $this;
     }
+
+    public function onlyStatusProcess(): void
+    {
+        $this->onlyProcess = true;
+    }
+
 
     /**
      * Метод возвращает события всех Честных знаков по заказу со статусом Process «В резерве»
@@ -90,13 +97,16 @@ final class ProductSignProcessByOrderRepository implements ProductSignProcessByO
                 OrderUid::TYPE
             );
 
-        $dbal
-            ->andWhere('event.status = :status')
-            ->setParameter(
-                'status',
-                ProductSignStatusProcess::class,
-                ProductSignStatus::TYPE
-            );
+        if(true === $this->onlyProcess)
+        {
+            $dbal
+                ->andWhere('event.status = :status')
+                ->setParameter(
+                    'status',
+                    ProductSignStatusProcess::class,
+                    ProductSignStatus::TYPE,
+                );
+        }
 
         $dbal
             ->join(
