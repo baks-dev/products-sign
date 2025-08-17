@@ -23,18 +23,36 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Repository\ProductSignCodeByDigest;
+namespace BaksDev\Products\Sign\Repository\ProductSignCodeByDigest\Tests;
 
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use BaksDev\Core\Doctrine\DBALQueryBuilder;
+use BaksDev\Products\Sign\Repository\ProductSignCodeByDigest\ProductSignCodeByDigestInterface;
+use Doctrine\ORM\EntityManagerInterface;
+use PHPUnit\Framework\Attributes\DependsOnClass;
+use PHPUnit\Framework\Attributes\Group;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Component\DependencyInjection\Attribute\When;
 
-final readonly class ProductSignCodeByDigestResult
+
+/**
+ * @group products-sign
+ */
+#[Group('products-sign')]
+#[When(env: 'test')]
+class ProductSignCodeByDigestRepositoryTest extends KernelTestCase
 {
-    public function __construct(
-        private string $main
-    ) {}
 
-    public function getIdentifier(): ProductSignUid
+    public function testUseCase(): void
     {
-        return new ProductSignUid($this->main);
+        /** @var ProductSignCodeByDigestInterface $ProductSignCodeByDigestRepository */
+        $ProductSignCodeByDigestRepository = self::getContainer()->get(ProductSignCodeByDigestInterface::class);
+
+        $result = $ProductSignCodeByDigestRepository->find('e9158e5479fc1ad9ffdb129ffb6061e2');
+
+        // dump($result);
+
+        self::assertTrue(true);
+
     }
+
 }

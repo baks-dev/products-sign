@@ -23,14 +23,14 @@
 
 namespace BaksDev\Products\Sign\Repository\ProductSignCodeByDigest;
 
-use Generator;
+use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 
 interface ProductSignCodeByDigestInterface
 {
     /**
      * Метод возвращает идентификатор файла изображения честного знака в директории
      *
-     * @return Generator<int, ProductSignCodeByDigestResult>|false
+     * @return ProductSignUid|false
      */
-    public function find(string $name): ProductSignCodeByDigestResult|false;
+    public function find(string $name): ProductSignUid|false;
 }

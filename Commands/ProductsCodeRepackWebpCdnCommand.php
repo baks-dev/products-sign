@@ -29,8 +29,18 @@ namespace BaksDev\Products\Sign\Commands;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImage;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
+use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
+use BaksDev\Products\Sign\Repository\ProductSignCodeByDigest\ProductSignCodeByDigestInterface;
 use BaksDev\Products\Sign\Repository\UnCompressProductsCode\UnCompressProductsCodeInterface;
 use BaksDev\Products\Sign\Repository\UnCompressProductsCode\UnCompressProductsCodeResult;
+use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use Doctrine\ORM\Mapping\Table;
+use FilesystemIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use ReflectionAttribute;
+use ReflectionClass;
+use SplFileInfo;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -38,6 +48,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 #[AsCommand(
     name: 'baks:products:code:repack:webp:cdn',
@@ -46,9 +57,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class ProductsCodeRepackWebpCdnCommand extends Command
 {
     public function __construct(
+        #[Autowire('%kernel.project_dir%')] private readonly string $upload,
         private readonly UnCompressProductsCodeInterface $UnCompressProductsCode,
-        private readonly CDNUploadImage $CDNUploadImage,
-        private readonly MessageDispatchInterface $MessageDispatch
+        private readonly MessageDispatchInterface $MessageDispatch,
+        private readonly ProductSignCodeByDigestInterface $ProductSignCodeByDigest,
     )
     {
         parent::__construct();
@@ -58,44 +70,14 @@ class ProductsCodeRepackWebpCdnCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        /** Получаем все изображения продукта без сжатия */
-        $images = $this->UnCompressProductsCode->findAll();
-
-        if(false === $images || false === $images->valid())
-        {
-            $io->success('Изображений для сжатия не найдено');
-            return Command::SUCCESS;
-        }
-
-        $helper = $this->getHelper('question');
-
-        /**
-         * Интерактивная форма списка профилей
-         */
-
-        $questions[] = 'Все';
-        $questions['+'] = 'Выполнить все асинхронно';
-        $questions['-'] = 'Выйти';
-
-        $question = new ChoiceQuestion(
-            question: 'Сжатие стикеров Честных знаков продукции (Ctrl+C чтобы выйти)',
-            choices: $questions,
-            default: '0'
-        );
-
-        $key = $helper->ask($input, $output, $question);
-
-        /**
-         * Выходим без выполненного запроса
-         */
-
-        if($key === '-' || $key === 'Выйти')
-        {
-            return Command::SUCCESS;
-        }
-
         $progressBar = new ProgressBar($output);
         $progressBar->start();
+
+        /**
+         * Обрабатываем файлы по базе данных
+         */
+
+        $images = $this->UnCompressProductsCode->findAll();
 
         /** @var UnCompressProductsCodeResult $UnCompressProductsCodeResult */
         foreach($images as $UnCompressProductsCodeResult)
@@ -104,7 +86,7 @@ class ProductsCodeRepackWebpCdnCommand extends Command
             {
                 $io->writeln(sprintf(
                     '<fg=red>Ошибка при сжатии изображения: класс %s не найден</>',
-                    $UnCompressProductsCodeResult->getEntity()
+                    $UnCompressProductsCodeResult->getEntity(),
                 ));
 
                 return Command::FAILURE;
@@ -113,33 +95,75 @@ class ProductsCodeRepackWebpCdnCommand extends Command
             $CDNUploadImageMessage = new CDNUploadImageMessage(
                 $UnCompressProductsCodeResult->getIdentifier(),
                 $UnCompressProductsCodeResult->getEntity(),
-                $UnCompressProductsCodeResult->getName()
+                $UnCompressProductsCodeResult->getName(),
             );
 
-            if($key === '0' || $key === 'Все')
-            {
-                $compress = ($this->CDNUploadImage)($CDNUploadImageMessage);
-
-                if($compress === false)
-                {
-                    $io->writeln(sprintf(
-                            '<fg=red>Ошибка при сжатии изображения %s: %s</>',
-                            $UnCompressProductsCodeResult->getEntity(),
-                            $UnCompressProductsCodeResult->getIdentifier())
-                    );
-                }
-            }
-
-            if($key === '+' || $key === 'Выполнить все асинхронно')
-            {
-                $this->MessageDispatch->dispatch(
-                    message: $CDNUploadImageMessage,
-                    transport: 'files-res'
-                );
-            }
+            $this->MessageDispatch->dispatch(message: $CDNUploadImageMessage);
 
             $progressBar->advance();
         }
+
+
+        /**
+         * Проверяем директории на признак не пережатых файлов
+         */
+
+
+        /** Выделяем из сущности название таблицы для директории файлов */
+        $ref = new ReflectionClass(ProductSignCode::class);
+
+        /** @var ReflectionAttribute $current */
+        $current = current($ref->getAttributes(Table::class));
+        $TABLE = $current->getArguments()['name'] ?? 'images';
+
+        $upload = null;
+        $upload[] = $this->upload;
+        $upload[] = 'public';
+        $upload[] = 'upload';
+        $upload[] = $TABLE;
+
+        $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
+
+        $iterator = new RecursiveDirectoryIterator($uploadDir, FilesystemIterator::SKIP_DOTS);
+
+        /** @var SplFileInfo $info */
+        foreach(new RecursiveIteratorIterator($iterator) as $info)
+        {
+            /** Удаляем, если в директории имеется файл output.pdf (файл документа) */
+
+            if($info->isFile() && $info->getFilename() === 'output.pdf')
+            {
+                unlink($info->getRealPath()); // удаляем файл
+                rmdir($info->getPath()); // удаляем пустую директорию
+
+                continue;
+            }
+
+            /** Определяем файл в базе данных по названию директории */
+            $dirName = basename(dirname($info->getRealPath()));
+            $ProductSignUid = $this->ProductSignCodeByDigest->find($dirName);
+
+            if(false === $ProductSignUid instanceof ProductSignUid)
+            {
+                $io->warning(sprintf('Честный знак %s не найден в базе данных', $dirName));
+
+                unlink($info->getRealPath()); // удаляем файл
+                rmdir($info->getPath());  // удаляем пустую директорию
+
+                continue;
+            }
+
+            $CDNUploadImageMessage = new CDNUploadImageMessage(
+                $ProductSignUid,
+                ProductSignCode::class,
+                $dirName,
+            );
+
+            $this->MessageDispatch->dispatch(message: $CDNUploadImageMessage);
+
+            $progressBar->advance();
+        }
+
 
         $progressBar->finish();
         $io->success('Изображения успешно сжаты');

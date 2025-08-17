@@ -27,6 +27,7 @@ namespace BaksDev\Products\Sign\Repository\ProductSignCodeByDigest;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
+use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 
 
 final readonly class ProductSignCodeByDigestRepository implements ProductSignCodeByDigestInterface
@@ -36,12 +37,12 @@ final readonly class ProductSignCodeByDigestRepository implements ProductSignCod
     /**
      * Метод возвращает идентификатор файла изображения честного знака в директории
      */
-    public function find(string $name): ProductSignCodeByDigestResult|false
+    public function find(string $name): ProductSignUid|false
     {
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
 
         $dbal
-            ->addSelect('code.main')
+            ->addSelect('code.main AS value')
             ->from(ProductSignCode::class, 'code')
             ->where('code.name = :name')
             ->setParameter(
@@ -49,8 +50,6 @@ final readonly class ProductSignCodeByDigestRepository implements ProductSignCod
                 value: $name,
             );
 
-        $result = $dbal->fetchHydrate(ProductSignCodeByDigestResult::class);
-
-        return $result instanceof ProductSignCodeByDigestResult ? $result : false;
+        return $dbal->fetchHydrate(ProductSignUid::class);
     }
 }
