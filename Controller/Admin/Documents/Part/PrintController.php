@@ -54,7 +54,7 @@ final class PrintController extends AbstractController
 
         return $this->render(
             ['codes' => $codes,],
-            routingName: 'admin.print',
+            dir: 'admin.print',
         );
     }
 

@@ -87,6 +87,12 @@ final class DecommissionProductSignHandler
                 return sprintf('%s: Ошибка при списании честных знаков', $handle);
             }
 
+            /** Разбиваем все по 100 */
+            if($i % 100 === 0)
+            {
+                $ProductSignUid = new ProductSignUid();
+            }
+
             $i++;
         }
 
