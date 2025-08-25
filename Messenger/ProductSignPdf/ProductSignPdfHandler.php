@@ -42,7 +42,6 @@ use DateTimeImmutable;
 use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
 use Imagick;
-use ImagickPixel;
 use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -208,7 +207,7 @@ final readonly class ProductSignPdfHandler
                 /** Преобразуем PDF страницу в PNG и сохраняем временно для расчета дайджеста md5 */
                 $Imagick->setIteratorIndex($number);
                 $Imagick->setImageFormat('png');
-                $Imagick->borderImage(new ImagickPixel("white"), 5, 5);
+                $Imagick->borderImage('white', 5, 5);
                 $Imagick->writeImage($fileTemp);
 
                 /** Рассчитываем дайджест файла для перемещения */
