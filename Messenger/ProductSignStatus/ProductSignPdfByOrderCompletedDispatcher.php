@@ -30,6 +30,9 @@ use BaksDev\Files\Resources\Twig\ImagePathExtension;
 use BaksDev\Orders\Order\Messenger\OrderMessage;
 use BaksDev\Orders\Order\Repository\OrderProducts\OrderProductResultDTO;
 use BaksDev\Orders\Order\Repository\OrderProducts\OrderProductsInterface;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
 use Doctrine\ORM\Mapping\Table;
@@ -66,7 +69,7 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
             ->namespace('products-sign')
             ->deduplication([
                 $OrderUid,
-                self::class
+                self::class,
             ]);
 
         if($Deduplicator->isExecuted())
@@ -109,9 +112,9 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
             $paths[] = $OrderUid;
             $paths[] = (string) $product->getProduct();
 
-            !$product->getProductOfferConst() ?: $paths[] = (string) $product->getProductOfferConst();
-            !$product->getProductVariationConst() ?: $paths[] = (string) $product->getProductVariationConst();
-            !$product->getProductModificationConst() ?: $paths[] = (string) $product->getProductModificationConst();
+            false === ($product->getProductOfferConst() instanceof ProductOfferConst) ?: $paths[] = (string) $product->getProductOfferConst();
+            false === ($product->getProductVariationConst() instanceof ProductVariationConst) ?: $paths[] = (string) $product->getProductVariationConst();
+            false === ($product->getProductModificationConst() instanceof ProductModificationConst) ?: $paths[] = (string) $product->getProductModificationConst();
 
             $uploadDir = implode(DIRECTORY_SEPARATOR, $paths);
             $uploadFile = $uploadDir.DIRECTORY_SEPARATOR.'output.pdf';
@@ -139,7 +142,7 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
                 ->modification($product->getProductModificationConst())
                 ->findAll();
 
-            if(empty($codes))
+            if(false === $codes || false === $codes->valid())
             {
                 $Deduplicator->delete();
                 return;
@@ -156,12 +159,17 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
             $projectDir = implode(DIRECTORY_SEPARATOR, [
                 $this->projectDir,
                 'public',
-                ''
+                '',
             ]);
 
-            foreach($codes as $code)
+            foreach($codes as $ProductSignByOrderResult)
             {
-                $Process[] = ($code['code_cdn'] === false ? $projectDir : '').$this->ImagePathExtension->imagePath($code['code_image'], $code['code_ext'], $code['code_cdn']);
+                $Process[] = ($ProductSignByOrderResult->isCodeCdn() === false ? $projectDir : '')
+                    .$this->ImagePathExtension->imagePath(
+                        name: $ProductSignByOrderResult->getCodeImage(),
+                        ext: $ProductSignByOrderResult->getCodeExt(),
+                        cdn: $ProductSignByOrderResult->isCodeCdn(),
+                    );
             }
 
             $Process[] = $uploadFile;
