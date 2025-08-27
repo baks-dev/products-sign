@@ -43,6 +43,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
 final class TransferController extends AbstractController
 {
+    /**
+     * Отчет о передаче честных знаков
+     */
     #[Route('/admin/product/sign/transfer', name: 'admin.transfer', methods: ['GET', 'POST'])]
     public function off(
         Request $request,

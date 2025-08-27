@@ -26,13 +26,20 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Repository\ProductSignReport;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
+use BaksDev\Delivery\Entity\Delivery;
+use BaksDev\Delivery\Type\Id\DeliveryUid;
 use BaksDev\Orders\Order\Entity\Invariable\OrderInvariable;
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Entity\Products\Price\OrderPrice;
+use BaksDev\Orders\Order\Entity\User\Delivery\OrderDelivery;
+use BaksDev\Orders\Order\Entity\User\OrderUser;
+use BaksDev\Products\Category\Entity\CategoryProduct;
 use BaksDev\Products\Category\Entity\Offers\CategoryProductOffers;
 use BaksDev\Products\Category\Entity\Offers\Variation\CategoryProductVariation;
 use BaksDev\Products\Category\Entity\Offers\Variation\Modification\CategoryProductModification;
+use BaksDev\Products\Category\Type\Id\CategoryProductUid;
+use BaksDev\Products\Product\Entity\Category\ProductCategory;
 use BaksDev\Products\Product\Entity\Offers\ProductOffer;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
 use BaksDev\Products\Product\Entity\Offers\Variation\ProductVariation;
@@ -50,6 +57,9 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDecommi
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use BaksDev\Users\Profile\TypeProfile\Entity\Section\Fields\TypeProfileSectionField;
+use BaksDev\Users\Profile\TypeProfile\Entity\TypeProfile;
+use BaksDev\Users\Profile\TypeProfile\Type\Id\TypeProfileUid;
+use BaksDev\Users\Profile\UserProfile\Entity\Event\UserProfileEvent;
 use BaksDev\Users\Profile\UserProfile\Entity\Event\Value\UserProfileValue;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
@@ -78,6 +88,10 @@ final class ProductSignReportRepository implements ProductSignReportInterface
     private ProductModificationConst|false $modification = false;
 
     private array|false $status = false;
+
+    private DeliveryUid|false $type = false;
+
+    private CategoryProductUid|false $category = false;
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder)
     {
@@ -230,6 +244,41 @@ final class ProductSignReportRepository implements ProductSignReportInterface
     {
         // Честные знаки со статусом Decommission «Списание» также должны быть в отчете на передачу
         $this->status = [ProductSignStatusProcess::STATUS, ProductSignStatusDecommission::STATUS];
+
+        return $this;
+    }
+
+    public function fromProductCategory(CategoryProduct|CategoryProductUid|null|false $category): self
+    {
+        if(empty($category))
+        {
+            $this->category = false;
+            return $this;
+        }
+
+        if($category instanceof CategoryProduct)
+        {
+            $category = $category->getId();
+        }
+
+        $this->category = $category;
+        return $this;
+    }
+
+    public function orderType(Delivery|DeliveryUid|null|false $type): self
+    {
+        if(empty($type))
+        {
+            $this->type = false;
+            return $this;
+        }
+
+        if($type instanceof Delivery)
+        {
+            $type = $type->getId();
+        }
+
+        $this->type = $type;
 
         return $this;
     }
@@ -393,6 +442,24 @@ final class ProductSignReportRepository implements ProductSignReportInterface
             'product.id = invariable.product',
         );
 
+        /** Настройки категорий */
+
+        if($this->category instanceof CategoryProductUid)
+        {
+            $dbal
+                ->join(
+                    'product',
+                    ProductCategory::class,
+                    'product_categories_product',
+                    'product_categories_product.event = product.event AND product_categories_product.category = :category',
+                )
+                ->setParameter(
+                    key: 'category',
+                    value: $this->category,
+                    type: CategoryProductUid::TYPE,
+                );
+        }
+
         $dbal->join(
             'product',
             ProductTrans::class,
@@ -425,8 +492,6 @@ final class ProductSignReportRepository implements ProductSignReportInterface
         );
 
 
-        /** Настройки категорий */
-
         $dbal->leftJoin(
             'product_offer',
             CategoryProductOffers::class,
@@ -458,6 +523,29 @@ final class ProductSignReportRepository implements ProductSignReportInterface
             'ord.id = event.ord',
         );
 
+        if($this->type instanceof DeliveryUid)
+        {
+            $dbal->leftJoin(
+                'ord',
+                OrderUser::class,
+                'ord_usr',
+                'ord_usr.event = ord.id',
+            );
+
+            $dbal
+                ->join(
+                    'ord_usr',
+                    OrderDelivery::class,
+                    'order_delivery',
+                    'order_delivery.usr = ord_usr.id AND order_delivery.delivery = :delivery',
+                )
+                ->setParameter(
+                    key: 'delivery',
+                    value: $this->type,
+                    type: DeliveryUid::TYPE,
+                );
+        }
+
 
         $dbal
             ->addSelect('order_invariable.number')
@@ -467,6 +555,7 @@ final class ProductSignReportRepository implements ProductSignReportInterface
                 'order_invariable',
                 'order_invariable.main = event.ord',
             );
+
 
         $dbal
             ->leftJoin(

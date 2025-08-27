@@ -43,6 +43,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 #[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
 final class ReportController extends AbstractController
 {
+    /**
+     * Отчет о реализации честных знаков
+     */
     #[Route('/admin/product/sign/report', name: 'admin.report', methods: ['GET', 'POST'])]
     public function off(
         Request $request,
@@ -69,7 +72,10 @@ final class ReportController extends AbstractController
             $ProductSignReport
                 ->fromSeller($ProductSignReportDTO->getSeller())
                 ->dateFrom($ProductSignReportDTO->getFrom())
-                ->dateTo($ProductSignReportDTO->getTo());
+                ->dateTo($ProductSignReportDTO->getTo())
+                ->fromProductCategory($ProductSignReportDTO->getCategory()) // Определенной категории товары
+                ->orderType($ProductSignReportDTO->getDelivery()) // только определенного типа доставки
+            ;
 
             /** Получаем только в завершенные и возвращаем хвост кодировки */
             $data = $ProductSignReport

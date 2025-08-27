@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Forms\ProductsSignReport;
 
+use BaksDev\Delivery\Forms\Delivery\DeliveryForm;
 use BaksDev\Products\Category\Repository\CategoryChoice\CategoryChoiceInterface;
 use BaksDev\Products\Category\Type\Id\CategoryProductUid;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileChoice\UserProfileChoiceInterface;
@@ -59,9 +60,10 @@ final class ProductSignReportForm extends AbstractType
                 return $category->getOptions();
             },
             'label' => false,
-            //'required' => false,
+            'required' => false,
         ]);
 
+        $builder->add('delivery', DeliveryForm::class, ['required' => false]);
 
         $builder->add('from', DateType::class, [
             'widget' => 'single_text',

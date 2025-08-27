@@ -26,7 +26,9 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Forms\ProductsSignReport;
 
 
+use BaksDev\Delivery\Type\Id\DeliveryUid;
 use BaksDev\Products\Category\Type\Id\CategoryProductUid;
+use BaksDev\Users\Profile\TypeProfile\Type\Id\TypeProfileUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use DateTimeImmutable;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -43,6 +45,29 @@ final class ProductSignReportDTO
     /** Категория */
     #[Assert\Uuid]
     private ?CategoryProductUid $category = null;
+
+
+    private ?DeliveryUid $delivery = null;
+
+    /**
+     * Delivery
+     */
+    public function getDelivery(): ?DeliveryUid
+    {
+        return $this->delivery;
+    }
+
+    public function setDelivery(DeliveryUid|string|null $delivery): self
+    {
+        if(is_string($delivery))
+        {
+            $delivery = new DeliveryUid($delivery);
+        }
+
+        $this->delivery = $delivery;
+
+        return $this;
+    }
 
 
     private ?DateTimeImmutable $from = null;
@@ -115,5 +140,6 @@ final class ProductSignReportDTO
         $this->seller = $seller;
         return $this;
     }
+
 
 }

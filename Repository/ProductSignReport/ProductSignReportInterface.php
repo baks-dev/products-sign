@@ -23,6 +23,9 @@
 
 namespace BaksDev\Products\Sign\Repository\ProductSignReport;
 
+use BaksDev\Delivery\Entity\Delivery;
+use BaksDev\Delivery\Type\Id\DeliveryUid;
+use BaksDev\Products\Category\Entity\CategoryProduct;
 use BaksDev\Products\Category\Type\Id\CategoryProductUid;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
@@ -43,7 +46,9 @@ interface ProductSignReportInterface
 
     public function dateTo(DateTimeImmutable $to): self;
 
-    //public function setCategory(CategoryProductUid|string|null|false $category): self;
+    public function fromProductCategory(CategoryProduct|CategoryProductUid|null|false $category): self;
+
+    public function orderType(Delivery|DeliveryUid|null|false $type): self;
 
     /**
      * Product

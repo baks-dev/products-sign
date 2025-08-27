@@ -41,6 +41,7 @@ use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserPro
 use DateTimeImmutable;
 use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
+use Exception;
 use Imagick;
 use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
@@ -158,7 +159,6 @@ final readonly class ProductSignPdfHandler
             $errors = 0;
 
 
-
             /** Директория загрузки файла с кодом */
 
             $ref = new ReflectionClass(ProductSignCode::class);
@@ -169,7 +169,7 @@ final readonly class ProductSignPdfHandler
             {
                 $this->logger->critical(
                     sprintf('Невозможно определить название таблицы из класса сущности %s ', ProductSignCode::class),
-                    [self::class.':'.__LINE__]
+                    [self::class.':'.__LINE__],
                 );
             }
 
@@ -207,7 +207,20 @@ final readonly class ProductSignPdfHandler
                 /** Преобразуем PDF страницу в PNG и сохраняем временно для расчета дайджеста md5 */
                 $Imagick->setIteratorIndex($number);
                 $Imagick->setImageFormat('png');
-                $Imagick->borderImage('white', 5, 5);
+
+                /**
+                 * В некоторых случаях может вызывать ошибку,
+                 * в таком случае сохраняем без рамки и пробуем отсканировать как есть
+                 */
+                try
+                {
+                    $Imagick->borderImage('white', 5, 5);
+                }
+                catch(Exception $e)
+                {
+                    $this->logger->critical('products-sign: Ошибка при добавлении рамки к изображению. Пробуем отсканировать как есть.', [$e->getMessage()]);
+                }
+
                 $Imagick->writeImage($fileTemp);
 
                 /** Рассчитываем дайджест файла для перемещения */
@@ -298,13 +311,13 @@ final readonly class ProductSignPdfHandler
                 {
                     $this->logger->info(
                         sprintf('%s: %s', $handle->getId(), $code),
-                        [self::class.':'.__LINE__]
+                        [self::class.':'.__LINE__],
                     );
 
                     /** Создаем комманду для отправки файла CDN */
                     $this->messageDispatch->dispatch(
                         new CDNUploadImageMessage($handle->getId(), ProductSignCode::class, $md5),
-                        transport: 'files-res-low'
+                        transport: 'files-res-low',
                     );
 
                     $totalPurchase++;
