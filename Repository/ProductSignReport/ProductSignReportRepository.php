@@ -516,12 +516,13 @@ final class ProductSignReportRepository implements ProductSignReportInterface
 
         /** Информация о заказе */
 
-        $dbal->leftJoin(
-            'event',
-            Order::class,
-            'ord',
-            'ord.id = event.ord',
-        );
+        $dbal
+            ->join(
+                'event',
+                Order::class,
+                'ord',
+                'ord.id = event.ord',
+            );
 
         if($this->type instanceof DeliveryUid)
         {
@@ -529,8 +530,9 @@ final class ProductSignReportRepository implements ProductSignReportInterface
                 'ord',
                 OrderUser::class,
                 'ord_usr',
-                'ord_usr.event = ord.id',
+                'ord_usr.event = ord.event',
             );
+
 
             $dbal
                 ->join(
@@ -544,8 +546,9 @@ final class ProductSignReportRepository implements ProductSignReportInterface
                     value: $this->type,
                     type: DeliveryUid::TYPE,
                 );
-        }
 
+
+        }
 
         $dbal
             ->addSelect('order_invariable.number')
@@ -555,7 +558,6 @@ final class ProductSignReportRepository implements ProductSignReportInterface
                 'order_invariable',
                 'order_invariable.main = event.ord',
             );
-
 
         $dbal
             ->leftJoin(
