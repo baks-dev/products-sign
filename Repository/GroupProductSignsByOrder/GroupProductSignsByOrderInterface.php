@@ -37,7 +37,11 @@ interface GroupProductSignsByOrderInterface
 {
     public function forOrder(Order|OrderUid|string $order): self;
 
-    /** Метод возвращает список группы честных знаков заказа для скачивания */
+    /**
+     * Метод возвращает список группы честных знаков заказа для скачивания
+     *
+     * @return Generator<GroupProductSignsByOrderResult>|false
+     */
     public function findAll(): Generator|false;
 
 }

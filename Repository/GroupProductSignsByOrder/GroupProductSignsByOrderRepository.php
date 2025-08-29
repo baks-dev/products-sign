@@ -78,7 +78,11 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
     }
 
 
-    /** Метод возвращает список группы честных знаков заказа для скачивания */
+    /**
+     * Метод возвращает список группы честных знаков заказа для скачивания
+     *
+     * @return Generator<GroupProductSignsByOrderResult>|false
+     */
     public function findAll(): Generator|false
     {
         if(false === ($this->order instanceof OrderUid))
