@@ -192,6 +192,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
         return $this;
     }
 
+
     /**
      * Метод возвращает один Честный знак на указанную продукцию со статусом New «Новый»
      */
@@ -201,6 +202,8 @@ final class ProductSignNewRepository implements ProductSignNewInterface
         {
             throw new InvalidArgumentException('Не определено обязательное свойство user, profile, либо product');
         }
+
+        $this->ORMQueryBuilder->getEntityManager()->beginTransaction();
 
         $orm = $this->ORMQueryBuilder->createQueryBuilder(self::class);
 
@@ -212,7 +215,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
             ->setParameter(
                 key: 'usr',
                 value: $this->user,
-                type: UserUid::TYPE
+                type: UserUid::TYPE,
             );
 
         if($this->part !== false)
@@ -230,7 +233,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
             ->setParameter(
                 key: 'product',
                 value: $this->product,
-                type: ProductUid::TYPE
+                type: ProductUid::TYPE,
             );
 
 
@@ -262,7 +265,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 ->setParameter(
                     key: 'offer',
                     value: $this->offer,
-                    type: ProductOfferConst::TYPE
+                    type: ProductOfferConst::TYPE,
                 );
         }
         else
@@ -278,7 +281,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 ->setParameter(
                     key: 'variation',
                     value: $this->variation,
-                    type: ProductVariationConst::TYPE
+                    type: ProductVariationConst::TYPE,
                 );
         }
         else
@@ -293,7 +296,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 ->setParameter(
                     key: 'modification',
                     value: $this->modification,
-                    type: ProductModificationConst::TYPE
+                    type: ProductModificationConst::TYPE,
                 );
         }
         else
@@ -306,7 +309,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
             ProductSign::class,
             'main',
             'WITH',
-            'main.id = invariable.main'
+            'main.id = invariable.main',
         );
 
         $orm
@@ -322,7 +325,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
             ->setParameter(
                 key: 'status',
                 value: ProductSignStatusNew::class,
-                type: ProductSignStatus::TYPE
+                type: ProductSignStatus::TYPE,
             );
 
         //        // (event.profile IS NULL OR event.profile = :profile) AND
@@ -337,7 +340,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 ProductSignModify::class,
                 'modify',
                 'WITH',
-                'modify.event = main.event'
+                'modify.event = main.event',
             );
 
         /**
@@ -361,5 +364,10 @@ final class ProductSignNewRepository implements ProductSignNewInterface
         $orm->setMaxResults(1);
 
         return $orm->getOneOrNullResult() ?: false;
+    }
+
+    public function commit(): void
+    {
+        $this->ORMQueryBuilder->getEntityManager()->commit();
     }
 }
