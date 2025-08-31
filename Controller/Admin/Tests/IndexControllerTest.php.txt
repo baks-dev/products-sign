@@ -21,9 +21,11 @@ namespace BaksDev\Products\Sign\Controller\Admin\Tests;
 use BaksDev\Users\User\Tests\TestUserAccount;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
+use PHPUnit\Framework\Attributes\DependsOnClass;
+use PHPUnit\Framework\Attributes\Group;
 
-/** @group products-sign */
 #[When(env: 'test')]
+#[Group('product-sign')]
 final class IndexControllerTest extends WebTestCase
 {
     private const string URL = '/admin/product/signs';

@@ -40,11 +40,8 @@ use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
-/**
- * @group product-sign
- */
-#[Group('product-sign')]
 #[When(env: 'test')]
+#[Group('product-sign')]
 class ProductSignXlsxHandlerTest extends KernelTestCase
 {
 

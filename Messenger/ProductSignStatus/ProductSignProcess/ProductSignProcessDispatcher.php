@@ -41,6 +41,7 @@ use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignProcessDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
 use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileIndividual;
 use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileOrganization;
+use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileUser;
 use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileWorker;
 use BaksDev\Users\Profile\UserProfile\Repository\CurrentUserProfileEvent\CurrentUserProfileEventInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
@@ -159,14 +160,13 @@ final readonly class ProductSignProcessDispatcher
         }
 
         /**
-         * Если тип профиля клиента Сотрудник - присваиваем Владельца
+         * Определяем тип профиля клиента
          */
 
         $UserProfileEventUid = $CurrentOrderEvent->getClientProfile();
-
         $UserProfileEvent = $this->CurrentUserProfileEvent->findByEvent($UserProfileEventUid);
-
         $TypeProfileUid = $UserProfileEvent->getType();
+
 
         /**
          * Если тип клиента Сотрудник - присваиваем NULL (Не передаем и не списываем честный знак)
@@ -177,8 +177,17 @@ final readonly class ProductSignProcessDispatcher
         }
 
         /**
+         * Если тип клиента «Физ. лицо» - присваиваем идентификатор склада в качестве продавца
+         */
+        if(true === $TypeProfileUid->equals(TypeProfileUser::class))
+        {
+            $ProductSignInvariableDTO
+                ->setSeller($CurrentOrderEvent->getOrderProfile());
+        }
+
+        /**
          * Если тип профиля клиента «Организация» либо «Индивидуальный предприниматель»
-         * присваиваем в качестве продавца профиль клиента
+         * присваиваем в качестве продавца профиль клиента (для передачи)
          */
         if(
             false === $TypeProfileUid->equals(TypeProfileOrganization::class) ||
@@ -190,16 +199,11 @@ final readonly class ProductSignProcessDispatcher
         }
 
 
-        /**
-         * Присваиваем идентификатор склада в качестве продавца
-         */
-        $ProductSignInvariableDTO
-            ->setSeller($CurrentOrderEvent->getOrderProfile());
-
         $ProductSignEvent->getDto($ProductSignProcessDTO);
 
+        /* TODO: ПРОТЕСТИРОВАТЬ !!! */
         /** Снимаем lock с записи для сохранения */
-        $this->ProductSignNew->commit();
+        // $this->ProductSignNew->commit();
 
         $handle = $this->ProductSignStatusHandler->handle($ProductSignProcessDTO);
 

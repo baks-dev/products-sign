@@ -42,12 +42,8 @@ use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
-
-/**
- * @group products-sign
- */
-#[Group('products-sign')]
 #[When(env: 'test')]
+#[Group('product-sign')]
 class ProductSignProcessDebugDispatcherTest extends KernelTestCase
 {
     public function testUseCase(): void

@@ -203,7 +203,8 @@ final class ProductSignNewRepository implements ProductSignNewInterface
             throw new InvalidArgumentException('Не определено обязательное свойство user, profile, либо product');
         }
 
-        $this->ORMQueryBuilder->getEntityManager()->beginTransaction();
+        /* TODO: ПРОТЕСТИРОВАТЬ !!! */
+        //$this->ORMQueryBuilder->getEntityManager()->beginTransaction();
 
         $orm = $this->ORMQueryBuilder->createQueryBuilder(self::class);
 
