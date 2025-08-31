@@ -43,11 +43,6 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @depends BaksDev\Products\Sign\UseCase\Admin\Cancel\Tests\ProductSignCancelHandleTest::class
- * @depends BaksDev\Products\Sign\Controller\Admin\Tests\DeleteControllerTest::class
- *
- */
 #[When(env: 'test')]
 #[Group('product-sign')]
 final class ProductSignDeleteHandleTest extends KernelTestCase

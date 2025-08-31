@@ -28,9 +28,6 @@ use BaksDev\Products\Sign\UseCase\Admin\New\Tests\ProductSignNewHandleTest;
 use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
 
-/**
- * @depends BaksDev\Products\Sign\UseCase\Admin\New\Tests\ProductSignNewHandleTest::class
- */
 #[When(env: 'test')]
 #[Group('product-sign')]
 final class EditControllerTest extends WebTestCase
