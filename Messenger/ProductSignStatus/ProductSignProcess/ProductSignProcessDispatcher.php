@@ -201,10 +201,6 @@ final readonly class ProductSignProcessDispatcher
 
         $ProductSignEvent->getDto($ProductSignProcessDTO);
 
-        /* TODO: ПРОТЕСТИРОВАТЬ !!! */
-        /** Снимаем lock с записи для сохранения */
-        // $this->ProductSignNew->commit();
-
         $handle = $this->ProductSignStatusHandler->handle($ProductSignProcessDTO);
 
         if(false === ($handle instanceof ProductSign))

@@ -97,8 +97,8 @@ class ProductSignNewTest extends KernelTestCase
         self::assertTrue(true);
         return;
 
-        /** @var ProductSignNewInterface $ProductSignNewInterface */
-        $ProductSignNewInterface = self::getContainer()->get(ProductSignNewInterface::class);
+        /** @var ProductSignNewInterface $ProductSignNewRepository */
+        $ProductSignNewRepository = self::getContainer()->get(ProductSignNewInterface::class);
 
         // self::$user = "0191d360-1613-7d30-8859-f43991ffe926";
         // self::$profile = "0191d362-a007-7d4b-863e-bdd8a5d9a28a";
@@ -107,7 +107,7 @@ class ProductSignNewTest extends KernelTestCase
         // self::$variation = "01878a7a-aa00-77a6-9f90-4dc47498a632";
         // self::$modification = "01878a7a-a9ff-7e4f-8809-151e88674d80";
 
-        $ProductSignEvent = $ProductSignNewInterface
+        $ProductSignEvent = $ProductSignNewRepository
             ->forUser(self::$user)
             ->forProfile(self::$profile)
             ->forProduct(self::$product)

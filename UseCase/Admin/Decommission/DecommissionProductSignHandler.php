@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\UseCase\Admin\Decommission;
 
+use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Repository\ProductSignNew\ProductSignNewInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
@@ -57,7 +58,7 @@ final class DecommissionProductSignHandler
                 ->forPart($command->getPart())
                 ->getOneProductSign();
 
-            if($ProductSignEvent === false)
+            if(false === ($ProductSignEvent instanceof ProductSignEvent))
             {
                 /** Пробуем найти честные знаки без партии */
 
