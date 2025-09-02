@@ -27,6 +27,7 @@ namespace BaksDev\Products\Sign\Messenger\ProductSignPdf;
 
 use BaksDev\Barcode\Reader\BarcodeRead;
 use DirectoryIterator;
+use Exception;
 use Psr\Log\LoggerInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -137,14 +138,23 @@ final readonly class ProductSignCropDispatcher
              */
 
             $cropFilename = $info->getPath().DIRECTORY_SEPARATOR.uniqid('crop_', true).'.pdf';
-            $processCrop = new Process(['sudo', 'pdfcrop', '--margins', '1', $info->getRealPath(), $cropFilename]);
-            $processCrop
-                ->setTimeout(null)
-                ->mustRun();
 
-            /** Удаляем после обработки основной файл PDF */
-            $this->filesystem->remove($info->getRealPath());
+            try
+            {
+                $processCrop = new Process(['sudo', 'pdfcrop', '--margins', '1', $info->getRealPath(), $cropFilename]);
+                $processCrop
+                    ->setTimeout(null)
+                    ->mustRun();
 
+                /** Удаляем после обработки основной файл PDF */
+                $this->filesystem->remove($info->getRealPath());
+
+            }
+            catch(Exception)
+            {
+                /** Пробуем просканировать без обрезки */
+                $this->filesystem->rename($info->getRealPath(), $cropFilename);
+            }
         }
     }
 }
