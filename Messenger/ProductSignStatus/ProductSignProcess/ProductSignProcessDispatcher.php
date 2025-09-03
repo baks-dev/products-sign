@@ -179,7 +179,10 @@ final readonly class ProductSignProcessDispatcher
         /**
          * Если тип клиента «Физ. лицо» - присваиваем идентификатор склада в качестве продавца
          */
-        if(true === $TypeProfileUid->equals(TypeProfileUser::class))
+        if(
+            false === $this->isMarketplace($CurrentOrderEvent)
+            && true === $TypeProfileUid->equals(TypeProfileUser::class)
+        )
         {
             $ProductSignInvariableDTO
                 ->setSeller($CurrentOrderEvent->getOrderProfile());
@@ -190,8 +193,8 @@ final readonly class ProductSignProcessDispatcher
          * присваиваем в качестве продавца профиль клиента (для передачи)
          */
         if(
-            false === $TypeProfileUid->equals(TypeProfileOrganization::class) ||
-            false === $TypeProfileUid->equals(TypeProfileIndividual::class)
+            true === $TypeProfileUid->equals(TypeProfileOrganization::class) ||
+            true === $TypeProfileUid->equals(TypeProfileIndividual::class)
         )
         {
             $ProductSignInvariableDTO
@@ -229,10 +232,6 @@ final readonly class ProductSignProcessDispatcher
                 // Способ доставки Yandex
                 $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsYaMarket::class)
                 || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsYaMarket::class)
-
-                // Способ оплаты Yandex
-                || $CurrentOrderEvent->isDeliveryTypeEquals(TypePaymentFbsYandex::class)
-                || $CurrentOrderEvent->isDeliveryTypeEquals(TypePaymentDbsYaMarket::class)
             )
             {
                 return true;
@@ -246,11 +245,6 @@ final readonly class ProductSignProcessDispatcher
                 // Способ доставки Ozon
                 $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsOzon::class)
                 || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsOzon::class)
-
-                // Способ оплаты Ozon
-                || $CurrentOrderEvent->isPaymentTypeEquals(TypePaymentDbsOzon::TYPE)
-                || $CurrentOrderEvent->isPaymentTypeEquals(TypePaymentFbsOzon::class)
-
             )
             {
                 return true;
@@ -264,11 +258,6 @@ final readonly class ProductSignProcessDispatcher
                 $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsWildberries::class)
                 || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsWildberries::class)
                 || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFboWildberries::class)
-
-                // Способ оплаты Wildberries
-                || $CurrentOrderEvent->isDeliveryTypeEquals(TypePaymentDbsWildberries::class)
-                || $CurrentOrderEvent->isDeliveryTypeEquals(TypePaymentFbsWildberries::class)
-                || $CurrentOrderEvent->isDeliveryTypeEquals(TypePaymentFboWildberries::class)
             )
             {
                 return true;
