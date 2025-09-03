@@ -40,6 +40,7 @@ use BaksDev\Products\Category\Entity\Offers\Variation\CategoryProductVariation;
 use BaksDev\Products\Category\Entity\Offers\Variation\Modification\CategoryProductModification;
 use BaksDev\Products\Category\Type\Id\CategoryProductUid;
 use BaksDev\Products\Product\Entity\Category\ProductCategory;
+use BaksDev\Products\Product\Entity\Event\ProductEvent;
 use BaksDev\Products\Product\Entity\Offers\ProductOffer;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
 use BaksDev\Products\Product\Entity\Offers\Variation\ProductVariation;
@@ -432,88 +433,6 @@ final class ProductSignReportRepository implements ProductSignReportInterface
             'code.main = invariable.main',
         );
 
-
-        /** Сырье */
-
-        $dbal->join(
-            'invariable',
-            Product::class,
-            'product',
-            'product.id = invariable.product',
-        );
-
-        /** Настройки категорий */
-
-        if($this->category instanceof CategoryProductUid)
-        {
-            $dbal
-                ->join(
-                    'product',
-                    ProductCategory::class,
-                    'product_categories_product',
-                    'product_categories_product.event = product.event AND product_categories_product.category = :category',
-                )
-                ->setParameter(
-                    key: 'category',
-                    value: $this->category,
-                    type: CategoryProductUid::TYPE,
-                );
-        }
-
-        $dbal->join(
-            'product',
-            ProductTrans::class,
-            'product_trans',
-            'product_trans.event = product.event AND product_trans.local = :local',
-        );
-
-        /** Свойства торговых предложений */
-
-        $dbal->leftJoin(
-            'product',
-            ProductOffer::class,
-            'product_offer',
-            'product_offer.event = product.event AND product_offer.const = invariable.offer',
-        );
-
-        $dbal
-            ->leftJoin(
-                'product_offer',
-                ProductVariation::class,
-                'product_variation',
-                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation',
-            );
-
-        $dbal->leftJoin(
-            'product_variation',
-            ProductModification::class,
-            'product_modification',
-            'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification',
-        );
-
-
-        $dbal->leftJoin(
-            'product_offer',
-            CategoryProductOffers::class,
-            'category_offer',
-            'category_offer.id = product_offer.category_offer',
-        );
-
-        $dbal->leftJoin(
-            'product_variation',
-            CategoryProductVariation::class,
-            'category_variation',
-            'category_variation.id = product_variation.category_variation',
-        );
-
-        $dbal->leftJoin(
-            'product_modification',
-            CategoryProductModification::class,
-            'category_modification',
-            'category_modification.id = product_modification.category_modification',
-        );
-
-
         /** Информация о заказе */
 
         $dbal
@@ -569,13 +488,108 @@ final class ProductSignReportRepository implements ProductSignReportInterface
 
 
         $dbal
-            ->addSelect('SUM(order_price.price) AS total')
-            ->leftJoin(
+            //->addSelect('order_price.price AS total')
+            ->join(
                 'order_product',
                 OrderPrice::class,
                 'order_price',
                 'order_price.product = order_product.id',
             );
+
+
+        /** Сырье */
+
+        /*$dbal->join(
+            'invariable',
+            Product::class,
+            'product',
+            'product.id = invariable.product',
+        );*/
+
+        $dbal->join(
+            'order_product',
+            ProductEvent::class,
+            'product_event',
+            'product_event.id = order_product.product',
+        );
+
+
+        /** Настройки категорий */
+
+        if($this->category instanceof CategoryProductUid)
+        {
+            $dbal
+                ->join(
+                    'product_event',
+                    ProductCategory::class,
+                    'product_categories_product',
+                    'product_categories_product.event = product_event.id AND product_categories_product.category = :category',
+                )
+                ->setParameter(
+                    key: 'category',
+                    value: $this->category,
+                    type: CategoryProductUid::TYPE,
+                );
+        }
+
+        $dbal->join(
+            'product_event',
+            ProductTrans::class,
+            'product_trans',
+            'product_trans.event = product_event.id AND product_trans.local = :local',
+        );
+
+        /** Свойства торговых предложений */
+
+        $dbal
+            ->leftJoin(
+                'product_event',
+                ProductOffer::class,
+                'product_offer',
+                'product_offer.event = product_event.id AND product_offer.const = invariable.offer',
+            );
+
+        $dbal
+            ->leftJoin(
+                'order_product',
+                ProductVariation::class,
+                'product_variation',
+                'product_variation.offer = order_product.offer AND product_variation.const = invariable.variation',
+            );
+
+        $dbal
+            ->leftJoin(
+                'order_product',
+                ProductModification::class,
+                'product_modification',
+                'product_modification.variation = order_product.variation AND product_modification.const = invariable.modification',
+            );
+
+
+
+
+
+        $dbal->leftJoin(
+            'product_offer',
+            CategoryProductOffers::class,
+            'category_offer',
+            'category_offer.id = product_offer.category_offer',
+        );
+
+        $dbal->leftJoin(
+            'product_variation',
+            CategoryProductVariation::class,
+            'category_variation',
+            'category_variation.id = product_variation.category_variation',
+        );
+
+        $dbal->leftJoin(
+            'product_modification',
+            CategoryProductModification::class,
+            'category_modification',
+            'category_modification.id = product_modification.category_modification',
+        );
+
 
         $dbal->addSelect(
             "JSON_AGG
@@ -605,7 +619,11 @@ final class ProductSignReportRepository implements ProductSignReportInterface
                                 'code', code.code
                             )
         
-                    ) AS products",
+                    ) FILTER ( WHERE COALESCE(
+                                    product_modification.article, 
+                                    product_variation.article, 
+                                    product_offer.article
+                                ) IS NOT NULL)  AS products",
         );
 
 
@@ -648,7 +666,6 @@ final class ProductSignReportRepository implements ProductSignReportInterface
 
 
         $dbal->allGroupByExclude();
-
 
         $result = $dbal->fetchAllHydrate(ProductSignReportResult::class);
 

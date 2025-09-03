@@ -42,7 +42,7 @@ final class ProductSignReportResult
         private readonly string $date,
         private readonly string $seller,
 
-        private readonly ?string $total,
+        //private readonly ?int $total,
 
         private readonly string $products,
 
