@@ -53,11 +53,6 @@ final class ProductSignPackUpdateDispatcher
             ->namespace('products-sign')
             ->deduplication([$message->getCode()]);
 
-        if($Deduplicator->isExecuted())
-        {
-            return;
-        }
-
         /** Пробуем определить идентификатор честного знака по вхождению */
         $ProductSignUid = $this
             ->ProductSignByLikeCodeRepository
@@ -65,8 +60,9 @@ final class ProductSignPackUpdateDispatcher
 
         if(false === ($ProductSignUid instanceof ProductSignUid))
         {
-            // Не пишем в лог чтобы не засорять
-            //$this->logger->warning(sprintf("products-sign: Код честного знака не найден: %s", $message->getCode()));
+            /** Удаляем дедубликатор для другого сканирования PDF */
+            $Deduplicator->delete();
+
             return;
         }
 
@@ -84,8 +80,6 @@ final class ProductSignPackUpdateDispatcher
             ));
 
             $this->cache->init('products-sign')->clear();
-
-            return;
         }
 
         /** Удаляем дедубликатор для другого сканирования PDF */
