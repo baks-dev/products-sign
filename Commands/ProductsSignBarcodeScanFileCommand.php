@@ -73,12 +73,18 @@ class ProductsSignBarcodeScanFileCommand extends Command
                 'products-sign',
             ]).DIRECTORY_SEPARATOR;
 
+        if(false === is_dir($UPLOAD))
+        {
+            return Command::SUCCESS;
+        }
+
         $directory = new RecursiveDirectoryIterator($UPLOAD);
         $iterator = new RecursiveIteratorIterator($directory);
 
         $io = new SymfonyStyle($input, $output);
 
         $isset = null;
+
 
         foreach($iterator as $info)
         {
