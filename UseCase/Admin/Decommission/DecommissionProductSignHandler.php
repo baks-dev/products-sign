@@ -77,6 +77,7 @@ final class DecommissionProductSignHandler
             $ProductSignEvent->getDto($ProductSignDecommissionDTO);
 
             $ProductSignDecommissionDTO
+                ->setOrd($command->getOrd())
                 ->getInvariable()
                 ->setPart($ProductSignUid) // присваиваем новый идентификатор партии
                 ->setSeller($command->getSeller());
