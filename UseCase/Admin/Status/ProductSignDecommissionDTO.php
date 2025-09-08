@@ -49,8 +49,6 @@ final class ProductSignDecommissionDTO implements ProductSignEventInterface
     #[Assert\NotBlank]
     private readonly ProductSignStatus $status;
 
-
-
     #[Assert\Valid]
     private ProductSignInvariableDTO $invariable;
 

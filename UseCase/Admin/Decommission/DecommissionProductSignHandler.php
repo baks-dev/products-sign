@@ -98,7 +98,6 @@ final class DecommissionProductSignHandler
             $i++;
         }
 
-
         return $ProductSignUid;
     }
 }

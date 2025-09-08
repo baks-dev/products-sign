@@ -87,6 +87,8 @@ final class DecommissionProductSignDTO
 
     private ?OrderUid $ord = null;
 
+    public function __construct() {}
+
     /**
      * Usr
      */

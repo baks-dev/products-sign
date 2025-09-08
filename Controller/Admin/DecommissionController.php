@@ -58,13 +58,13 @@ final class DecommissionController extends AbstractController
     ): Response
     {
 
-        $OffProductSignDTO = new DecommissionProductSignDTO();
-        $OffProductSignDTO->setCategory($category);
-        $OffProductSignDTO->setProduct($product);
-        $OffProductSignDTO->setOffer($offer);
-        $OffProductSignDTO->setVariation($variation);
-        $OffProductSignDTO->setModification($modification);
-        $OffProductSignDTO->setPart($request->get('part'));
+        $OffProductSignDTO = new DecommissionProductSignDTO()
+            ->setCategory($category)
+            ->setProduct($product)
+            ->setOffer($offer)
+            ->setVariation($variation)
+            ->setModification($modification)
+            ->setPart($request->get('part'));
 
         // Форма
         $form = $this
