@@ -25,16 +25,139 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Repository\AllProductSignExport;
 
-use Symfony\Component\Validator\Constraints as Assert;
+use BaksDev\Field\Pack\Inn\Type\InnField;
+use BaksDev\Field\Pack\Kpp\Type\KppField;
+use BaksDev\Field\Pack\Okpo\Type\OkpoField;
+use BaksDev\Reference\Money\Type\Money;
+use DateMalformedStringException;
+use DateTimeImmutable;
+use JsonException;
+
 
 /** @see ProductSignExportResult */
 final class ProductSignExportResult
 {
+    private array|null|false $requisite_decode = null;
+
     public function __construct(
-        ...$data
-    )
+        private readonly string $number,
+        private readonly string $requisite,
+        private readonly string $delivery_date,
+        private readonly string $products,
+    ) {}
+
+    public function getOrderNumber(): string
     {
-        dd($data); /* TODO: удалить !!! */
+        return $this->number;
     }
 
+    /**
+     * @throws JsonException
+     */
+    private function getRequisite(): array|false
+    {
+        if(is_null($this->requisite_decode))
+        {
+            if(empty($this->requisite))
+            {
+                $this->requisite_decode = false;
+                return false;
+            }
+
+            if(false === json_validate($this->requisite))
+            {
+                $this->requisite_decode = false;
+                return false;
+            }
+
+            $this->requisite_decode = json_decode($this->requisite, false, 512, JSON_THROW_ON_ERROR);
+        }
+
+        return $this->requisite_decode;
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function getInn(): int|false
+    {
+        $requisite = $this->getRequisite();
+
+        $field = array_filter($requisite, static fn($element) => $element->type === InnField::TYPE);
+
+        $current = current($field);
+
+        return $current ? (int) $current->value : false;
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function getKpp(): int|false
+    {
+        $requisite = $this->getRequisite();
+
+        $field = array_filter($requisite, static fn($element) => $element->type === KppField::TYPE);
+
+        $current = current($field);
+
+        return $current ? (int) $current->value : false;
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function getOkpo(): int|false
+    {
+        $requisite = $this->getRequisite();
+
+        $field = array_filter($requisite, static fn($element) => $element->type === OkpoField::TYPE);
+
+        $current = current($field);
+
+        return $current ? (int) $current->value : false;
+    }
+
+
+    /**
+     * @throws DateMalformedStringException
+     */
+    public function getDeliveryDate(): DateTimeImmutable
+    {
+        return new DateTimeImmutable($this->delivery_date);
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function getOrderTotalPrice(): Money
+    {
+        $price = 0;
+
+        foreach($this->getProducts() as $product)
+        {
+            $price += $product->price;
+        }
+
+        return new Money($price, true);
+    }
+
+    /**
+     * @return array<int, object<'code', string, 'price', int, 'article', string >>|false
+     * @throws JsonException
+     */
+    public function getProducts(): array|false
+    {
+        if(empty($this->products))
+        {
+            return false;
+        }
+
+        if(false === json_validate($this->products))
+        {
+            return false;
+        }
+
+        return json_decode($this->products, false, 512, JSON_THROW_ON_ERROR);
+    }
 }

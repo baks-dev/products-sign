@@ -27,6 +27,7 @@ namespace BaksDev\Products\Sign\Controller\Public;
 
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Products\Sign\Repository\AllProductSignExport\AllProductSignExportInterface;
+use BaksDev\Products\Sign\Repository\AllProductSignExport\ProductSignExportResult;
 use BaksDev\Reference\Money\Type\Money;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use DateTimeImmutable;
@@ -40,7 +41,7 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-final class ExportProcessController extends AbstractController
+final class ExportTransferController extends AbstractController
 {
     /**
      * Отчет о «Честных знаках» на передачу честных знаков по свойству:
@@ -48,16 +49,13 @@ final class ExportProcessController extends AbstractController
      * profile != seller
      * status = process
      */
-    #[Route('/product/signs/export/process/{profile}', name: 'public.export.process', methods: ['GET', 'POST'])]
+    #[Route('/product/signs/export/transfer/{profile}', name: 'public.export.transfer', methods: ['GET', 'POST'])]
     public function index(
         Request $request,
         #[MapEntity] UserProfile $profile,
         AllProductSignExportInterface $allProductSign,
-        int $page = 0,
     ): Response
     {
-
-        // /product/signs/export/done/018d3075-6e7b-7b5e-95f6-923243b1fa3d?from=2024-09-01T00:00:00&to=2024-09-31T00:00:00
 
         $from = $request->get('from');
 
@@ -81,40 +79,88 @@ final class ExportProcessController extends AbstractController
             ->forProfile($profile)
             ->dateFrom($from)
             ->dateTo($to)
-            ->execute();
+            ->onlyTransfer() // Передача честных знаков
+            ->findAll();
 
-        if($data === false)
+        if(false === $data || false === $data->valid())
         {
             return new JsonResponse([
                 'status' => 404,
-                'message' => 'За указанный период выполненных честных знаков не найдено'
+                'message' => 'За указанный период выполненных честных знаков не найдено',
             ], status: 404);
         }
 
+
         $rows = null;
 
+        /** @var ProductSignExportResult $item */
         foreach($data as $key => $item)
         {
             /** Номер заказа */
-            $rows[$key]['number'] = $item['number'];
+            $rows[$key]['number'] = $item->getOrderNumber();
 
             /** Дата доставки в формате ISO8601 */
-            $datetime = new DateTimeImmutable($item['delivery_date']);
-            $rows[$key]['date'] = $datetime->format(DateTimeInterface::ATOM);
+            $datetime = $item->getDeliveryDate();
+            $rows[$key]['date'] = $datetime->format(DateTimeInterface::ATOM); // Updated ISO8601
 
             /** Полная стоимость заказа */
-            $total = new Money($item['order_total'], true);
-            $rows[$key]['total'] = $total->getValue();
-            $rows[$key]['delivery'] = $item['delivery_name'];
+            $rows[$key]['documentamount'] = $item->getOrderTotalPrice()->getValue();
+
+            $item->getInn() ? $rows[$key]['clientInn'] = $item->getInn() : null;
+            $item->getKpp() ? $rows[$key]['clientKpp'] = $item->getKpp() : null;
+            $item->getOkpo() ? $rows[$key]['clientOkpo'] = $item->getOkpo() : null;
+
 
             /** Перечисляем все заказы и их честный знак */
-            $products = json_decode($item['products'], true, 512, JSON_THROW_ON_ERROR);
 
             $products = array_map(static function($item) {
-                $price = new Money($item['price'], true);
-                $item['price'] = $price->getValue();
-                return $item;
-            }, $products);
+
+                $chars = null;
+
+                preg_match('/^(.*?)\(\d{2}\).{4}\(\d{2}\)/', $item->code, $matches);
+
+                if(isset($matches[1]))
+                {
+
+                    // Преобразуем строку в массив символов
+                    $chars = str_split($matches[1]);
+
+                    // 1 символ (индекс 0)
+                    if($chars[0] === '(')
+                    {
+                        unset($chars[0]);
+                    }
+
+                    // 4 символ (индекс 3)
+                    if($chars[3] === ')')
+                    {
+                        unset($chars[3]);
+                    }
+
+
+                    // 19 символ (индекс 18)
+                    if($chars[18] === '(')
+                    {
+                        unset($chars[18]);
+                    }
+
+                    // 22 символ (индекс 21)
+                    if($chars[21] === ')')
+                    {
+                        unset($chars[21]);
+                    }
+
+                }
+
+                return [
+                    'good' => $item->article,
+                    'count' => 1,
+                    'price' => new Money($item->price, true)->getValue(),
+                    'amount' => new Money($item->price, true)->getValue(),
+                    'markingcode' => $chars ? implode('', $chars) : false,
+                ];
+            }, $item->getProducts());
+
 
             $rows[$key]['products'] = $products;
         }

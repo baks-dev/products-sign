@@ -26,8 +26,6 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Repository\AllProductSignExport;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
-use BaksDev\Delivery\Entity\Event\DeliveryEvent;
-use BaksDev\Delivery\Entity\Trans\DeliveryTrans;
 use BaksDev\Field\Pack\Inn\Type\InnField;
 use BaksDev\Field\Pack\Kpp\Type\KppField;
 use BaksDev\Field\Pack\Okpo\Type\OkpoField;
@@ -38,9 +36,6 @@ use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Entity\Products\Price\OrderPrice;
 use BaksDev\Orders\Order\Entity\User\Delivery\OrderDelivery;
 use BaksDev\Orders\Order\Entity\User\OrderUser;
-use BaksDev\Orders\Order\Type\Status\OrderStatus;
-use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusCompleted;
-use BaksDev\Products\Product\Entity\Event\ProductEvent;
 use BaksDev\Products\Product\Entity\Offers\ProductOffer;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
 use BaksDev\Products\Product\Entity\Offers\Variation\ProductVariation;
@@ -119,21 +114,25 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
     }
 
     /** Честные знаки для передачи */
-    public function onlyTransfer(): void
+    public function onlyTransfer(): self
     {
         $this->type = [TypeProfileOrganization::TYPE, TypeProfileIndividual::TYPE];
+
+        return $this;
     }
 
     /**
      * Честные знаки для вывода из оборота (покупатель)
      */
-    public function onlyDoneBuyer(): void
+    public function onlyDoneBuyer(): self
     {
         $this->type = [TypeProfileUser::TYPE];
+
+        return $this;
     }
 
 
-    public function execute(): Generator|false
+    public function findAll(): Generator|false
     {
         if(false === ($this->profile instanceof UserProfileUid))
         {
@@ -150,7 +149,7 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
             throw new InvalidArgumentException('Invalid Argument to DateTime');
         }
 
-        if(false === $this->type)
+        if(empty($this->type))
         {
             throw new InvalidArgumentException('Invalid Argument Type');
         }
@@ -303,7 +302,7 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
             )
             ->setParameter(
                 key: 'user_profile_type',
-                value: [TypeProfileOrganization::TYPE, TypeProfileIndividual::TYPE],
+                value: $this->type,
                 type: ArrayParameterType::STRING,
             );
 
