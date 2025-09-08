@@ -25,12 +25,12 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\UseCase\Admin\Status;
 
+use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDecommission;
 use BaksDev\Products\Sign\UseCase\Admin\Status\Invariable\ProductSignInvariableDTO;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see MaterialSignEvent */
@@ -54,6 +54,7 @@ final class ProductSignDecommissionDTO implements ProductSignEventInterface
     #[Assert\Valid]
     private ProductSignInvariableDTO $invariable;
 
+    private ?OrderUid $ord = null;
 
     public function __construct()
     {
@@ -89,5 +90,16 @@ final class ProductSignDecommissionDTO implements ProductSignEventInterface
     public function getInvariable(): ProductSignInvariableDTO
     {
         return $this->invariable;
+    }
+
+    public function getOrd(): ?OrderUid
+    {
+        return $this->ord;
+    }
+
+    public function setOrd(?OrderUid $ord): self
+    {
+        $this->ord = $ord;
+        return $this;
     }
 }

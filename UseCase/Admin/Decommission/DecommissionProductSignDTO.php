@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\UseCase\Admin\Decommission;
 
+use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Category\Type\Id\CategoryProductUid;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
@@ -32,7 +33,6 @@ use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
-use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Validator\Constraints as Assert;
 
 final class DecommissionProductSignDTO
@@ -84,6 +84,8 @@ final class DecommissionProductSignDTO
     private ?int $total = null;
 
     private ?string $part = null;
+
+    private ?OrderUid $ord = null;
 
     /**
      * Usr
@@ -219,6 +221,17 @@ final class DecommissionProductSignDTO
     public function setPart(?string $part): self
     {
         $this->part = $part;
+        return $this;
+    }
+
+    public function getOrd(): ?OrderUid
+    {
+        return $this->ord;
+    }
+
+    public function setOrd(?OrderUid $ord): self
+    {
+        $this->ord = $ord;
         return $this;
     }
 }
