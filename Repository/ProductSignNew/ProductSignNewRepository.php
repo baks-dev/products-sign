@@ -354,8 +354,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 type: UserProfileUid::TYPE,
             );
 
-        /** Сортируем по дате, выбирая самый старый знак */
-        //$orm->orderBy('event.profile');
+        /** Сортируем по дате, выбирая самый старый знак и мешок */
         $orm->addOrderBy('modify.modDate');
         $orm->addOrderBy('invariable.part');
 

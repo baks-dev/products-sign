@@ -28,6 +28,9 @@ namespace BaksDev\Products\Sign\Repository\AllProductSignExport;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Delivery\Entity\Event\DeliveryEvent;
 use BaksDev\Delivery\Entity\Trans\DeliveryTrans;
+use BaksDev\Field\Pack\Inn\Type\InnField;
+use BaksDev\Field\Pack\Kpp\Type\KppField;
+use BaksDev\Field\Pack\Okpo\Type\OkpoField;
 use BaksDev\Orders\Order\Entity\Event\OrderEvent;
 use BaksDev\Orders\Order\Entity\Invariable\OrderInvariable;
 use BaksDev\Orders\Order\Entity\Order;
@@ -44,11 +47,19 @@ use BaksDev\Products\Product\Entity\Offers\Variation\ProductVariation;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
+use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
+use BaksDev\Users\Profile\TypeProfile\Entity\Section\Fields\TypeProfileSectionField;
+use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileIndividual;
+use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileOrganization;
+use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileUser;
+use BaksDev\Users\Profile\UserProfile\Entity\Event\UserProfileEvent;
+use BaksDev\Users\Profile\UserProfile\Entity\Event\Value\UserProfileValue;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use DateTimeImmutable;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Types\Types;
 use Generator;
 use InvalidArgumentException;
@@ -60,6 +71,8 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
     private DateTimeImmutable|false $from = false;
 
     private DateTimeImmutable|false $to = false;
+
+    private array|false $type = false;
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder) {}
 
@@ -97,7 +110,6 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
     {
         if(is_string($to))
         {
-
             $to = new DateTimeImmutable($to);
         }
 
@@ -106,51 +118,100 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
         return $this;
     }
 
+    /** Честные знаки для передачи */
+    public function onlyTransfer(): void
+    {
+        $this->type = [TypeProfileOrganization::TYPE, TypeProfileIndividual::TYPE];
+    }
+
+    /**
+     * Честные знаки для вывода из оборота (покупатель)
+     */
+    public function onlyDoneBuyer(): void
+    {
+        $this->type = [TypeProfileUser::TYPE];
+    }
+
 
     public function execute(): Generator|false
     {
-        if($this->profile === false)
+        if(false === ($this->profile instanceof UserProfileUid))
         {
-            throw new InvalidArgumentException('Invalid Argument profile');
+            throw new InvalidArgumentException('Invalid Argument UserProfile');
         }
 
-        if($this->from === false)
+        if(false === ($this->from instanceof DateTimeImmutable))
         {
-            throw new InvalidArgumentException('Invalid Argument from date');
+            throw new InvalidArgumentException('Invalid Argument from DateTime');
         }
 
-        if($this->to === false)
+        if(false === ($this->to instanceof DateTimeImmutable))
         {
-            throw new InvalidArgumentException('Invalid Argument to date');
+            throw new InvalidArgumentException('Invalid Argument to DateTime');
+        }
+
+        if(false === $this->type)
+        {
+            throw new InvalidArgumentException('Invalid Argument Type');
         }
 
         $dbal = $this->DBALQueryBuilder
             ->createQueryBuilder(self::class)
             ->bindLocal();
 
-        $dbal->from(OrderEvent::class, 'event');
-
-        $dbal->where('event.status = :status')
-            ->setParameter(
-                'status',
-                OrderStatusCompleted::class,
-                OrderStatus::TYPE
-            );
-
         $dbal
-            ->andWhere('event.created BETWEEN :start AND :end')
-            ->setParameter('start', $this->from, Types::DATETIME_IMMUTABLE)
-            ->setParameter('end', $this->to, Types::DATETIME_IMMUTABLE);
-
+            ->from(ProductSignEvent::class, 'sign_event')
+            ->andWhere('sign_event.status = :sign_status AND sign_event.ord IS NOT NULL')
+            ->setParameter(
+                key: 'sign_status',
+                value: ProductSignStatusDone::class,
+                type: ProductSignStatus::TYPE,
+            );
 
         $dbal
             ->join(
-                'event',
-                Order::class,
-                'main',
-                'main.event = event.id'
+                'sign_event',
+                ProductSignModify::class,
+                'sign_modify',
+                '
+                    sign_modify.event = sign_event.id 
+                    AND sign_modify.mod_date BETWEEN :from AND :to
+                ',
+            )
+            ->setParameter(
+                key: 'from',
+                value: $this->from,
+                type: Types::DATETIME_IMMUTABLE,
+            )
+            ->setParameter(
+                key: 'to',
+                value: $this->to,
+                type: Types::DATETIME_IMMUTABLE,
             );
 
+        $dbal
+            ->leftJoin(
+                'sign_event',
+                ProductSignInvariable::class,
+                'sign_invariable',
+                'sign_invariable.main = sign_event.main',
+            );
+
+        $dbal
+            ->leftJoin(
+                'sign_event',
+                ProductSignCode::class,
+                'sign_code',
+                'sign_code.main = sign_event.main',
+            );
+
+        $dbal
+            ->join(
+                'sign_event',
+                Order::class,
+                'main',
+                'main.id = sign_event.ord',
+            );
 
         $dbal
             ->addSelect('order_invariable.number')
@@ -158,23 +219,21 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
                 'main',
                 OrderInvariable::class,
                 'order_invariable',
-                'order_invariable.main = main.id AND 
-                order_invariable.event = event.id AND 
-                order_invariable.profile = :profile'
+                'order_invariable.main = main.id 
+                AND order_invariable.profile = :profile',
             )
             ->setParameter(
-                'profile',
-                $this->profile,
-                UserProfileUid::TYPE
+                key: 'profile',
+                value: $this->profile,
+                type: UserProfileUid::TYPE,
             );
-
 
         $dbal
             ->leftJoin(
                 'main',
-                OrderUser::class,
-                'order_user',
-                'order_user.event = main.event'
+                OrderEvent::class,
+                'event',
+                'event.id = main.event',
             );
 
         $dbal
@@ -183,51 +242,32 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
                 'order_user',
                 OrderDelivery::class,
                 'order_delivery',
-                'order_delivery.usr = order_user.id'
+                'order_delivery.usr = order_user.id',
             );
 
         $dbal
-            ->addSelect('delivery_event.sort AS delivery_sort')
             ->leftJoin(
-                'order_delivery',
-                DeliveryEvent::class,
-                'delivery_event',
-                'delivery_event.id = order_delivery.event'
+                'main',
+                OrderUser::class,
+                'order_user',
+                'order_user.event = main.event',
             );
 
-        $dbal
-            ->addSelect('delivery_trans.name AS delivery_name')
-            ->leftJoin(
-                'order_delivery',
-                DeliveryTrans::class,
-                'delivery_trans',
-                'delivery_trans.event = order_delivery.event AND delivery_trans.local = :local'
-            );
 
         $dbal
             ->leftJoin(
                 'event',
                 OrderProduct::class,
                 'order_product',
-                'order_product.event = event.id'
+                'order_product.event = event.id',
             );
 
-
         $dbal
-            ->addSelect('SUM(order_price.price) AS order_total')
             ->leftJoin(
                 'event',
                 OrderPrice::class,
                 'order_price',
-                'order_price.product = order_product.id'
-            );
-
-        $dbal
-            ->leftJoin(
-                'order_product',
-                ProductEvent::class,
-                'product_event',
-                'product_event.id = order_product.product'
+                'order_price.product = order_product.id',
             );
 
         $dbal
@@ -235,7 +275,7 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
                 'order_product',
                 ProductOffer::class,
                 'product_offer',
-                'product_offer.id = order_product.offer AND product_offer.event = order_product.product'
+                'product_offer.id = order_product.offer AND product_offer.const = sign_invariable.offer',
             );
 
         $dbal
@@ -243,7 +283,7 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
                 'order_product',
                 ProductVariation::class,
                 'product_variation',
-                'product_variation.id = order_product.variation AND product_variation.offer = product_offer.id'
+                'product_variation.id = order_product.variation AND product_variation.const = sign_invariable.variation',
             );
 
         $dbal
@@ -251,52 +291,44 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
                 'order_product',
                 ProductModification::class,
                 'product_modification',
-                'product_modification.id = order_product.modification AND product_modification.variation = product_variation.id'
+                'product_modification.id = order_product.modification AND product_modification.const = sign_invariable.modification',
             );
 
-
         $dbal
-            ->leftJoin(
-                'main',
-                ProductSignEvent::class,
-                'sign_event',
-                '
-                    sign_event.ord = main.id AND
-                    sign_event.status = :sign_status
-                '
+            ->join(
+                'order_user',
+                UserProfileEvent::class,
+                'user_profile_event',
+                'user_profile_event.id = order_user.profile AND user_profile_event.type IN (:user_profile_type)',
             )
             ->setParameter(
-                'sign_status',
-                ProductSignStatusDone::class,
-                ProductSignStatus::TYPE
+                key: 'user_profile_type',
+                value: [TypeProfileOrganization::TYPE, TypeProfileIndividual::TYPE],
+                type: ArrayParameterType::STRING,
             );
 
         $dbal
             ->leftJoin(
-                'product_modification',
-                ProductSignInvariable::class,
-                'sign_invariable',
-                '
-                    sign_invariable.event = sign_event.id AND
-                    sign_invariable.main = sign_event.main AND
-                    
-                    sign_invariable.product = product_event.main AND
-                    sign_invariable.offer = product_offer.const AND
-                    sign_invariable.variation = product_variation.const AND
-                    sign_invariable.modification = product_modification.const
-                '
+                'order_user',
+                UserProfileValue::class,
+                'user_profile_value',
+                'user_profile_value.event = order_user.profile',
             );
 
-
+        /** Выбираем только контакт и номер телефон */
         $dbal
-            ->leftJoin(
-                'sign_invariable',
-                ProductSignCode::class,
-                'sign_code',
+            ->join(
+                'user_profile_value',
+                TypeProfileSectionField::class,
+                'type_section_field_client',
                 '
-                    sign_code.main = sign_invariable.main AND 
-                    sign_code.event = sign_invariable.event
-                '
+                type_section_field_client.id = user_profile_value.field AND
+                type_section_field_client.type IN (:fields)
+            ')
+            ->setParameter(
+                key: 'fields',
+                value: [InnField::TYPE, KppField::TYPE, OkpoField::TYPE],
+                type: ArrayParameterType::STRING,
             );
 
 
@@ -306,17 +338,40 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
         
                             JSONB_BUILD_OBJECT
                             (
-                                'article', product_modification.article,
+                                'article', COALESCE(
+                                    product_modification.article,
+                                    product_variation.article,
+                                    product_offer.article
+                                ),
                                 'price', order_price.price,
+                                'total', order_price.total,
                                 'code', sign_code.code
                             )
         
-                    ) AS products"
+                    ) FILTER (WHERE COALESCE(
+                                    product_modification.article,
+                                    product_variation.article,
+                                    product_offer.article
+                                ) IS NOT NULL) AS products",
+        );
+
+
+        $dbal->addSelect(
+            "JSON_AGG
+                    ( DISTINCT
+        
+                        JSONB_BUILD_OBJECT
+                        (
+                            'type', type_section_field_client.type,
+                            'value', user_profile_value.value
+                        )
+        
+                    ) AS requisite",
         );
 
 
         $dbal->allGroupByExclude();
 
-        return $dbal->fetchAllGenerator();
+        return $dbal->fetchAllHydrate(ProductSignExportResult::class);
     }
 }
