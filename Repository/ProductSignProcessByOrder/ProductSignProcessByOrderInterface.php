@@ -31,6 +31,8 @@ interface ProductSignProcessByOrderInterface
 {
     public function forOrder(Order|OrderUid|string $order): self;
 
+    public function onlyStatusProcess(): void;
+
     /**
      * Метод возвращает события Честный знак по заказу со статусом Process «В резерве»
      */

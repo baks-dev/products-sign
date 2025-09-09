@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignCancel;
 
 
+use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignCancelDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\ProductSignStatusHandler;
 use Psr\Log\LoggerInterface;
@@ -33,7 +34,7 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler(priority: 0)]
-final class ProductSignCancelDispatcher
+final readonly class ProductSignCancelDispatcher
 {
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
@@ -45,13 +46,31 @@ final class ProductSignCancelDispatcher
         $ProductSignCancelDTO = new ProductSignCancelDTO()
             ->setId($message->getEvent());
 
-        $this->productSignStatusHandler->handle($ProductSignCancelDTO);
+        /** При отмене присваиваем партию в качестве профиля */
+        $ProductSignCancelDTO
+            ->getInvariable()
+            ->setPart($message->getProfile());
 
-        $this->logger->warning(
-            'Отменили «Честный знак» (возвращаем статус New «Новый»)',
+        $handle = $this->productSignStatusHandler->handle($ProductSignCancelDTO);
+
+        if($handle instanceof ProductSign)
+        {
+            $this->logger->warning(
+                'Отменили «Честный знак» (возвращаем статус New «Новый»)',
+                [
+                    'ProductSignEventUid' => (string) $message->getEvent(),
+                    self::class.':'.__LINE__,
+                ],
+            );
+
+            return;
+        }
+
+        $this->logger->critical(
+            'products-sign: Ошибка при отмене честного знака',
             [
+                'ProductSignEventUid' => (string) $message->getEvent(),
                 self::class.':'.__LINE__,
-                'ProductSignUid' => $message->getEvent(),
             ],
         );
     }

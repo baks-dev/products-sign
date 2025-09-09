@@ -34,13 +34,12 @@ use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusCanceled;
 use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignCancel\ProductSignCancelMessage;
 use BaksDev\Products\Sign\Repository\ProductSignProcessByOrder\ProductSignProcessByOrderInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusCancel;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
- * Делаем отмену Честный знак на продукцию New «Новый» если статус заказа Canceled «Отменен»
+ * Делаем отмену Честный знак на статус New «Новый» если статус заказа Canceled «Отменен»
  */
 #[AsMessageHandler(priority: 80)]
 final readonly class ProductSignCancelByOrderCanceledDispatcher
@@ -49,37 +48,18 @@ final readonly class ProductSignCancelByOrderCanceledDispatcher
         #[Target('productsSignLogger')] private LoggerInterface $logger,
         private OrderEventInterface $OrderEventRepository,
         private ProductSignProcessByOrderInterface $productSignProcessByOrder,
-        private DeduplicatorInterface $deduplicator,
         private MessageDispatchInterface $MessageDispatch,
     ) {}
 
     public function __invoke(OrderMessage $message): void
     {
-        $Deduplicator = $this->deduplicator
-            ->namespace('products-sign')
-            ->deduplication([
-                (string) $message->getId(),
-                ProductSignStatusCancel::STATUS,
-                self::class
-            ]);
-
-        if($Deduplicator->isExecuted())
-        {
-            return;
-        }
-
-        /** Log Data */
-        $dataLogs['OrderUid'] = (string) $message->getId();
-        $dataLogs['OrderEventUid'] = (string) $message->getEvent();
-        $dataLogs['LastOrderEventUid'] = (string) $message->getLast();
-
         $OrderEvent = $this->OrderEventRepository
             ->find($message->getEvent());
 
         if(false === ($OrderEvent instanceof OrderEvent))
         {
-            $dataLogs[0] = self::class.':'.__LINE__;
-            $this->logger->critical('products-sign: Не найдено событие Order', $dataLogs);
+            $this->logger->critical('products-sign: Не найдено событие Order',
+                [var_export($message, true), self::class.':'.__LINE__]);
 
             return;
         }
@@ -96,9 +76,14 @@ final readonly class ProductSignCancelByOrderCanceledDispatcher
             ->forOrder($message->getId())
             ->findAll();
 
-
         if(false === $ProductSignEvents || $ProductSignEvents->valid() === false)
         {
+            $this->logger->warning
+            (
+                sprintf('%s: Честные знаки для отмены заказа не найдены', $OrderEvent->getOrderNumber()),
+                [var_export($message, true), self::class.':'.__LINE__],
+            );
+
             return;
         }
 
@@ -107,15 +92,13 @@ final readonly class ProductSignCancelByOrderCanceledDispatcher
         {
             $ProductSignCancelMessage = new ProductSignCancelMessage(
                 $OrderEvent->getOrderProfile(),
-                $ProductSignEventUid
+                $ProductSignEventUid,
             );
 
             $this->MessageDispatch->dispatch(
                 message: $ProductSignCancelMessage,
-                transport: 'products-sign'
+                transport: 'products-sign',
             );
         }
-
-        $Deduplicator->save();
     }
 }
