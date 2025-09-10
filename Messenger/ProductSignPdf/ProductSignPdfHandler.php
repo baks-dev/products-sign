@@ -28,12 +28,9 @@ namespace BaksDev\Products\Sign\Messenger\ProductSignPdf;
 use BaksDev\Barcode\Reader\BarcodeRead;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
-use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
-use BaksDev\Products\Sign\Entity\ProductSign;
+use BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignScaner\ProductSignScannerMessage;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
-use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignDTO;
-use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignHandler;
+use BaksDev\Products\Stocks\Entity\Stock\ProductStock;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\Products\ProductStockDTO;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockDTO;
 use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockHandler;
@@ -41,11 +38,8 @@ use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserPro
 use DateTimeImmutable;
 use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
-use Exception;
 use Imagick;
 use Psr\Log\LoggerInterface;
-use ReflectionAttribute;
-use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Filesystem;
@@ -57,10 +51,7 @@ final readonly class ProductSignPdfHandler
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $upload,
         #[Target('productsSignLogger')] private LoggerInterface $logger,
-        private ProductSignHandler $productSignHandler,
         private PurchaseProductStockHandler $purchaseProductStockHandler,
-        private Filesystem $filesystem,
-        private BarcodeRead $barcodeRead,
         private MessageDispatchInterface $messageDispatch,
         private UserByUserProfileInterface $UserByUserProfileInterface
 
@@ -105,32 +96,6 @@ final readonly class ProductSignPdfHandler
         $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
 
 
-        //        /**
-        //         * Сохраняем все листы PDF в отдельные файлы на случай, если есть непреобразованные
-        //         */
-        //
-        //        /** @var DirectoryIterator $SignPdfFile */
-        //        foreach(new DirectoryIterator($uploadDir) as $SignPdfFile)
-        //        {
-        //            if($SignPdfFile->getExtension() !== 'pdf')
-        //            {
-        //                continue;
-        //            }
-        //
-        //            /** Пропускаем файлы, которые уже разбиты на страницы */
-        //            if(str_starts_with($SignPdfFile->getFilename(), 'page') === true)
-        //            {
-        //                continue;
-        //            }
-        //
-        //            $process = new Process(['pdftk', $SignPdfFile->getRealPath(), 'burst', 'output', $SignPdfFile->getPath().DIRECTORY_SEPARATOR.uniqid('page_', true).'.%d.pdf']);
-        //            $process->mustRun();
-        //
-        //            /** Удаляем после обработки основной файл PDF */
-        //            $this->filesystem->remove($SignPdfFile->getRealPath());
-        //        }
-
-
         /** Обрабатываем страницы */
 
         $totalPurchase = 0;
@@ -152,217 +117,55 @@ final readonly class ProductSignPdfHandler
                 continue;
             }
 
-            /** Генерируем идентификатор группы для отмены */
+            /**
+             * Отправляем файл для сканирования
+             */
+
+            // Генерируем идентификатор группы для отмены
             $part = new ProductSignUid()->stringToUuid($SignFile->getPath().(new DateTimeImmutable('now')->format('Ymd')));
 
-            $counter = 0;
-            $errors = 0;
+            $ProductSignScannerMessage = new ProductSignScannerMessage(
+                path: $SignFile->getRealPath(),
+                part: $part,
 
+                usr: $message->getUsr(),
+                profile: $message->getProfile(),
+                product: $message->getProduct(),
+                offer: $message->getOffer(),
+                variation: $message->getVariation(),
+                modification: $message->getModification(),
 
-            /** Директория загрузки файла с кодом */
+                share: $message->isNotShare(),
+                number: $message->getNumber(),
 
-            $ref = new ReflectionClass(ProductSignCode::class);
-            /** @var ReflectionAttribute $current */
-            $current = current($ref->getAttributes(Table::class));
+            );
 
-            if(!isset($current->getArguments()['name']))
-            {
-                $this->logger->critical(
-                    sprintf('Невозможно определить название таблицы из класса сущности %s ', ProductSignCode::class),
-                    [self::class.':'.__LINE__],
-                );
-            }
-
-            /** Создаем полный путь для сохранения файла с кодом относительно директории сущности */
-            $pathCode = null;
-            $pathCode[] = $this->upload;
-            $pathCode[] = 'public';
-            $pathCode[] = 'upload';
-            $pathCode[] = $current->getArguments()['name'];
-            $pathCode[] = '';
-
-            $dirCode = implode(DIRECTORY_SEPARATOR, $pathCode);
-
-            /** Если директория загрузки не найдена - создаем с правами 0700 */
-            $this->filesystem->exists($dirCode) ?: $this->filesystem->mkdir($dirCode);
-
+            $this->messageDispatch->dispatch(
+                message: $ProductSignScannerMessage,
+                transport: 'barcode',
+            );
 
             /**
-             * Открываем PDF для подсчета страниц на случай если их несколько
+             * Подсчет количества страниц для создания закупки
              */
-            $pdfPath = $SignFile->getRealPath();
-            $Imagick = new Imagick();
-            $Imagick->setResolution(500, 500);
-            $Imagick->readImage($pdfPath);
-            $pages = $Imagick->getNumberImages(); // количество страниц в файле
 
-            /** Удаляем после обработки файл PDF */
-            $this->filesystem->remove($pdfPath);
-
-
-            for($number = 0; $number < $pages; $number++)
+            /** Пропускаем, если не требуется создавать закупочный лист */
+            if(false === $message->isPurchase())
             {
-                $fileTemp = $dirCode.uniqid('', true).'.png';
-
-                /** Преобразуем PDF страницу в PNG и сохраняем временно для расчета дайджеста md5 */
-                $Imagick->setIteratorIndex($number);
-                $Imagick->setImageFormat('png');
-
-                /**
-                 * В некоторых случаях может вызывать ошибку,
-                 * в таком случае сохраняем без рамки и пробуем отсканировать как есть
-                 */
-                try
-                {
-                    $Imagick->borderImage('white', 5, 5);
-                }
-                catch(Exception $e)
-                {
-                    $this->logger->critical('products-sign: Ошибка при добавлении рамки к изображению. Пробуем отсканировать как есть.', [$e->getMessage()]);
-                }
-
-                $Imagick->writeImage($fileTemp);
-
-                /** Рассчитываем дайджест файла для перемещения */
-                $md5 = md5_file($fileTemp);
-                $dirMove = $dirCode.$md5.DIRECTORY_SEPARATOR;
-                $fileMove = $dirMove.'image.png';
-
-
-                /** Если директория для перемещения не найдена - создаем  */
-                $this->filesystem->exists($dirMove) ?: $this->filesystem->mkdir($dirMove);
-
-                /**
-                 * Перемещаем в указанную директорию если файла не существует
-                 * Если в перемещаемой директории файл существует - удаляем временный файл
-                 */
-                $this->filesystem->exists($fileMove) === true ? $this->filesystem->remove($fileTemp) : $this->filesystem->rename($fileTemp, $fileMove);
-
-                /**
-                 * Создаем для сохранения честный знак
-                 * в случае ошибки сканирования - присваивается статус с ошибкой
-                 */
-                $ProductSignDTO = new ProductSignDTO();
-
-                /** Сканируем честный знак */
-                $decode = $this->barcodeRead->decode($fileMove);
-                $code = $decode->getText();
-
-                if($decode->isError() || str_starts_with($code, '(00)'))
-                {
-                    $code = uniqid('error_', true);
-                    $ProductSignDTO->setStatus(ProductSignStatusError::class);
-                }
-
-                $decode->isError() ? ++$errors : ++$counter;
-
-                /**
-                 * Переименовываем директорию по коду честного знака (для уникальности)
-                 */
-
-                $scanDirName = md5($code);
-                $renameDir = $dirCode.$scanDirName.DIRECTORY_SEPARATOR;
-
-                if($this->filesystem->exists($renameDir) === true)
-                {
-                    // Удаляем директорию если уже имеется
-                    $this->filesystem->remove($dirMove);
-                }
-                else
-                {
-                    // переименовываем директорию если не существует
-                    $this->filesystem->rename($dirMove, $renameDir);
-                }
-
-
-                /** Присваиваем результат сканера */
-
-                $ProductSignCodeDTO = $ProductSignDTO->getCode();
-                $ProductSignCodeDTO->setCode($code);
-                $ProductSignCodeDTO->setName($scanDirName);
-                $ProductSignCodeDTO->setExt('png');
-
-                $ProductSignInvariableDTO = $ProductSignDTO->getInvariable();
-                $ProductSignInvariableDTO->setPart($part);
-                $ProductSignInvariableDTO->setUsr($message->getUsr());
-
-                $ProductSignInvariableDTO->setProfile($message->getProfile());
-                $ProductSignInvariableDTO->setSeller($message->isNotShare() ? $message->getProfile() : null);
-
-                $ProductSignInvariableDTO->setProduct($message->getProduct());
-                $ProductSignInvariableDTO->setOffer($message->getOffer());
-                $ProductSignInvariableDTO->setVariation($message->getVariation());
-                $ProductSignInvariableDTO->setModification($message->getModification());
-                $ProductSignInvariableDTO->setNumber($message->getNumber());
-
-                $handle = $this->productSignHandler->handle($ProductSignDTO);
-
-                if(false === ($handle instanceof ProductSign))
-                {
-                    if($handle === false)
-                    {
-                        $this->logger->warning(sprintf('Дубликат честного знака %s: ', $code));
-                        continue;
-                    }
-
-                    $this->logger->critical(sprintf('products-sign: Ошибка %s при сканировании: ', $handle));
-                }
-                else
-                {
-                    $this->logger->info(
-                        sprintf('%s: %s', $handle->getId(), $code),
-                        [self::class.':'.__LINE__],
-                    );
-
-                    /** Создаем комманду для отправки файла CDN */
-                    $this->messageDispatch->dispatch(
-                        new CDNUploadImageMessage($handle->getId(), ProductSignCode::class, $md5),
-                        transport: 'files-res-low',
-                    );
-
-                    $totalPurchase++;
-                }
-
-                //                /** Создаем закупку */
-                //                if(isset($PurchaseProductStockDTO) && $message->isPurchase() && $message->getProfile())
-                //                {
-                //                    // Найдем в коллекции DTO с совпадающими product, offer, variation, modification
-                //                    $findPurchaseProduct = $PurchaseProductStockDTO
-                //                        ->getProduct()
-                //                        ->filter
-                //                        (
-                //                            function(ProductStockDTO $element) use ($message) {
-                //                                return
-                //                                    $element->getProduct()->equals($element->getProduct())
-                //                                    && ((is_null($element->getOffer()) === true && is_null($message->getOffer()) === true) || $element->getOffer()->equals($message->getOffer()))
-                //                                    && ((is_null($element->getVariation()) === true && is_null($message->getVariation()) === true) || $element->getVariation()->equals($message->getVariation()))
-                //                                    && ((is_null($element->getModification()) === true && is_null($message->getModification()) === true) || $element->getModification()->equals($message->getModification()));
-                //                            }
-                //                        );
-                //
-                //                    $ProductStockDTO = $findPurchaseProduct->current();
-                //
-                //                    if(false === ($ProductStockDTO instanceof ProductStockDTO))
-                //                    {
-                //                        $ProductStockDTO = new ProductStockDTO();
-                //                        $ProductStockDTO->setProduct($message->getProduct());
-                //                        $ProductStockDTO->setOffer($message->getOffer());
-                //                        $ProductStockDTO->setVariation($message->getVariation());
-                //                        $ProductStockDTO->setModification($message->getModification());
-                //                        $ProductStockDTO->setTotal(0);
-                //
-                //                        $PurchaseProductStockDTO->addProduct($ProductStockDTO);
-                //                    }
-                //
-                //                    $ProductStockTotal = $ProductStockDTO->getTotal() + 1;
-                //                    $ProductStockDTO->setTotal($ProductStockTotal);
-                //                }
+                continue;
             }
 
-            $Imagick->clear();
+            $pdfPath = $SignFile->getRealPath();
+
+            $Imagick = new Imagick();
+            $Imagick->setResolution(50, 50); // устанавливаем малое разрешение
+            $Imagick->readImage($pdfPath);
+
+            $totalPurchase += $Imagick->getNumberImages(); // количество страниц в файле
+
         }
 
-        /** Сохраняем закупку */
+        /** Сохраняем закупку на подгружаемый профиль */
         if($message->isPurchase())
         {
             // Получаем идентификатор пользователя по профилю
@@ -391,7 +194,16 @@ final readonly class ProductSignPdfHandler
 
                 $PurchaseProductStockDTO->addProduct($ProductStockDTO);
 
-                $this->purchaseProductStockHandler->handle($PurchaseProductStockDTO);
+                $ProductStock = $this->purchaseProductStockHandler->handle($PurchaseProductStockDTO);
+
+                if(false === ($ProductStock instanceof ProductStock))
+                {
+                    $this->logger->critical(
+                        sprintf('products-sign: Ошибка %s при создании закупочного листа', $ProductStock),
+                        [self::class.':'.__LINE__],
+                    );
+                }
+
             }
         }
     }
