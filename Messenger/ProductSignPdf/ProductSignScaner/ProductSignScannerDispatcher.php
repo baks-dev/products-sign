@@ -59,6 +59,12 @@ final readonly class ProductSignScannerDispatcher
 
     public function __invoke(ProductSignScannerMessage $message): void
     {
+        /** Файла больше не существует */
+        if(false === $this->filesystem->exists($message->getRealPath()))
+        {
+            return;
+        }
+
         /** Директория загрузки изображения с кодом */
 
         $ref = new ReflectionClass(ProductSignCode::class);
