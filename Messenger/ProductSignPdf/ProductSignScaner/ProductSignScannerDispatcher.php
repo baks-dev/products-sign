@@ -192,7 +192,7 @@ final readonly class ProductSignScannerDispatcher
             $ProductSignInvariableDTO = $ProductSignDTO->getInvariable();
 
             $ProductSignInvariableDTO
-                ->setPart($part)
+                ->setPart($message->getPart())
                 ->setUsr($message->getUsr())
                 ->setProfile($message->getProfile())
                 ->setSeller($message->isNotShare() ? $message->getProfile() : null)
