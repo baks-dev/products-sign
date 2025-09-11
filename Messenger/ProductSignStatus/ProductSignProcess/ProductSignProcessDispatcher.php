@@ -230,8 +230,19 @@ final readonly class ProductSignProcessDispatcher
         {
             if(
                 // Способ доставки Yandex
-                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsYaMarket::class)
-                || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsYaMarket::class)
+                (
+                    $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsYaMarket::TYPE) // FBS
+                    || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsYaMarket::TYPE) // DBS
+                )
+
+                ||
+
+                // Способ оплаты Yandex
+                (
+                    $CurrentOrderEvent->isPaymentTypeEquals(TypePaymentFbsYandex::TYPE) // FBS
+                    || $CurrentOrderEvent->isPaymentTypeEquals(TypePaymentDbsYaMarket::TYPE) // DBS
+                )
+
             )
             {
                 return true;
@@ -243,8 +254,20 @@ final readonly class ProductSignProcessDispatcher
         {
             if(
                 // Способ доставки Ozon
-                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsOzon::class)
-                || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsOzon::class)
+                (
+                    $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsOzon::TYPE) // DBS
+                    || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsOzon::TYPE) // FBS
+                )
+
+                ||
+
+                // Способ оплаты Ozon
+                (
+                    $CurrentOrderEvent->isPaymentTypeEquals(TypePaymentDbsOzon::TYPE) // DBS
+                    || $CurrentOrderEvent->isPaymentTypeEquals(TypePaymentFbsOzon::TYPE) // FBS
+                )
+
+
             )
             {
                 return true;
@@ -255,9 +278,21 @@ final readonly class ProductSignProcessDispatcher
         {
             if(
                 // Способ доставки Wildberries
-                $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsWildberries::class)
-                || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsWildberries::class)
-                || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFboWildberries::class)
+                (
+                    $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryDbsWildberries::TYPE) // DBS
+                    || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFbsWildberries::TYPE) // FBS
+                    || $CurrentOrderEvent->isDeliveryTypeEquals(TypeDeliveryFboWildberries::TYPE) // FBO
+                )
+
+                ||
+
+                // Способ оплаты Wildberries
+                (
+                    $CurrentOrderEvent->isPaymentTypeEquals(TypePaymentDbsWildberries::TYPE) // DBS
+                    || $CurrentOrderEvent->isPaymentTypeEquals(TypePaymentFbsWildberries::TYPE) // FBS
+                    || $CurrentOrderEvent->isPaymentTypeEquals(TypePaymentFboWildberries::TYPE) // FBO
+                )
+
             )
             {
                 return true;
