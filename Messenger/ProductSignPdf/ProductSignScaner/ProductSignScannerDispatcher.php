@@ -209,10 +209,17 @@ final readonly class ProductSignScannerDispatcher
                 if($handle === false)
                 {
                     $this->logger->warning(sprintf('Дубликат честного знака %s: ', $code));
+
+                    /** Удаляем после обработки файл PDF */
+                    $this->filesystem->remove($pdfPath);
+
                     continue;
                 }
 
-                $this->logger->critical(sprintf('products-sign: Ошибка %s при сканировании: ', $handle));
+                $this->logger->critical(
+                    sprintf('products-sign: Ошибка %s при сканировании: ', $handle),
+                    [self::class.':'.__LINE__],
+                );
             }
             else
             {
@@ -226,13 +233,12 @@ final readonly class ProductSignScannerDispatcher
                     new CDNUploadImageMessage($handle->getId(), ProductSignCode::class, $md5),
                     transport: 'files-res-low',
                 );
+
+                /** Удаляем после обработки файл PDF */
+                $this->filesystem->remove($pdfPath);
             }
         }
 
-        /** Удаляем после обработки файл PDF */
-        $this->filesystem->remove($pdfPath);
-
         $Imagick->clear();
-
     }
 }
