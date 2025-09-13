@@ -97,7 +97,7 @@ final readonly class ProductSignScannerDispatcher
          * Открываем PDF для подсчета страниц на случай если их несколько
          */
 
-        Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 86400);
+        Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
 
         $pdfPath = $message->getRealPath();
         $Imagick = new Imagick();

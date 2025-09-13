@@ -100,6 +100,8 @@ final readonly class ProductSignPdfHandler
 
         $totalPurchase = 0;
 
+        Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
+
         foreach(new DirectoryIterator($uploadDir) as $SignFile)
         {
             if($SignFile->getExtension() !== 'pdf')
@@ -185,12 +187,12 @@ final readonly class ProductSignPdfHandler
                     ->setProfile($message->getProfile())
                     ->setNumber($PurchaseNumber);
 
-                $ProductStockDTO = new ProductStockDTO();
-                $ProductStockDTO->setProduct($message->getProduct());
-                $ProductStockDTO->setOffer($message->getOffer());
-                $ProductStockDTO->setVariation($message->getVariation());
-                $ProductStockDTO->setModification($message->getModification());
-                $ProductStockDTO->setTotal($totalPurchase);
+                $ProductStockDTO = new ProductStockDTO()
+                    ->setProduct($message->getProduct())
+                    ->setOffer($message->getOffer())
+                    ->setVariation($message->getVariation())
+                    ->setModification($message->getModification())
+                    ->setTotal($totalPurchase);
 
                 $PurchaseProductStockDTO->addProduct($ProductStockDTO);
 
