@@ -67,7 +67,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
             ->deduplication([
                 (string) $message->getId(),
                 ProductSignStatusProcess::STATUS,
-                md5(self::class)
+                self::class,
             ]);
 
         if($Deduplicator->isExecuted())
@@ -83,7 +83,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         {
             $this->logger->critical(
                 'products-sign: Не найдено событие ProductStock',
-                [var_export($message, true), self::class.':'.__LINE__]
+                [var_export($message, true), self::class.':'.__LINE__],
             );
 
             return;
@@ -93,7 +93,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         {
             $this->logger->notice(
                 'Не резервируем честный знак: Складская заявка не является Package «Упаковка»',
-                [var_export($message, true), self::class.':'.__LINE__]
+                [var_export($message, true), self::class.':'.__LINE__],
             );
 
             return;
@@ -103,7 +103,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         {
             $this->logger->notice(
                 'Не резервируем честный знак: упаковка без идентификатора заказа',
-                [var_export($message, true), self::class.':'.__LINE__]
+                [var_export($message, true), self::class.':'.__LINE__],
             );
 
             return;
@@ -120,7 +120,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
             {
                 $this->logger->notice(
                     'Не резервируем честный знак: Складская заявка при поступлении на склад по заказу (резерв уже имеется)',
-                    [var_export($message, true), self::class.':'.__LINE__]
+                    [var_export($message, true), self::class.':'.__LINE__],
                 );
 
                 return;
@@ -135,7 +135,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         {
             $this->logger->warning(
                 'Заявка на упаковку не имеет продукции в коллекции',
-                [var_export($message, true), self::class.':'.__LINE__]
+                [var_export($message, true), self::class.':'.__LINE__],
             );
 
             return;
@@ -145,7 +145,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         {
             $this->logger->warning(
                 'Заявка на упаковку не может определить ProductStocksInvariable',
-                [self::class.':'.__LINE__, var_export($message, true)]
+                [self::class.':'.__LINE__, var_export($message, true)],
             );
 
             return;
@@ -164,9 +164,9 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
                 ->critical(
                     sprintf(
                         'products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ',
-                        $UserProfileUid
+                        $UserProfileUid,
                     ),
-                    [var_export($message, true), self::class.':'.__LINE__]
+                    [var_export($message, true), self::class.':'.__LINE__],
                 );
 
             return;
@@ -188,7 +188,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
                 product: $product->getProduct(),
                 offer: $product->getOffer(),
                 variation: $product->getVariation(),
-                modification: $product->getModification()
+                modification: $product->getModification(),
             );
 
             $productTotal = $product->getTotal();
@@ -198,12 +198,12 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
                 $this->MessageDispatch
                     ->dispatch(
                         message: $ProductSignProcessMessage,
-                        transport: 'products-sign'
+                        transport: 'products-sign',
                     );
 
-                /** Разбиваем партии по 500 шт */
+                /** Разбиваем партии по 100 шт */
 
-                if(($i % 500) === 0)
+                if(($i % 100) === 0)
                 {
                     $ProductSignProcessMessage->setPart(new ProductSignUid());
                 }

@@ -107,8 +107,8 @@ final class ExportTransferController extends AbstractController
             $rows[$key]['documentamount'] = $item->getOrderTotalPrice()->getValue();
 
             $item->getInn() ? $rows[$key]['clientInn'] = $item->getInn() : null;
-            $item->getKpp() ? $rows[$key]['clientKpp'] = $item->getKpp() : null;
-            $item->getOkpo() ? $rows[$key]['clientOkpo'] = $item->getOkpo() : null;
+            $rows[$key]['clientKpp'] = $item->getKpp() ?: null;
+            //$item->getOkpo() ? $rows[$key]['clientOkpo'] = $item->getOkpo() : null;
 
 
             /** Перечисляем все заказы и их честный знак */
