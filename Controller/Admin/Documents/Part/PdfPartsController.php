@@ -147,9 +147,9 @@ final class PdfPartsController extends AbstractController
             $url = ($code->isCodeCdn() === false ? $projectDir : '').$ImagePathExtension->imagePath($code->getCodeImage(), $code->getCodeExt(), $code->isCodeCdn());
             $headers = get_headers($url, true);
 
-            if($headers !== false && str_contains($headers[0], '200'))
+            if($headers !== false && (str_contains($headers[0], '200') && $headers['Content-Length'] > 100))
             {
-                $Process[] = ($code->isCodeCdn() === false ? $projectDir : '').$ImagePathExtension->imagePath($code->getCodeImage(), $code->getCodeExt(), $code->isCodeCdn());
+                $Process[] = $url;
                 continue;
             }
 

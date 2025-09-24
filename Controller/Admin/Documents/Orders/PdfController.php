@@ -159,9 +159,9 @@ final class PdfController extends AbstractController
             $url = ($code->isCodeCdn() === false ? $projectDir : '').$ImagePathExtension->imagePath($code->getCodeImage(), $code->getCodeExt(), $code->isCodeCdn());
             $headers = get_headers($url, true);
 
-            if($headers !== false && str_contains($headers[0], '200'))
+            if($headers !== false && (str_contains($headers[0], '200') && $headers['Content-Length'] > 100))
             {
-                $Process[] = ($code->isCodeCdn() === false ? $projectDir : '').$ImagePathExtension->imagePath($code->getCodeImage(), $code->getCodeExt(), $code->isCodeCdn());
+                $Process[] = $url;
                 continue;
             }
 
@@ -177,7 +177,7 @@ final class PdfController extends AbstractController
 
             $path = $BarcodeWrite->getPath();
 
-            $Process[] = $path.DIRECTORY_SEPARATOR.$code->getSignId().'.png';
+            $Process[] = $path.$code->getSignId().'.png';
 
             $logger->critical(sprintf('Лист %s: ошибка изображения %s', $key, $url), [$code->getSignId()]);
         }
