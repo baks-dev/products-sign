@@ -90,22 +90,24 @@ class ProductSignInvariable extends EntityReadonly
     // Продукция
 
     /** ID продукта */
-    #[Assert\NotBlank]
     #[Assert\Uuid]
-    #[ORM\Column(type: ProductUid::TYPE)]
-    private readonly ProductUid $product;
+    #[ORM\Column(type: ProductUid::TYPE, nullable: true)]
+    private ProductUid $product;
 
     /** Постоянный уникальный идентификатор ТП */
+    #[Assert\Uuid]
     #[ORM\Column(type: ProductOfferConst::TYPE, nullable: true)]
-    private readonly ?ProductOfferConst $offer;
+    private ?ProductOfferConst $offer;
 
     /** Постоянный уникальный идентификатор варианта */
+    #[Assert\Uuid]
     #[ORM\Column(type: ProductVariationConst::TYPE, nullable: true)]
-    private readonly ?ProductVariationConst $variation;
+    private ?ProductVariationConst $variation;
 
     /** Постоянный уникальный идентификатор модификации */
+    #[Assert\Uuid]
     #[ORM\Column(type: ProductModificationConst::TYPE, nullable: true)]
-    private readonly ?ProductModificationConst $modification;
+    private ?ProductModificationConst $modification;
 
     public function __construct(ProductSignEvent $event)
     {
