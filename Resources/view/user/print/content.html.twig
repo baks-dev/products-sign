@@ -9,7 +9,7 @@
         {% for item in codes %}
 
             {# Обложка  #}
-            {% set image_path = '/assets/img/blank.svg' %}
+            {% set image_path = '/assets/'~version~'/img/blank.svg' %}
 
             {% if item.code_ext is defined and item.code_ext is not null %}
                 {% set img_host =  item.code_cdn == true  ? CDN_HOST : '' %}
@@ -24,7 +24,7 @@
         {% endfor %}
     </div>
 {% else %}
-    {% set image_path = '/assets/img/blank.svg' %}
+    {% set image_path = '/assets/'~version~'/img/blank.svg' %}
 
     <div class="text-center w-25">
         <svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" fill="currentColor"

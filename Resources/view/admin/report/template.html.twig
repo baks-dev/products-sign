@@ -11,7 +11,7 @@
      {# <link rel="preconnect" href="https://yastatic.net" /> #}
      {# <link rel="preload"
            href="https://api-maps.yandex.ru/2.1/?apikey={{ MAPS_YANDEX_API }}&lang={{ app.request.locale|lower }}"> #}
-     <link href="/assets/plugins/nice-select2/nice-select2.min.css" rel="stylesheet">
+     <link href="/assets/{{ version }}/plugins/nice-select2/nice-select2.min.css" rel="stylesheet">
  {% endblock %}
 
 
@@ -24,7 +24,7 @@
 
 
 {% block javascript %}
-<script nonce='{{ csp_nonce() }}' async  data-src="/assets/js/radio.input.min.js?v={{ version }}" class="lazy"></script>
- <script nonce='{{ csp_nonce() }}' async  data-src="/assets/products-sign/report.js?v={{ version }}" class="lazy"></script>
- <script nonce='{{ csp_nonce() }}' async data-src='/assets/plugins/nice-select2/nice-select2.min.js?v={{ version }}' class='lazy'></script>
+<script nonce='{{ csp_nonce() }}' async  data-src="/assets/{{ version }}/js/radio.input.min.js?v={{ version }}" class="lazy"></script>
+ <script nonce='{{ csp_nonce() }}' async  data-src="/assets/{{ version }}/products-sign/report.js?v={{ version }}" class="lazy"></script>
+ <script nonce='{{ csp_nonce() }}' async data-src='/assets/{{ version }}/plugins/nice-select2/nice-select2.min.js?v={{ version }}' class='lazy'></script>
 {% endblock %}
