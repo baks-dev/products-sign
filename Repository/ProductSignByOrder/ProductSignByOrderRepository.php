@@ -222,7 +222,9 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
 
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
 
-        $dbal->from(
+        $dbal
+            ->addSelect('event.comment')
+            ->from(
             ProductSignEvent::class,
             'event'
         );

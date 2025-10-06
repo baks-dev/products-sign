@@ -43,7 +43,7 @@ final class ProductSignByOrderResult
         private readonly string $code_image, // " => "/upload/product_sign_code/0a58f0ee235e31dc73b5551299a4af88"
         private readonly string $code_ext, // " => "webp"
         private readonly bool $code_cdn, // " => true
-
+        private readonly ?string $comment
 
     ) {}
 
@@ -123,4 +123,8 @@ final class ProductSignByOrderResult
         return $this->code_cdn === true;
     }
 
+    public function getComment(): ?string
+    {
+        return $this->comment;
+    }
 }
