@@ -226,6 +226,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 );
         }
 
+
         $orm
             ->andWhere('invariable.product = :product')
             ->setParameter(
@@ -256,10 +257,10 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 );
         }
 
-        if($this->offer)
+        if($this->offer instanceof ProductOfferConst)
         {
             $orm
-                ->andWhere('invariable.offer = :offer OR invariable.offer IS NULL')
+                ->andWhere('invariable.offer = :offer')
                 ->setParameter(
                     key: 'offer',
                     value: $this->offer,
@@ -272,7 +273,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
         }
 
 
-        if($this->variation)
+        if($this->variation instanceof ProductVariationConst)
         {
             $orm
                 ->andWhere('invariable.variation = :variation')
@@ -287,7 +288,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
             $orm->andWhere('invariable.variation IS NULL');
         }
 
-        if($this->modification)
+        if($this->modification instanceof ProductModificationConst)
         {
             $orm
                 ->andWhere('invariable.modification = :modification')
