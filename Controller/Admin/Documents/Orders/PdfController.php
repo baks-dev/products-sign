@@ -172,26 +172,25 @@ final class PdfController extends AbstractController
                 if(true === file_exists($publicDir.$url))
                 {
                     $Process[] = $publicDir.$url;
-                }
-                /** В случае отсутствия Честного знака - генерируем из кода, сохраненного в БД */
-                else
-                {
-                    $BarcodeWrite
-                        ->text($code->getBigCode())
-                        ->type(BarcodeType::DataMatrix)
-                        ->format(BarcodeFormat::PNG)
-                        ->generate(filename: (string) $code->getSignId());
-
-                    $path = $BarcodeWrite->getPath();
-
-                    $Process[] = $path.$code->getSignId().'.png';
-
-                    $logger->critical(
-                        message: sprintf('Лист %s: ошибка изображения %s', $key, $url),
-                        context: [$code->getSignId()]
-                    );
+                    continue;
                 }
             }
+
+            /** В случае отсутствия файла Честного знака - генерируем из кода, сохраненного в БД */
+            $BarcodeWrite
+                ->text($code->getBigCode())
+                ->type(BarcodeType::DataMatrix)
+                ->format(BarcodeFormat::PNG)
+                ->generate(filename: (string) $code->getSignId());
+
+            $path = $BarcodeWrite->getPath();
+
+            $Process[] = $path.$code->getSignId().'.png';
+
+            $logger->critical(
+                message: sprintf('Лист %s: ошибка изображения %s', $key, $url),
+                context: [$code->getSignId()]
+            );
         }
 
         $Process[] = $uploadFile;
