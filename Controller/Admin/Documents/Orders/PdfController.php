@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -146,29 +147,36 @@ final class PdfController extends AbstractController
 
         $Process[] = 'convert';
 
-        /** Присваиваем директорию public для локальных файлов */
-        $projectDir = implode(DIRECTORY_SEPARATOR, [
-            $projectDir,
-            'public',
-            '',
-        ]);
-
-
         foreach($codes as $key => $code)
         {
-            $url = ($code->isCodeCdn() === false ? $projectDir : '').$ImagePathExtension->imagePath($code->getCodeImage(), $code->getCodeExt(), $code->isCodeCdn());
-            $headers = get_headers($url, true);
+            $url = $ImagePathExtension->imagePath($code->getCodeImage(), $code->getCodeExt(), $code->isCodeCdn());
 
-            if($headers !== false && (str_contains($headers[0], '200') && $headers['Content-Length'] > 100))
+            /** Если Честные знаки на CDN */
+            if(true === $code->isCodeCdn())
             {
-                $Process[] = $url;
-                continue;
+                $headers = get_headers($url, true);
+
+                if($headers !== false && (str_contains($headers[0], '200') && $headers['Content-Length'] > 100))
+                {
+                    $Process[] = $url;
+                    continue;
+                }
             }
 
-            /**
-             * В случае отсутствия марки - генерируем из кода
-             */
+            /** Если Честные знаки локально */
+            if(false === $code->isCodeCdn())
+            {
+                /** Присваиваем директорию public для локальных файлов */
+                $publicDir = $projectDir.DIRECTORY_SEPARATOR.'public';
 
+                if(true === file_exists($publicDir.$url))
+                {
+                    $Process[] = $publicDir.$url;
+                    continue;
+                }
+            }
+
+            /** В случае отсутствия файла Честного знака - генерируем из кода, сохраненного в БД */
             $BarcodeWrite
                 ->text($code->getBigCode())
                 ->type(BarcodeType::DataMatrix)
@@ -179,7 +187,10 @@ final class PdfController extends AbstractController
 
             $Process[] = $path.$code->getSignId().'.png';
 
-            $logger->critical(sprintf('Лист %s: ошибка изображения %s', $key, $url), [$code->getSignId()]);
+            $logger->critical(
+                message: sprintf('Лист %s: ошибка изображения %s', $key, $url),
+                context: [$code->getSignId()]
+            );
         }
 
         $Process[] = $uploadFile;
