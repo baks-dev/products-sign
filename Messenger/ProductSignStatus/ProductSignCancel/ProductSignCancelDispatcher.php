@@ -33,6 +33,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+/** Делаем отмену Честный знак на статус New «Новый» */
 #[AsMessageHandler(priority: 0)]
 final readonly class ProductSignCancelDispatcher
 {
