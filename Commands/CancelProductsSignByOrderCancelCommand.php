@@ -32,7 +32,9 @@ use BaksDev\Orders\Order\Repository\AllOrders\AllOrdersResult;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusCanceled;
 use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignCancel\ProductSignCancelMessage;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
+use BaksDev\Users\Profile\UserProfile\Repository\CurrentAllUserProfiles\CurrentAllUserProfilesByUserInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Type\Id\UserUid;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -50,6 +52,7 @@ class CancelProductsSignByOrderCancelCommand extends Command
     public function __construct(
         private readonly AllOrdersInterface $AllOrdersRepository,
         private readonly ProductSignByOrderInterface $ProductSignByOrderRepository,
+        private readonly CurrentAllUserProfilesByUserInterface $CurrentAllUserProfilesByUserRepository,
         private readonly MessageDispatchInterface $MessageDispatch
     )
     {
@@ -65,61 +68,83 @@ class CancelProductsSignByOrderCancelCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        /** Идентификатор пользователя бизнес-профиля */
+        $UserUid = new UserUid();
 
-        $UserProfileUid = new UserProfileUid('019577a9-71a3-714b-a99c-0386833d802f');
+        $profiles = $this->CurrentAllUserProfilesByUserRepository
+            ->forUser($UserUid)
+            ->findAll();
 
-        /** Получаем все заказы со статусом Canceled «Отменен» */
-        $AllOrdersRepository = $this->AllOrdersRepository
-            ->status(OrderStatusCanceled::class)
-            ->forProfile($UserProfileUid)
-            ->setLimit(100);
-
-        $page = 0;
-
-        while(true)
+        if(false === $profiles || false === $profiles->valid())
         {
-            $orders = $AllOrdersRepository
-                ->findPaginator()
-                ->setPage($page)
-                ->getData();
+            $io->success('Честные знаки успешно отменены');
+            return Command::SUCCESS;
+        }
 
-            if(empty($orders))
+        foreach($profiles as $UserProfileUid)
+        {
+            /** Получаем все заказы со статусом Canceled «Отменен» */
+            $AllOrdersRepository = $this->AllOrdersRepository
+                ->status(OrderStatusCanceled::class)
+                ->forProfile($UserProfileUid)
+                ->setLimit(5000);
+
+            $page = 0;
+
+            while(true)
             {
-                return Command::SUCCESS;
-            }
+                $orders = $AllOrdersRepository
+                    ->findPaginator()
+                    ->setPage($page)
+                    ->getData();
 
-            /** @var AllOrdersResult $order */
-            foreach($orders as $order)
-            {
-                $result = $this->ProductSignByOrderRepository
-                    ->forOrder($order->getOrderId())
-                    ->findAll();
-
-                if(false === $result || false === $result->valid())
+                if(empty($orders))
                 {
-                    $io->writeln(sprintf('<fg=gray>- %s</>', $order->getOrderId()));
-                    continue;
+                    break;
                 }
 
-                $io->writeln(sprintf('<fg=green>+ %s</>', $order->getOrderId()));
-
-                foreach($result as $ProductSignByOrderResult)
+                /** @var AllOrdersResult $order */
+                foreach($orders as $order)
                 {
-                    $ProductSignCancelMessage = new ProductSignCancelMessage(
-                        $UserProfileUid,
-                        $ProductSignByOrderResult->getSignEvent(),
-                    );
+                    $result = $this->ProductSignByOrderRepository
+                        ->forOrder($order->getOrderId())
+                        ->withStatusDone()
+                        ->findAll();
 
-                    /*$this->MessageDispatch->dispatch(
-                        message: $ProductSignCancelMessage,
-                    );*/
+                    if(false === $result || false === $result->valid())
+                    {
+                        $io->writeln(sprintf('<fg=gray>- %s</>', $order->getOrderNumber()));
+                        continue;
+                    }
+
+                    $io->writeln(sprintf('<fg=green>+ %s</>', $order->getOrderNumber()));
+
+                    foreach($result as $ProductSignByOrderResult)
+                    {
+                        $ProductSignCancelMessage = new ProductSignCancelMessage(
+                            $UserProfileUid,
+                            $ProductSignByOrderResult->getSignEvent(),
+                        );
+
+                        if($order->getOrderNumber() === '000.000.000.000')
+                        {
+                            $this->MessageDispatch->dispatch(
+                                message: $ProductSignCancelMessage,
+                            );
+
+                            continue;
+                        }
+
+                        $io->warning('Найден честный знак на отмененный заказ');
+                        $io->warning(sprintf('Номер заказа: %s', $order->getOrderNumber()));
+
+                        return Command::INVALID;
+                    }
                 }
 
-                dump($order->getOrderNumber()); /* TODO: удалить !!! */
+                $page++;
+
             }
-
-            $page++;
-
         }
 
 
