@@ -179,10 +179,12 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
          * @var ProductStockProduct $product
          */
 
-        $ProductSignPart = new ProductSignUid();
+
 
         foreach($products as $product)
         {
+            $ProductSignPart = new ProductSignUid();
+
             $ProductSignProcessMessage = new ProductSignProcessMessage(
                 order: $ProductStockEvent->getOrder(),
                 part: $ProductSignPart,
@@ -198,6 +200,8 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
 
             for($i = 1; $i <= $productTotal; $i++)
             {
+                $ProductSignProcessMessage->setPart($ProductSignPart);
+
                 $this->MessageDispatch
                     ->dispatch(
                         message: $ProductSignProcessMessage,
