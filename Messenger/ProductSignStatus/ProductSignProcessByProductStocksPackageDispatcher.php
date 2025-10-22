@@ -158,6 +158,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
             ->forProfile($UserProfileUid)
             ->find();
 
+
         if(false === ($User instanceof User))
         {
             $this->logger
@@ -178,11 +179,13 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
          * @var ProductStockProduct $product
          */
 
+        $ProductSignPart = new ProductSignUid();
+
         foreach($products as $product)
         {
             $ProductSignProcessMessage = new ProductSignProcessMessage(
                 order: $ProductStockEvent->getOrder(),
-                part: new ProductSignUid(),
+                part: $ProductSignPart,
                 user: $User->getId(),
                 profile: $UserProfileUid,
                 product: $product->getProduct(),
@@ -205,7 +208,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
 
                 if(($i % 100) === 0)
                 {
-                    $ProductSignProcessMessage->setPart(new ProductSignUid());
+                    $ProductSignPart = new ProductSignUid();
                 }
             }
         }

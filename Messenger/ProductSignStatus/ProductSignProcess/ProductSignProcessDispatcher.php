@@ -145,10 +145,7 @@ final readonly class ProductSignProcessDispatcher
 
 
         $ProductSignProcessDTO = new ProductSignProcessDTO($message->getOrder());
-
-        $ProductSignInvariableDTO = $ProductSignProcessDTO
-            ->getInvariable()
-            ->setPart($message->getPart());
+        $ProductSignInvariableDTO = $ProductSignProcessDTO->getInvariable();
 
 
         /** Если тип заказа Wildberries, Озон, Яндекс, Озон - Присваиваем владельца в качестве продавца */
@@ -201,8 +198,10 @@ final readonly class ProductSignProcessDispatcher
                 ->setSeller($UserProfileEvent->getMain());
         }
 
-
         $ProductSignEvent->getDto($ProductSignProcessDTO);
+
+        /** Присваиваем партию упаковки */
+        $ProductSignInvariableDTO->setPart($message->getPart());
 
         $handle = $this->ProductSignStatusHandler->handle($ProductSignProcessDTO);
 
