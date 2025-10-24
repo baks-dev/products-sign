@@ -28,6 +28,7 @@ namespace BaksDev\Products\Sign\Messenger\ProductSignPdf;
 use BaksDev\Barcode\Reader\BarcodeRead;
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
+use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Products\Sign\Messenger\ProductSignPackUpdate\ProductSignPackUpdateMessage;
@@ -95,6 +96,10 @@ final readonly class ProductSignXlsxHandler
 
         /** Обрабатываем файлы EXEL */
 
+        $Deduplicator = $this->deduplicator
+            ->namespace('products-sign')
+            ->expiresAfter('1 day');
+
         foreach(new DirectoryIterator($uploadDir) as $SignFileExel)
         {
             if($SignFileExel->getExtension() !== 'xlsx')
@@ -133,10 +138,7 @@ final readonly class ProductSignXlsxHandler
                         continue;
                     }
 
-                    $Deduplicator = $this->deduplicator
-                        ->namespace('products-sign')
-                        ->expiresAfter('1 day')
-                        ->deduplication([$valueCode]);
+                    $Deduplicator->deduplication([$valueCode]);
 
                     // Код добавлен в список обработки (либо уже обработан)
                     if($Deduplicator->isExecuted())
@@ -165,7 +167,8 @@ final readonly class ProductSignXlsxHandler
 
                     $this->MessageDispatch->dispatch(
                         message: $ProductSignPackUpdateMessage,
-                        transport: 'async',
+                        stamps: [new MessageDelay('1 minutes')],
+                        transport: 'barcode-low',
                     );
 
                     /**

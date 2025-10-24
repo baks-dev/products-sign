@@ -136,6 +136,11 @@ class ProductSignInvariable extends EntityReadonly
         return $this->profile;
     }
 
+    public function getPart(): ?string
+    {
+        return $this->part;
+    }
+
     public function getDto($dto): mixed
     {
         $dto = is_string($dto) && class_exists($dto) ? new $dto() : $dto;

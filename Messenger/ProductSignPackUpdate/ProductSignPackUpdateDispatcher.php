@@ -26,11 +26,14 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Messenger\ProductSignPackUpdate;
 
 
-use BaksDev\Core\Cache\AppCacheInterface;
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
+use BaksDev\Core\Messenger\MessageDelay;
+use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Repository\ProductSignByLikeCode\ProductSignByLikeCodeInterface;
-use BaksDev\Products\Sign\Repository\UpdateProductSignPack\UpdateProductSignPackInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use BaksDev\Products\Sign\UseCase\Admin\Part\UpdateProductSignPartDTO;
+use BaksDev\Products\Sign\UseCase\Admin\Part\UpdateProductSignPartHandler;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -42,9 +45,9 @@ final class ProductSignPackUpdateDispatcher
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
         private readonly ProductSignByLikeCodeInterface $ProductSignByLikeCodeRepository,
-        private readonly UpdateProductSignPackInterface $UpdateProductSignPackRepository,
         private readonly DeduplicatorInterface $deduplicator,
-        private readonly AppCacheInterface $cache
+        private readonly MessageDispatchInterface $messageDispatch,
+        private readonly UpdateProductSignPartHandler $UpdateProductSignPartHandler
     ) {}
 
     public function __invoke(ProductSignPackUpdateMessage $message): void
@@ -58,29 +61,49 @@ final class ProductSignPackUpdateDispatcher
             ->ProductSignByLikeCodeRepository
             ->find($message->getCode());
 
+        /** Пробуем повторить попытку через время */
         if(false === ($ProductSignUid instanceof ProductSignUid))
         {
-            /** Удаляем дедубликатор для другого сканирования PDF */
-            $Deduplicator->delete();
+            $this->messageDispatch->dispatch(
+                message: $message,
+                stamps: [new MessageDelay('1 minutes')],
+                transport: 'barcode-low',
+            );
 
             return;
         }
 
-        $isUpdate = $this
-            ->UpdateProductSignPackRepository
-            ->forProductSign($ProductSignUid)
-            ->update($message->getPack());
+        $UpdateProductSignPartDTO = new UpdateProductSignPartDTO(
+            $ProductSignUid,
+            $message->getPack(),
+        );
 
-        if($isUpdate === 1)
+        $ProductSignInvariable = $this->UpdateProductSignPartHandler->handle($UpdateProductSignPartDTO);
+
+        if(true === $ProductSignInvariable)
         {
-            $this->logger->debug(sprintf(
-                "%s => %s",
-                $ProductSignUid,
-                $message->getCode(),
-            ));
-
-            $this->cache->init('products-sign')->clear();
+            return;
         }
+
+        if(false === ($ProductSignInvariable instanceof ProductSignInvariable))
+        {
+            $this->logger->critical(
+                'products-sign: Ошибка при обновлении упаковки честного знака',
+                [self::class.':'.__LINE__, var_export($UpdateProductSignPartDTO, true)],
+            );
+
+            $this->messageDispatch->dispatch(
+                message: $message,
+                stamps: [new MessageDelay('1 minutes')],
+                transport: 'barcode-low',
+            );
+
+            return;
+        }
+
+        $this->logger->debug(sprintf(
+            "%s => %s", $ProductSignUid, $message->getPack(),
+        ), [self::class.':'.__LINE__]);
 
         /** Удаляем дедубликатор для другого сканирования PDF */
         $Deduplicator->delete();
