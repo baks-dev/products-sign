@@ -41,8 +41,7 @@ unit ALL=(ALL) NOPASSWD: /usr/bin/pdfcrop
 
 сохранить изменения Ctrl+X -> Y
 
-
-* Pазрешить работу с PDF, изменив в файле /etc/ImageMagick-6/policy.xml и перезапустить web-сервер
+* Разрешить работу с PDF, изменив в файле /etc/ImageMagick-6/policy.xml и перезапустить web-сервер
 
 ```html
 <policy domain="coder" rights="none" pattern="PDF"/>
