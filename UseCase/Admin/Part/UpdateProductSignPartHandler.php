@@ -38,7 +38,7 @@ final class UpdateProductSignPartHandler extends AbstractHandler
 
         $ProductSignInvariable = $this
             ->getRepository(ProductSignInvariable::class)
-            ->find($command->getPart());
+            ->find($command->getMain());
 
         if(false === ($ProductSignInvariable instanceof ProductSignInvariable))
         {
