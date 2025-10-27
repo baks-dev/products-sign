@@ -29,7 +29,6 @@ use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 
 final readonly class GroupProductSignsByOrderResult
 {
@@ -64,9 +63,9 @@ final readonly class GroupProductSignsByOrderResult
         return $this->counter;
     }
 
-    public function getSignPart(): ProductSignUid
+    public function getSignPart(): string
     {
-        return new ProductSignUid($this->sign_part);
+        return $this->sign_part;
     }
 
     public function getProductId(): ProductUid
