@@ -99,6 +99,8 @@ final readonly class ProductSignScannerDispatcher
         $pdfPath = $message->getRealPath();
 
         Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
+        Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, 256);
+
         $Imagick = new Imagick();
         $Imagick->setResolution(500, 500);
         $Imagick->readImage($pdfPath);
