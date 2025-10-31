@@ -25,26 +25,32 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\UseCase\Admin\Pdf\ProductSignFile;
 
-use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductSignFile */
 final class ProductSignFileDTO
 {
-    #[Assert\NotBlank]
-    #[Assert\File(maxSize: '100m', mimeTypes: [
+    /**
+     * @var array<int, UploadedFile>|null
+     */
+    #[Assert\Collection(
+        fields: [
+            new Assert\File(maxSize: '100m', mimeTypes: [
 
-        /** PDF */
-        'application/pdf',
-        'application/acrobat',
-        'application/nappdf',
-        'application/x-pdf',
-        'image/pdf',
+                /** PDF */
+                'application/pdf',
+                'application/acrobat',
+                'application/nappdf',
+                'application/x-pdf',
+                'image/pdf',
 
-        /** XLSX */
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-
-    ])]
-    public ?File $pdf = null;
-
+                /** XLSX */
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]),
+        ],
+        allowExtraFields: true,
+        // allowMissingFields: true,
+    )]
+    public ?array $pdf = null;
 }
