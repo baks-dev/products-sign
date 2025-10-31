@@ -31,6 +31,7 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Messenger\ProductSignMessage;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use Doctrine\Common\Collections\Criteria;
 
@@ -51,16 +52,23 @@ final class ProductSignStatusHandler extends AbstractHandler
         $this->flush();
 
         /** Если отмена честных знаков  */
-        if(true === ($command->getEvent() instanceof ProductSignEventUid) && $command->getStatus()->equals(ProductSignStatusNew::class))
+        if(
+            true === ($command->getEvent() instanceof ProductSignEventUid)
+            && $command->getStatus()->equals(ProductSignStatusNew::class)
+        )
         {
             /** Получаем предыдущее событие для удаления */
             $lastProductSignEvent = $this
                 ->getRepository(ProductSignEvent::class)
                 ->find($command->getEvent());
 
-            if($lastProductSignEvent instanceof ProductSignEvent)
+            if(
+                $lastProductSignEvent instanceof ProductSignEvent
+                && $lastProductSignEvent->getStatus()->equals(ProductSignStatusDone::class)
+            )
             {
-                $lastProductSignEvent->cancel();
+                /** Применяем возврат к предыдущему событию */
+                $lastProductSignEvent->refund();
                 $this->flush();
             }
         }
@@ -68,7 +76,7 @@ final class ProductSignStatusHandler extends AbstractHandler
         /* Отправляем сообщение в шину */
         $this->messageDispatch->dispatch(
             message: new ProductSignMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()),
-            transport: 'products-sign'
+            transport: 'products-sign',
         );
 
         return $this->main;
