@@ -33,6 +33,7 @@ use BaksDev\Products\Sign\Messenger\ProductSignMessage;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use Doctrine\Common\Collections\Criteria;
 
 final class ProductSignStatusHandler extends AbstractHandler
@@ -62,13 +63,17 @@ final class ProductSignStatusHandler extends AbstractHandler
                 ->getRepository(ProductSignEvent::class)
                 ->find($command->getEvent());
 
-            if(
-                $lastProductSignEvent instanceof ProductSignEvent
-                && $lastProductSignEvent->getStatus()->equals(ProductSignStatusDone::class)
-            )
+            if($lastProductSignEvent instanceof ProductSignEvent)
             {
-                /** Применяем возврат к предыдущему событию */
-                $lastProductSignEvent->refund();
+                /** Присваиваем статус к предыдущему событию */
+                match (true)
+                {
+                    // Refund «Возврат» при статусе Done «Выполнен»
+                    $lastProductSignEvent->getStatus()->equals(ProductSignStatusDone::class) => $lastProductSignEvent->refund(),
+                    // New «Новый» при статусе Process «В резерве»
+                    $lastProductSignEvent->getStatus()->equals(ProductSignStatusProcess::class) => $lastProductSignEvent->cancel(),
+                };
+
                 $this->flush();
             }
         }

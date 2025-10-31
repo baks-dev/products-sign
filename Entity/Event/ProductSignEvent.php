@@ -34,6 +34,7 @@ use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusRefund;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Doctrine\DBAL\Types\Types;
@@ -136,9 +137,20 @@ class ProductSignEvent extends EntityEvent
         return $this->id;
     }
 
-    public function refund()
+    /** Присваиваем статус Refund «Возврат» */
+    public function refund(): self
     {
         $this->status = new ProductSignStatus(ProductSignStatusRefund::class);
+        return $this;
+    }
+
+    /** Присваиваем статус New «Новый» */
+    public function cancel(): self
+    {
+        $this->status = new ProductSignStatus(ProductSignStatusNew::class);
+        $this->ord = null;
+
+        return $this;
     }
 
     /**
