@@ -35,6 +35,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 final readonly class ProductSignPdfHandler
 {
@@ -112,38 +113,45 @@ final readonly class ProductSignPdfHandler
 
         $filename = [];
 
-        /** @var ProductSignFileDTO $file */
-        foreach($command->getFiles() as $file)
+        /**
+         * @var ProductSignFileDTO $files
+         * @var UploadedFile $file
+         */
+        foreach($command->getFiles() as $files)
         {
-            $name = null;
-
-            if(
-                in_array($file->pdf->getMimeType(), ['application/pdf',
-                    'application/acrobat',
-                    'application/nappdf',
-                    'application/x-pdf',
-                    'image/pdf',])
-            )
+            foreach($files->pdf as $file)
             {
-                $name = uniqid('original_', true).'.pdf';
+                $name = null;
+
+                if(
+                    in_array($file->getMimeType(), ['application/pdf',
+                        'application/acrobat',
+                        'application/nappdf',
+                        'application/x-pdf',
+                        'image/pdf',])
+                )
+                {
+                    $name = uniqid('original_', true).'.pdf';
+                }
+
+                if('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' === $file->getMimeType())
+                {
+                    $name = uniqid('original_', true).'.xlsx';
+                }
+
+                if(empty($name))
+                {
+                    continue;
+                }
+
+                $filename[] = $name;
+
+                $file->move($uploadDir, $name);
+
+                /** Валидация файла  */
+                $this->validatorCollection->add($file);
             }
 
-            if('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' === $file->pdf->getMimeType())
-            {
-                $name = uniqid('original_', true).'.xlsx';
-            }
-
-            if(empty($name))
-            {
-                continue;
-            }
-
-            $filename[] = $name;
-
-            $file->pdf->move($uploadDir, $name);
-
-            /** Валидация файла  */
-            $this->validatorCollection->add($file->pdf);
         }
 
         /** Валидация всех объектов */
