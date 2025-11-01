@@ -2,11 +2,18 @@
 
 
 
-{#new: 'Новые'
+{#
+-- Заказ --
+new: 'Новые'
+process: 'В резерве'
 done: 'Выполнен'
 error: 'Ошибка'
 cancel: 'Отменен'
-process: 'В резерве' #}
+
+-- Поставка --
+supply: 'Поставка'
+undefined: 'Не определен'
+#}
 
 
 
@@ -39,12 +46,25 @@ process: 'В резерве' #}
 		</span>
     </h6>
 
-
 {% elseif status == 'cancel' or status == 'error' %}
     <h6 class="lh-normal m-0">
 		<span class="badge bg-danger shadow">
 			{{ status|trans }}
         </span>
+    </h6>
+
+{% elseif status == 'supply' %}
+    <h6 class="lh-normal m-0">
+		<span class="badge text-white bg-info shadow">
+			{{ status|trans }}
+		</span>
+    </h6>
+
+{% elseif status == 'undefined' %}
+    <h6 class="lh-normal m-0">
+		<span class="badge text-bg-secondary shadow">
+			{{ status|trans }}
+		</span>
     </h6>
 
 {% else %}

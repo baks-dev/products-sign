@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 namespace BaksDev\Products\Sign\Entity\Invariable;
@@ -92,7 +93,7 @@ class ProductSignInvariable extends EntityReadonly
     /** ID продукта */
     #[Assert\Uuid]
     #[ORM\Column(type: ProductUid::TYPE, nullable: true)]
-    private ProductUid $product;
+    private ?ProductUid $product;
 
     /** Постоянный уникальный идентификатор ТП */
     #[Assert\Uuid]

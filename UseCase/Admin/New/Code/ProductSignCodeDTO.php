@@ -19,21 +19,14 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\UseCase\Admin\New\Code;
 
-use BaksDev\Products\Product\Type\Id\ProductUid;
-use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
-use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
-use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCodeInterface;
-use BaksDev\Users\User\Type\Id\UserUid;
-use chillerlan\QRCode\QRCode;
-use Doctrine\DBAL\Types\Types;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see MaterialSignCode */

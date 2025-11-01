@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -28,6 +29,7 @@ namespace BaksDev\Products\Sign\Entity\Event;
 use BaksDev\Core\Entity\EntityEvent;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
+use BaksDev\Products\Sign\Entity\Event\Supply\ProductSignSupply;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
@@ -90,6 +92,19 @@ class ProductSignEvent extends EntityEvent
     #[ORM\Column(type: ProductSignStatus::TYPE)]
     private ProductSignStatus $status;
 
+    /**
+     * ID заказа
+     */
+    #[ORM\Column(type: OrderUid::TYPE, nullable: true)]
+    private ?OrderUid $ord = null;
+
+    /** Идентификатор поставки */
+    #[ORM\OneToOne(targetEntity: ProductSignSupply::class, mappedBy: 'event', cascade: ['all'])]
+    private ?ProductSignSupply $supply = null;
+
+    /** Комментарий */
+    #[ORM\Column(type: Types::STRING, nullable: true)]
+    private string $comment;
 
     /**
      * Профиль пользователя (null - общий)
@@ -99,18 +114,6 @@ class ProductSignEvent extends EntityEvent
      */
     #[ORM\Column(type: UserProfileUid::TYPE, nullable: true)]
     private ?UserProfileUid $profile = null;
-
-
-    /**
-     * ID заказа
-     */
-    #[ORM\Column(type: OrderUid::TYPE, nullable: true)]
-    private ?OrderUid $ord = null;
-
-
-    /** Комментарий */
-    #[ORM\Column(type: Types::STRING, nullable: true)]
-    private string $comment;
 
     public function __construct()
     {
