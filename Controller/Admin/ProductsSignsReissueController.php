@@ -37,7 +37,7 @@ use BaksDev\Products\Sign\Forms\ProductsSignsReissue\ProductsSignsReissueForm;
 use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignCancel\ProductSignCancelMessage;
 use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignProcess\ProductSignProcessMessage;
 use BaksDev\Products\Sign\Repository\ProductSignProcessByOrder\ProductSignProcessByOrderInterface;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -51,10 +51,10 @@ final class ProductsSignsReissueController extends AbstractController
 {
     #[Route('/admin/product/signs/reissue/{order}', name: 'admin.reissue', methods: ['GET', 'POST'])]
     public function reissue(
+        #[MapEntity] Order $order,
         Request $request,
         MessageDispatchInterface $MessageDispatch,
         ProductSignProcessByOrderInterface $ProductSignProcessByOrderRepository,
-        #[MapEntity] Order $order,
         ExistOrderEventByStatusInterface $ExistOrderEventByStatusRepository
     ): Response
     {
@@ -114,11 +114,14 @@ final class ProductsSignsReissueController extends AbstractController
             /** Получаем все честные знаки для данного заказаз  */
             $signs = $ProductSignProcessByOrderRepository->forOrder($order->getId())->findAll();
 
-            /** @var ProductSignUid $sign */
+            /** @var ProductSignEventUid $sign */
             foreach($signs as $sign)
             {
                 /** Отменяем честный знак */
-                $MessageDispatch->dispatch(new ProductSignCancelMessage($this->getProfileUid(), $sign->getValue()));
+                $MessageDispatch->dispatch(new ProductSignCancelMessage(
+                    $this->getProfileUid(),
+                    $sign->getValue()
+                ), [], 'products-sign');
 
                 /** Отправляем знак на повторную обработку */
                 $MessageDispatch->dispatch(new ProductSignProcessMessage(
@@ -130,7 +133,7 @@ final class ProductsSignsReissueController extends AbstractController
                     $sign->getParams()['offer'],
                     $sign->getParams()['variation'],
                     $sign->getParams()['modification']
-                ));
+                ), [], 'products-sign');
             }
 
             $this->addFlash
