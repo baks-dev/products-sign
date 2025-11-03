@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -55,27 +56,31 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
     private ?UserProfileUid $seller = null;
 
 
-    /** Группа штрихкодов, для отмены  */
+    /** Группа штрихкодов для отмены  */
     #[Assert\NotBlank]
     private string $part;
 
     /** Грузовая таможенная декларация (номер) */
     private ?string $number = null;
 
-    // Продукция
+    /**
+     * Продукт
+     */
 
     /** ID продукта */
-    #[Assert\NotBlank]
     #[Assert\Uuid]
-    private ProductUid $product;
+    private ?ProductUid $product;
 
     /** Постоянный уникальный идентификатор ТП */
+    #[Assert\Uuid]
     private ?ProductOfferConst $offer;
 
     /** Постоянный уникальный идентификатор варианта */
+    #[Assert\Uuid]
     private ?ProductVariationConst $variation;
 
     /** Постоянный уникальный идентификатор модификации */
+    #[Assert\Uuid]
     private ?ProductModificationConst $modification;
 
     /**
@@ -109,12 +114,12 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
     /**
      * Product
      */
-    public function getProduct(): ProductUid
+    public function getProduct(): ?ProductUid
     {
         return $this->product;
     }
 
-    public function setProduct(ProductUid $product): self
+    public function setProduct(?ProductUid $product): self
     {
         $this->product = $product;
         return $this;
@@ -176,6 +181,23 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
         return $this;
     }
 
+    /**
+     * Container
+     */
+    public function getContainer(): ?string
+    {
+        return $this->container;
+    }
+
+    public function setContainer(?string $container): self
+    {
+        $this->container = $container;
+        return $this;
+    }
+
+    /**
+     * Profile
+     */
     public function getProfile(): ?UserProfileUid
     {
         return $this->profile;
@@ -187,6 +209,9 @@ final class ProductSignInvariableDTO implements ProductSignInvariableInterface
         return $this;
     }
 
+    /**
+     * Seller
+     */
     public function getSeller(): ?UserProfileUid
     {
         return $this->seller;

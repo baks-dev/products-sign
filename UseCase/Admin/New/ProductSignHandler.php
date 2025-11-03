@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -33,6 +34,7 @@ use BaksDev\Files\Resources\Upload\File\FileUploadInterface;
 use BaksDev\Files\Resources\Upload\Image\ImageUploadInterface;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Messenger\ProductSignMessage;
 use BaksDev\Products\Sign\Repository\ExistsProductSignCode\ExistsProductSignCodeInterface;
@@ -42,7 +44,6 @@ final class ProductSignHandler extends AbstractHandler
 {
     public function __construct(
         private readonly ExistsProductSignCodeInterface $existsProductSignCode,
-
         EntityManagerInterface $entityManager,
         MessageDispatchInterface $messageDispatch,
         ValidatorCollectionInterface $validatorCollection,
@@ -53,8 +54,7 @@ final class ProductSignHandler extends AbstractHandler
         parent::__construct($entityManager, $messageDispatch, $validatorCollection, $imageUpload, $fileUpload);
     }
 
-
-    public function handle(ProductSignDTO $command): ProductSign|string|false
+    public function handle(ProductSignEventInterface $command): ProductSign|string|false
     {
         /** Делаем проверку на дубли */
         $Invariable = $command->getInvariable();
@@ -83,13 +83,13 @@ final class ProductSignHandler extends AbstractHandler
 
         $this->flush();
 
-        /* Отправляем сообщение в шину */
+        /** Отправляем сообщение в шину */
         $this->messageDispatch->dispatch(
             message: new ProductSignMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()),
             transport: 'products-sign'
         );
 
-        /* Загружаем файл обложки раздела на CDN */
+        /** Загружаем файл обложки раздела на CDN */
         $this->messageDispatch->dispatch(
             message: new CDNUploadImageMessage($this->main->getId(), ProductSignCode::class, $Barcode->getName()),
             transport: 'files-res'
