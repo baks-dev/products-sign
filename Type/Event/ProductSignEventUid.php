@@ -49,6 +49,7 @@ final class ProductSignEventUid extends Uid
         mixed $option = null,
         mixed $property = null,
         mixed $characteristic = null,
+        ?string $params = null,
     ) {
         parent::__construct($value);
 
@@ -56,6 +57,7 @@ final class ProductSignEventUid extends Uid
         $this->option = $option;
         $this->property = $property;
         $this->characteristic = $characteristic;
+        $this->params = $params;
     }
 
 
@@ -81,4 +83,13 @@ final class ProductSignEventUid extends Uid
         return $this->characteristic;
     }
 
+    public function getParams(): ?array
+    {
+        if(true === empty($this->params) || false === json_validate($this->params))
+        {
+            return null;
+        }
+
+        return json_decode($this->params, true);
+    }
 }

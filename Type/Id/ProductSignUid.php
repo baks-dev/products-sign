@@ -42,7 +42,6 @@ final class ProductSignUid extends Uid
 
     private mixed $characteristic;
 
-
     public function __construct(
         AbstractUid|string|null $value = null,
         mixed $attr = null,
@@ -80,5 +79,4 @@ final class ProductSignUid extends Uid
     {
         return $this->characteristic;
     }
-
 }

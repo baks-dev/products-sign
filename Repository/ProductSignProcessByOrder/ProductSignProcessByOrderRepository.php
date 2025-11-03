@@ -29,6 +29,7 @@ use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
@@ -89,6 +90,13 @@ final class ProductSignProcessByOrderRepository implements ProductSignProcessByO
             ->select('event.id AS value')
             ->from(ProductSignEvent::class, 'event');
 
+        $dbal->join(
+            'event',
+            ProductSignInvariable::class,
+            'invariable',
+            'invariable.event = event.id'
+        );
+
         $dbal
             ->where('event.ord = :ord')
             ->setParameter(
@@ -115,6 +123,22 @@ final class ProductSignProcessByOrderRepository implements ProductSignProcessByO
                 'main',
                 'main.event = event.id'
             );
+
+        $dbal->addSelect("JSON_AGG
+            ( DISTINCT
+			
+			    JSONB_BUILD_OBJECT
+			    (
+			        'id', main.id,
+			        'product', invariable.product,
+			        'offer', invariable.offer,
+			        'variation', invariable.variation,
+			        'modification', invariable.modification
+			    )
+			) AS params
+        ");
+
+        $dbal->allGroupByExclude();
 
         return $dbal->fetchAllHydrate(ProductSignEventUid::class);
     }

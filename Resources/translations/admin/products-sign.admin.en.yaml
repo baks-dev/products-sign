@@ -7,6 +7,7 @@ page:
   restore: 'Restore fair sign'
   pdf: 'Download PDF files'
   cancel: 'Cancel fair sign'
+  reissue: 'Reissue fair signs'
 
 
 breadcrumb:
@@ -27,7 +28,7 @@ success:
   pdf: 'The files have been successfully sent for processing.'
   cancel: 'Honest sign successfully cancelled'
   pickup: 'Order completed successfully'
-
+  reissue: 'Fair signs were successfully sent on reissuing'
 
 danger:
   new: '%s: Error adding fair sign'
@@ -36,6 +37,9 @@ danger:
   restore: '%s: Error while restoring fair sign'
   pdf: '%s: Error loading PDF files'
   cancel: '%s: Error when canceling fair sign'
+  reissue:
+    package: 'Order has not been packaged yet'
+    completed: 'Order has already been completed'
 
 form:
   code: 'Code'
