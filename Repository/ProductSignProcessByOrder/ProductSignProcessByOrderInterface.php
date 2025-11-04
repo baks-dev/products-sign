@@ -25,6 +25,7 @@ namespace BaksDev\Products\Sign\Repository\ProductSignProcessByOrder;
 
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use Generator;
 
 interface ProductSignProcessByOrderInterface
@@ -34,7 +35,9 @@ interface ProductSignProcessByOrderInterface
     public function onlyStatusProcess(): void;
 
     /**
-     * Метод возвращает события Честный знак по заказу со статусом Process «В резерве»
+     * Метод возвращает события всех Честных знаков по заказу со статусом Process «В резерве»
+     *
+     * @return Generator<ProductSignEventUid>|false
      */
     public function findAll(): Generator|false;
 }

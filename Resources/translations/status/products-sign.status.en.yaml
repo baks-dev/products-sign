@@ -1,7 +1,13 @@
+# Order
 new: 'New'
-decommission: 'Decommissioned'
-done: 'Done'
+decommission: 'Write-off'
+done: 'Completed'
 error: 'Error'
 cancel: 'Cancelled'
-process: 'In progress'
-delete: 'Delete'
+process: 'In reserve'
+delete: 'Deleted'
+refund: 'Refund'
+
+# Supply
+supply: 'Delivery'
+undefined: 'Undefined'

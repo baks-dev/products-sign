@@ -76,6 +76,8 @@ final class ProductSignProcessByOrderRepository implements ProductSignProcessByO
 
     /**
      * Метод возвращает события всех Честных знаков по заказу со статусом Process «В резерве»
+     *
+     * @return Generator<ProductSignEventUid>|false
      */
     public function findAll(): Generator|false
     {
