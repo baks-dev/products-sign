@@ -35,6 +35,7 @@ use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Repository\ProductSignNew\ProductSignNewInterface;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -76,11 +77,12 @@ class ProductSignNewTest extends KernelTestCase
                 'invariable',
                 ProductSignEvent::class,
                 'event',
-                'event.id = invariable.event AND status = :status AND profile IS NOT NULL'
+                'event.id = invariable.event AND event.status = :status AND event.profile IS NOT NULL',
             )
             ->setParameter('status', ProductSignStatusNew::class, ProductSignStatus::TYPE)
             ->setMaxResults(1)
             ->fetchAssociative();
+
 
 
         self::$user = $result['usr'] ?? false;
@@ -95,7 +97,7 @@ class ProductSignNewTest extends KernelTestCase
     public function testUseCase(): void
     {
         self::assertTrue(true);
-        return;
+        //return;
 
         /** @var ProductSignNewInterface $ProductSignNewRepository */
         $ProductSignNewRepository = self::getContainer()->get(ProductSignNewInterface::class);
@@ -109,7 +111,7 @@ class ProductSignNewTest extends KernelTestCase
 
         $ProductSignEvent = $ProductSignNewRepository
             ->forUser(self::$user)
-            ->forProfile(self::$profile)
+            ->forProfile(new UserProfileUid())
             ->forProduct(self::$product)
             ->forOfferConst(self::$offer)
             ->forVariationConst(self::$variation)

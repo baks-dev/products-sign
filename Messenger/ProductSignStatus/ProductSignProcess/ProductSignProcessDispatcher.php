@@ -26,6 +26,9 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignProcess;
 
 
+use BaksDev\Core\Cache\AppCacheInterface;
+use BaksDev\Core\Messenger\MessageDelay;
+use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Delivery\Type\Id\Choice\TypeDeliveryPickup;
 use BaksDev\Orders\Order\Entity\Event\OrderEvent;
 use BaksDev\Orders\Order\Repository\CurrentOrderEvent\CurrentOrderEventInterface;
@@ -57,6 +60,7 @@ use BaksDev\Yandex\Market\Orders\Type\DeliveryType\TypeDeliveryDbsYaMarket;
 use BaksDev\Yandex\Market\Orders\Type\DeliveryType\TypeDeliveryFbsYaMarket;
 use BaksDev\Yandex\Market\Orders\Type\PaymentType\TypePaymentDbsYaMarket;
 use BaksDev\Yandex\Market\Orders\Type\PaymentType\TypePaymentFbsYandex;
+use DateInterval;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -70,7 +74,9 @@ final readonly class ProductSignProcessDispatcher
         private ProductSignStatusHandler $ProductSignStatusHandler,
         private ProductSignNewInterface $ProductSignNew,
         private CurrentOrderEventInterface $CurrentOrderEvent,
-        private CurrentUserProfileEventInterface $CurrentUserProfileEvent
+        private CurrentUserProfileEventInterface $CurrentUserProfileEvent,
+        private AppCacheInterface $cache,
+        private MessageDispatchInterface $MessageDispatch,
     ) {}
 
     public function __invoke(ProductSignProcessMessage $message): void
@@ -142,6 +148,34 @@ final readonly class ProductSignProcessDispatcher
 
             return;
         }
+
+
+        /**
+         * Мьютекс на идентификатор честного знака
+         */
+
+        $cache = $this->cache->init('products-sign');
+        $item = $cache->getItem((string) $ProductSignEvent);
+
+        /** Если идентификатор найден - пробуем через время */
+        if(true === $item->isHit())
+        {
+            $this->MessageDispatch->dispatch(
+                message: $message,
+                stamps: [new MessageDelay('5 seconds')],
+                transport: 'products-sign',
+            );
+
+            return;
+        }
+
+        $item->expiresAfter(DateInterval::createFromDateString('1 minutes'));
+        $item->set(true);
+        $cache->save($item);
+
+        /**
+         * Резервируем «Честный знак»
+         */
 
 
         $ProductSignProcessDTO = new ProductSignProcessDTO($message->getOrder());

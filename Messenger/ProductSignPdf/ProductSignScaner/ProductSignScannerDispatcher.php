@@ -102,6 +102,9 @@ final readonly class ProductSignScannerDispatcher
         Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, 256);
 
         $Imagick = new Imagick();
+
+        $Imagick->clear();
+
         $Imagick->setResolution(500, 500);
         $Imagick->readImage($pdfPath);
         $pages = $Imagick->getNumberImages(); // количество страниц в файле
@@ -128,7 +131,7 @@ final readonly class ProductSignScannerDispatcher
             }
 
             $Imagick->writeImage($fileTemp);
-            $Imagick->clear();
+
 
             /** Рассчитываем дайджест файла для перемещения */
             $md5 = md5_file($fileTemp);
@@ -243,5 +246,7 @@ final readonly class ProductSignScannerDispatcher
                 $this->filesystem->remove($pdfPath);
             }
         }
+
+        $Imagick->clear();
     }
 }
