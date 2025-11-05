@@ -102,7 +102,6 @@ final readonly class ProductSignScannerDispatcher
         Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, 256);
 
         $Imagick = new Imagick();
-
         $Imagick->clear();
 
         $Imagick->setResolution(500, 500);
