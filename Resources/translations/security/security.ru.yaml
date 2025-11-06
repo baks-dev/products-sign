@@ -25,4 +25,9 @@ ROLE_PRODUCT_SIGN_STATUS:
   name: 'Статус'
   desc: ''
 
+ROLE_PRODUCT_SIGN_REISSUE:
+  name: 'Перевыпуск КИЗ'
+  desc: ''
+
+
 

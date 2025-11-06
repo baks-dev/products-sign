@@ -54,7 +54,7 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
 #[AsController]
-#[RoleSecurity('ROLE_PRODUCTS_SIGN_REISSUE')]
+#[RoleSecurity('ROLE_PRODUCT_SIGN_REISSUE')]
 final class ProductsSignsReissueController extends AbstractController
 {
     /**

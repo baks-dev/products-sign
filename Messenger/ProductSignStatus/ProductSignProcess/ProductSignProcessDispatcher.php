@@ -66,6 +66,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+/** Ставит в резерв честный знак по заказу */
 #[AsMessageHandler(priority: 0)]
 final readonly class ProductSignProcessDispatcher
 {
@@ -148,7 +149,6 @@ final readonly class ProductSignProcessDispatcher
 
             return;
         }
-
 
         /**
          * Мьютекс на идентификатор честного знака

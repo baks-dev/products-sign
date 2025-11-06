@@ -51,10 +51,11 @@ final class ProductSignProcessMessage
     public function __construct(
         OrderUid $order,
         ProductSignUid $part,
+
         UserUid $user,
         UserProfileUid $profile,
-        ProductUid $product,
 
+        ProductUid $product,
         ProductOfferConst|null|false $offer,
         ProductVariationConst|null|false $variation,
         ProductModificationConst|null|false $modification,
@@ -65,8 +66,8 @@ final class ProductSignProcessMessage
         $this->order = (string) $order;
         $this->user = (string) $user;
         $this->profile = (string) $profile;
-        $this->product = (string) $product;
 
+        $this->product = (string) $product;
         $this->offer = empty($offer) ? false : (string) $offer;
         $this->variation = empty($variation) ? false : (string) $variation;
         $this->modification = empty($modification) ? false : (string) $modification;

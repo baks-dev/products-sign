@@ -23,3 +23,7 @@ ROLE_PRODUCT_SIGN_DELETE:
 ROLE_PRODUCT_SIGN_STATUS:
   name: 'Status'
   desc: ''
+
+ROLE_PRODUCT_SIGN_REISSUE:
+  name: 'Перевыпуск'
+  desc: ''
