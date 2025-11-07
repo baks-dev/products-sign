@@ -27,6 +27,7 @@ namespace BaksDev\Products\Sign\Controller\Admin;
 
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
+use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Orders\Order\Entity\Event\OrderEvent;
 use BaksDev\Orders\Order\Entity\Order;
@@ -185,6 +186,7 @@ final class ProductsSignsReissueController extends AbstractController
                     $MessageDispatch
                         ->dispatch(
                             message: $ProductSignProcessMessage,
+                            stamps: [new MessageDelay('5 seconds')],
                             transport: 'products-sign',
                         );
 
