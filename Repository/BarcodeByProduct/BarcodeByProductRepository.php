@@ -33,9 +33,12 @@ use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
+use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use InvalidArgumentException;
 
 
@@ -178,6 +181,19 @@ final class BarcodeByProductRepository implements BarcodeByProductInterface
             'main',
             'main.id = invariable.main',
         );
+
+        $dbal
+            ->join(
+                'invariable',
+                ProductSignEvent::class,
+                'event',
+                'event.id = invariable.event AND event.status = :status',
+            )
+            ->setParameter(
+                key: 'status',
+                value: ProductSignStatusNew::class,
+                type: ProductSignStatus::TYPE,
+            );
 
         $dbal->leftJoin(
             'invariable',
