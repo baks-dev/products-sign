@@ -42,6 +42,8 @@ final class ProductSignEventUid extends Uid
 
     private mixed $characteristic;
 
+    private ?string $params;
+
 
     public function __construct(
         AbstractUid|string|null $value = null,

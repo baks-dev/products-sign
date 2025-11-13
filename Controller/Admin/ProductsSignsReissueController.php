@@ -35,7 +35,7 @@ use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Repository\ExistOrderEventByStatus\ExistOrderEventByStatusInterface;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusCompleted;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusPackage;
-use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierInterface;
+use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierByEventInterface;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
@@ -68,7 +68,7 @@ final class ProductsSignsReissueController extends AbstractController
         MessageDispatchInterface $MessageDispatch,
         ProductSignProcessByOrderInterface $ProductSignProcessByOrderRepository,
         ExistOrderEventByStatusInterface $ExistOrderEventByStatusRepository,
-        CurrentProductIdentifierInterface $CurrentProductIdentifierRepository,
+        CurrentProductIdentifierByEventInterface $CurrentProductIdentifierRepository,
     ): Response
     {
         $productsSignsReissueDTO = new ProductsSignsReissueDTO()
