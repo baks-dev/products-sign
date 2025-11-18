@@ -35,7 +35,6 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignDTO;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignHandler;
 use Doctrine\ORM\Mapping\Table;
-use Exception;
 use Imagick;
 use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
@@ -120,14 +119,14 @@ final readonly class ProductSignScannerDispatcher
              * В некоторых случаях может вызывать ошибку,
              * в таком случае сохраняем без рамки и пробуем отсканировать как есть
              */
-            try
-            {
-                $Imagick->borderImage('white', 5, 5);
-            }
-            catch(Exception $e)
-            {
-                $this->logger->critical('products-sign: Ошибка при добавлении рамки к изображению. Пробуем отсканировать как есть.', [$e->getMessage()]);
-            }
+            //            try
+            //            {
+            //                $Imagick->borderImage('white', 5, 5);
+            //            }
+            //            catch(Exception $e)
+            //            {
+            //                $this->logger->critical('products-sign: Ошибка при добавлении рамки к изображению. Пробуем отсканировать как есть.', [$e->getMessage()]);
+            //            }
 
             $Imagick->writeImage($fileTemp);
 
