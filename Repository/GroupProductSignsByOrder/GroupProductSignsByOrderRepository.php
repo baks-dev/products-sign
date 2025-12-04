@@ -265,6 +265,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
             ) AS product_article'
         );
 
+        $dbal->addOrderBy('invariable.part');
 
         $dbal->allGroupByExclude();
 
