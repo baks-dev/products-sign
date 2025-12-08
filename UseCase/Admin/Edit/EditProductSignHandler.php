@@ -44,7 +44,9 @@ final readonly class EditProductSignHandler
     public function handle(EditProductSignDTO $command): int
     {
         /** Валидация DTO  */
-        $this->validatorCollection->add($command);
+        $this->validatorCollection
+            ->init()
+            ->add($command);
 
         /** Валидация всех объектов */
         if($this->validatorCollection->isInvalid())

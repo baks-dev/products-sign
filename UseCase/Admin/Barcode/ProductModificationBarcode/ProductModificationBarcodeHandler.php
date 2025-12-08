@@ -35,6 +35,8 @@ final class ProductModificationBarcodeHandler extends AbstractHandler
     /** @see ProductModification */
     public function handle(ProductModificationBarcodeDTO $command): string|ProductModification
     {
+        $this->setCommand($command);
+
         $ProductModification = $this->getRepository(ProductModification::class)->find($command->getId());
 
         if(false === ($ProductModification instanceof ProductModification))
@@ -49,7 +51,6 @@ final class ProductModificationBarcodeHandler extends AbstractHandler
 
         $this->validatorCollection->add($ProductModification);
 
-        $this->setCommand($command);
 
         $ProductModification->setEntity($command);
 

@@ -35,6 +35,8 @@ final class ProductVariationBarcodeHandler extends AbstractHandler
     /** @see ProductVariation */
     public function handle(ProductVariationBarcodeDTO $command): string|ProductVariation
     {
+        $this->setCommand($command);
+
         $ProductVariation = $this->getRepository(ProductVariation::class)->find($command->getId());
 
         if(false === ($ProductVariation instanceof ProductVariation))
@@ -48,8 +50,6 @@ final class ProductVariationBarcodeHandler extends AbstractHandler
         }
 
         $this->validatorCollection->add($ProductVariation);
-
-        $this->setCommand($command);
 
         $ProductVariation->setEntity($command);
 

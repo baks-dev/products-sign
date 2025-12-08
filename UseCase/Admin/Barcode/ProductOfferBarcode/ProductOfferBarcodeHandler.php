@@ -35,6 +35,8 @@ final class ProductOfferBarcodeHandler extends AbstractHandler
     /** @see ProductOfferBarcodeHandler */
     public function handle(ProductOfferBarcodeDTO $command): string|ProductOffer
     {
+        $this->setCommand($command);
+
         $ProductOffer = $this->getRepository(ProductOffer::class)->find($command->getId());
 
         if(false === ($ProductOffer instanceof ProductOffer))
@@ -48,8 +50,6 @@ final class ProductOfferBarcodeHandler extends AbstractHandler
         }
 
         $this->validatorCollection->add($ProductOffer);
-
-        $this->setCommand($command);
 
         $ProductOffer->setEntity($command);
 
