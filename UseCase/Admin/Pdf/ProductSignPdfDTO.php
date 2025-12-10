@@ -30,6 +30,7 @@ use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
+use BaksDev\Products\Sign\UseCase\Admin\Pdf\ProductSignFile\ProductSignFileDTO;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -54,6 +55,8 @@ final class ProductSignPdfDTO
 
     #[Assert\Valid]
     private ArrayCollection $files;
+
+    private ?string $links = null;
 
     /** Категория */
     #[Assert\NotBlank]
@@ -88,7 +91,7 @@ final class ProductSignPdfDTO
     {
         $this->files = new ArrayCollection();
 
-        $ProductSignFileDTO = new ProductSignFile\ProductSignFileDTO();
+        $ProductSignFileDTO = new ProductSignFileDTO();
         $this->addFiles($ProductSignFileDTO);
     }
 
@@ -114,7 +117,7 @@ final class ProductSignPdfDTO
         return $this->files;
     }
 
-    public function addFiles(ProductSignFile\ProductSignFileDTO $file): self
+    public function addFiles(ProductSignFileDTO $file): self
     {
         $this->files->add($file);
         return $this;
@@ -259,4 +262,14 @@ final class ProductSignPdfDTO
         return $this->share === true;
     }
 
+    public function getLinks(): ?string
+    {
+        return $this->links;
+    }
+
+    public function setLinks(?string $links): self
+    {
+        $this->links = $links;
+        return $this;
+    }
 }

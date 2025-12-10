@@ -34,48 +34,82 @@
                 <div class="w-50">
                     <div class="d-flex radio-buttons mb-3" data-buttons="true">
                         <label class="btn p-0 border-dotted rounded-3 active">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-grow-1">
+                            <span class="d-flex align-items-center">
+                                <span class="flex-grow-1">
                                 <span class="h6">
-                                    <div class="form-check px-3 d-flex align-items-start">
+                                    <span class="form-check px-3 d-flex align-items-start">
                                         {{ form_widget(form.share, { label: false }) }}
                                         <span style="margin-top: 2px;">
-                                            {# {{ 'admin.form.label.active'|trans }} #}
                                             Доступен только владелцу
                                         </span>
-                                    </div>
+                                    </span>
                                 </span>
-                                </div>
-                            </div>
+                                </span>
+                            </span>
                         </label>
                     </div>
-
-                    {# {{ form_row(form.share, {
-                        label: 'Доступен только владелцу',
-                    }) }} #}
                 </div>
             </div>
 
+            {# Табы #}
+            <ul class="nav nav-pills gap-3 mb-3 mt-3" id="nav-products-sign">
+                <li class="nav-item" role="presentation">
+                    <button class="btn fw-bolder nav-link active"
+                            data-bs-toggle="tab"
+                            type="button"
+                            role="tab"
+                            aria-selected="true"
 
-            <div class="clearfix d-flex gap-3 align-items-center my-3">
-                <strong class="text-nowrap">Файлы PDF с честными знаками, либо XLSX с перечислением упаковок</strong>
-                <div class="w-100">
-                    <hr class="m-0">
-                </div>
-            </div>
+                            id="tab_files-tab"
+                            data-bs-target="#tab_files"
+                            aria-controls="nav-products-sign"
+                    >
+                        <small class="text-uppercase px-3">
+                            Загрузка файлов
+                        </small>
+                    </button>
+                </li>
 
 
-            <div class="card-body pb-0" id='{{ form.files.vars.id }}-collection'>
+                <li class="nav-item">
+                    <button class="btn fw-bolder nav-link"
+                            data-bs-toggle="tab"
+                            type="button"
+                            role="tab"
+                            aria-selected="true"
 
-                {% for file in form.files %}
+                            id="tab_links-tab"
+                            data-bs-target="#tab_links"
+                            aria-controls="nav-products-sign"
+                    >
+                        <small class="text-uppercase px-3">
+                            Добавление ссылок
+                        </small>
+                    </button>
+                </li>
+            </ul>
 
-                    <div class='d-flex align-items-center gap-3 mb-3'>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab_files" role="tabpanel">
+                    <div class="clearfix d-flex gap-3 align-items-center my-3">
+                        <strong class="text-nowrap">Файлы PDF с честными знаками, либо XLSX с перечислением упаковок</strong>
+                        <div class="w-100">
+                            <hr class="m-0">
+                        </div>
+                    </div>
 
-                        <div class="input-group w-100">
 
-                            {{ form_widget(file.pdf) }}
+                    <div class="card-body pb-0" id='{{ form.files.vars.id }}-collection'>
 
-                            <span class="input-group-text">
+                        {% for file in form.files %}
+
+                            <div class='d-flex align-items-center gap-3 mb-3'>
+
+                                <div class="input-group w-100">
+
+                                    {{ form_widget(file.pdf) }}
+
+                                    <span class="input-group-text">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor"
                                      class="bi bi-filetype-pdf" viewBox="0 0 16 16">
                                   <path fill-rule="evenodd"
@@ -91,21 +125,21 @@
                                 </svg>
                             </span>
 
-                        </div>
+                                </div>
+                            </div>
+
+                        {% endfor %}
+
                     </div>
 
-                {% endfor %}
+                    <button type="button"
+                            class="btn btn-sm btn-outline-primary border-0"
+                            id="pdf-add-collection"
+                            data-prototype="{{ include(_self|replace({ "content.html.twig": "_pdf.prototype.html.twig" }) )|e('html_attr') }}"
+                            data-collection="{{ form.files.vars.id }}-collection"
+                            data-index="{{ form.files.count }}"
 
-            </div>
-
-            <button type="button"
-                    class="btn btn-sm btn-outline-primary border-0"
-                    id="pdf-add-collection"
-                    data-prototype="{{ include(_self|replace({ "content.html.twig": "_pdf.prototype.html.twig" }) )|e('html_attr') }}"
-                    data-collection="{{ form.files.vars.id }}-collection"
-                    data-index="{{ form.files.count }}"
-
-            >
+                    >
 						<span class="svg-icon svg-icon-2">
 							<svg xmlns="http://www.w3.org/2000/svg"
                                  width="24"
@@ -124,8 +158,25 @@
 								<rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor"></rect>
 							</svg>
 						</span>
-                Добавить еще файл
-            </button>
+                        Добавить еще файл
+                    </button>
+                </div>
+
+                <div class="tab-pane fade show" id="tab_links" role="tabpanel">
+                    <div class="d-flex gap-3 align-items-center my-3">
+                        <strong class="text-nowrap">
+                            Ссылки на скачивание PDF-файлов с QR-кодами (каждая ссылка должна начинаться с отдельной строки)
+                        </strong>
+                        <div class="w-100">
+                            <hr class="m-0">
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3 align-items-center my-3 pb-0">
+                        {{ form_widget(form.links) }}
+                    </div>
+                </div>
+            </div>
 
             <div class="d-flex gap-3 align-items-center my-3">
                 <strong class="text-nowrap">Продукция, к которой относятся честные знаки в PDF</strong>
@@ -167,21 +218,6 @@
 
             </div>
 
-            <div id="________offer" class="d-flex gap-3 w-100">
-
-                {# <div class="w-50">{{ form_row(form.offer) }}</div> #}
-
-                <div id="_______variation" class="d-flex w-100 gap-3">
-                    {# <div class="w-100">{{ form_row(form.variation) }}</div> #}
-
-                    <div id="_______modification" class="w-100">
-                        {# <div>{{ form_row(form.modification) }}</div> #}
-                    </div>
-                </div>
-
-            </div>
-
-
         </div>
 
 
@@ -194,19 +230,19 @@
             <div class="flex-grow-1">
                 <div class="d-flex radio-buttons" data-buttons="true">
                     <label class="btn p-3 border-dotted rounded-3 active">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-grow-1">
+                        <span class="d-flex align-items-center">
+                            <span class="flex-grow-1">
                                 <span class="h5">
-                                    <div class="form-check px-3 d-flex align-items-center">
+                                    <span class="form-check px-3 d-flex align-items-center">
                                         {{ form_widget(form.purchase, { label: false }) }}
                                         <span>
                                             {# {{ 'admin.form.label.active'|trans }} #}
                                             Создать лист закупки продукции
                                         </span>
-                                    </div>
+                                    </span>
                                 </span>
-                            </div>
-                        </div>
+                            </span>
+                        </span>
                     </label>
                 </div>
             </div>
