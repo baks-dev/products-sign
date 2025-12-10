@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger;
 
-use BaksDev\Products\Sign\Repository\CurrentEvent\ProductSignCurrentEventInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 #[AsMessageHandler]

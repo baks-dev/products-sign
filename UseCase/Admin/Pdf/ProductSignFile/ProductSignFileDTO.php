@@ -50,7 +50,7 @@ final class ProductSignFileDTO
             ]),
         ],
         allowExtraFields: true,
-        // allowMissingFields: true,
+        allowMissingFields: true,
     )]
     public ?array $pdf = null;
 }

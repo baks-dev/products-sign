@@ -75,6 +75,7 @@ final class PdfController extends AbstractController
         ]);
 
         $form->handleRequest($request);
+
         $view = $form->createView();
 
         if($form->isSubmitted() && $form->isValid() && $form->has('product_sign_pdf'))

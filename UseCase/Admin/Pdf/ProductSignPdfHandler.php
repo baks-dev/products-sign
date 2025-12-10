@@ -28,6 +28,7 @@ namespace BaksDev\Products\Sign\UseCase\Admin\Pdf;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Core\Validator\ValidatorCollectionInterface;
 use BaksDev\Products\Sign\Entity\ProductSign;
+use BaksDev\Products\Sign\Messenger\ProductSignLink\ProductSignLinkMessage;
 use BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignPdfMessage;
 use BaksDev\Products\Sign\UseCase\Admin\Pdf\ProductSignFile\ProductSignFileDTO;
 use Psr\Log\LoggerInterface;
@@ -117,8 +118,14 @@ final readonly class ProductSignPdfHandler
          * @var ProductSignFileDTO $files
          * @var UploadedFile $file
          */
+
         foreach($command->getFiles() as $files)
         {
+            if(true === empty($files->pdf))
+            {
+                continue;
+            }
+
             foreach($files->pdf as $file)
             {
                 $name = null;
@@ -151,7 +158,46 @@ final readonly class ProductSignPdfHandler
                 /** Валидация файла  */
                 $this->validatorCollection->add($file);
             }
+        }
 
+        if(false === empty($command->getLinks()))
+        {
+            /** Получаем (если есть) введенные текстом ссылки на скачивание PDF */
+            $text = $command->getLinks();
+
+
+            /** Разделение текста на строки */
+            $lines = preg_split('/\r\n|\r|\n/', $text);
+
+            foreach ($lines as $line)
+            {
+                /** Если строка является ссылкой - пытаемся скачать  */
+                if(str_starts_with($line, 'https:'))
+                {
+                    $this->messageDispatch->dispatch(new ProductSignLinkMessage(
+                        $line,
+                        $uploadDir,
+                        $command->getUsr(),
+                        $command->getProfile(),
+                        $command->getProduct(),
+                        $command->getOffer(),
+                        $command->getVariation(),
+                        $command->getModification(),
+                        $command->isPurchase(),
+                        $command->isNotShare(),
+                        $command->getNumber(),
+                    ));
+                }
+            }
+        }
+
+        if(empty($filename))
+        {
+            /**
+             * Добавляем в коллекцию dto, т.к. пустая коллекция валидатора (в случае, если файлы не загружались
+             * пользователем, а были добавлены через ссылки) не позволит отправить сообщение на сканирование честных знаков
+             */
+            $this->validatorCollection->add($command);
         }
 
         /** Валидация всех объектов */

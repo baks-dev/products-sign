@@ -35,6 +35,7 @@ use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
+use BaksDev\Products\Sign\UseCase\Admin\Pdf\ProductSignFile\ProductSignFileForm;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileChoice\UserProfileChoiceInterface;
 use BaksDev\Users\Profile\UserProfile\Repository\UserProfileTokenStorage\UserProfileTokenStorageInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
@@ -46,6 +47,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -90,23 +92,6 @@ final class ProductSignPdfForm extends AbstractType
             HiddenType::class
         );
 
-        /*$builder
-            ->add('product', ChoiceType::class, [
-                'choices' => $this->productChoice->fetchAllProduct(),
-                'choice_value' => function (?ProductUid $product) {
-                    return $product?->getValue();
-                },
-                'choice_label' => function (ProductUid $product) {
-                    return $product->getAttr();
-                },
-
-                'choice_attr' => function (?ProductUid $product) {
-                    return $product?->getOption() ? ['data-filter' => '('.$product?->getOption().')'] : [];
-                },
-
-                'label' => false,
-            ]);*/
-
 
         /** Все профили пользователя */
         $builder->addEventListener(
@@ -119,9 +104,6 @@ final class ProductSignPdfForm extends AbstractType
 
                 $user = $this->userProfileTokenStorage->getUser();
                 $data->setUsr($user);
-
-                //$profile = $this->userProfileTokenStorage->getProfile();
-                //$data->setProfile($profile);
 
                 $profiles = $this->userProfileChoice->getActiveUserProfile($data->getUsr());
 
@@ -171,19 +153,6 @@ final class ProductSignPdfForm extends AbstractType
             }
         );
 
-
-        //        $builder->get('product')->addModelTransformer(
-        //            new CallbackTransformer(
-        //                function($product) {
-        //                    return $product instanceof ProductUid ? $product->getValue() : $product;
-        //                },
-        //                function($product) {
-        //                    return $product ? new ProductUid($product) : null;
-        //                }
-        //            )
-        //        );
-
-
         $builder->get('product')->addModelTransformer(
             new CallbackTransformer(
                 function($product) {
@@ -194,6 +163,7 @@ final class ProductSignPdfForm extends AbstractType
                 }
             )
         );
+
 
         /**
          * Торговые предложения
@@ -230,8 +200,6 @@ final class ProductSignPdfForm extends AbstractType
          * Множественный вариант торгового предложения
          * @var ProductVariationConst $variation
          */
-
-
         $builder->add(
             'variation',
             HiddenType::class
@@ -261,7 +229,6 @@ final class ProductSignPdfForm extends AbstractType
          * Модификатор множественного варианта торгового предложения
          * @var ProductModificationConst $modification
          */
-
         $builder->add(
             'modification',
             HiddenType::class
@@ -286,9 +253,8 @@ final class ProductSignPdfForm extends AbstractType
             }
         );
 
-
         $builder->add('files', CollectionType::class, [
-            'entry_type' => ProductSignFile\ProductSignFileForm::class,
+            'entry_type' => ProductSignFileForm::class,
             'entry_options' => ['label' => false],
             'label' => false,
             'by_reference' => false,
@@ -296,6 +262,8 @@ final class ProductSignPdfForm extends AbstractType
             'allow_add' => true,
             'prototype_name' => '__pdf_file__',
         ]);
+
+        $builder->add('links', TextAreaType::class, ['required' => false]);
 
         $builder->add('purchase', CheckboxType::class, ['required' => false]);
 
