@@ -25,17 +25,20 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignLink;
 
+use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignPdfMessage;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Psr\Log\LoggerInterface;
 
-#[AsMessageHandler]
+#[AsMessageHandler(priority: 0)]
 final readonly class ProductSignLinkDispatcher
 {
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $Logger,
         private HttpClientInterface $HttpClient,
+        private MessageDispatchInterface $MessageDispatch
     ) {}
 
     /** Обрабатываем ссылки на скачивание PDF-файлов */
@@ -74,11 +77,6 @@ final readonly class ProductSignLinkDispatcher
             $name = uniqid('original_', true).'.pdf';
         }
 
-        if('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' === $contentType)
-        {
-            $name = uniqid('original_', true).'.xlsx';
-        }
-
         if(empty($name))
         {
             return;
@@ -94,9 +92,9 @@ final readonly class ProductSignLinkDispatcher
 
 
         /** Необходимо проверить, что файл действительно был создан */
-        $file = fopen($message->getUploadDir().$name, 'r');
+        $fileExists = file_exists($message->getUploadDir().$name);
 
-        if(empty($file))
+        if(false === $fileExists)
         {
             $this->Logger->critical(sprintf(
                 'Файл PDF с честным знаком %s не был корректно сохранен',
@@ -105,6 +103,24 @@ final readonly class ProductSignLinkDispatcher
 
             return;
         }
+        
+
+        /** @var ProductSignPdfMessage $message */
+        /* Отправляем сообщение в шину для обработки файлов */
+        $this->MessageDispatch->dispatch(
+            message: new ProductSignPdfMessage(
+                $message->getUsr(),
+                $message->getProfile(),
+                $message->getProduct(),
+                $message->getOffer(),
+                $message->getVariation(),
+                $message->getModification(),
+                $message->isPurchase(),
+                $message->isNotShare(),
+                $message->getNumber(),
+            ),
+            transport: 'products-sign',
+        );
 
         $this->Logger->info(sprintf(
             'Сохранен файл PDF честного знака %s',

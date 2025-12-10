@@ -160,7 +160,6 @@ final readonly class ProductSignPdfHandler
             }
         }
 
-
         if(false === empty($command->getLinks()))
         {
             /** Получаем (если есть) введенные текстом ссылки на скачивание PDF */
@@ -175,7 +174,19 @@ final readonly class ProductSignPdfHandler
                 /** Если строка является ссылкой - пытаемся скачать  */
                 if(str_starts_with($line, 'https:'))
                 {
-                    $this->messageDispatch->dispatch(new ProductSignLinkMessage($line, $uploadDir));
+                    $this->messageDispatch->dispatch(new ProductSignLinkMessage(
+                        $line,
+                        $uploadDir,
+                        $command->getUsr(),
+                        $command->getProfile(),
+                        $command->getProduct(),
+                        $command->getOffer(),
+                        $command->getVariation(),
+                        $command->getModification(),
+                        $command->isPurchase(),
+                        $command->isNotShare(),
+                        $command->getNumber(),
+                    ));
                 }
             }
         }

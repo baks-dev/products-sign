@@ -25,9 +25,62 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignLink;
 
+use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
+use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
+use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use BaksDev\Users\User\Type\Id\UserUid;
+use Symfony\Component\Validator\Constraints as Assert;
+
 final readonly class ProductSignLinkMessage
 {
-    public function __construct(private string $link, private string $uploadDir) {}
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private string $usr;
+
+    #[Assert\Uuid]
+    private ?string $profile;
+
+    /** ID продукта */
+    #[Assert\NotBlank]
+    #[Assert\Uuid]
+    private string $product;
+
+    /** Постоянный уникальный идентификатор ТП */
+    #[Assert\Uuid]
+    private ?string $offer;
+
+    /** Постоянный уникальный идентификатор варианта */
+    #[Assert\Uuid]
+    private ?string $variation;
+
+    /** Постоянный уникальный идентификатор модификации */
+    #[Assert\Uuid]
+    private ?string $modification;
+
+    public function __construct(
+        private string $link,
+        private string $uploadDir,
+        UserUid $usr,
+        ?UserProfileUid $profile,
+        ProductUid $product,
+        ?ProductOfferConst $offer,
+        ?ProductVariationConst $variation,
+        ?ProductModificationConst $modification,
+        private bool $purchase,
+        private bool $share,
+        private ?string $number
+    )
+    {
+        $this->usr = (string) $usr;
+        $this->profile = (string) $profile;
+        $this->product = (string) $product;
+
+        $this->offer = $offer ? (string) $offer : null;
+        $this->variation = $variation ? (string) $variation : null;
+        $this->modification = $modification ? (string) $modification : null;
+    }
 
     public function getLink(): string
     {
@@ -37,5 +90,77 @@ final readonly class ProductSignLinkMessage
     public function getUploadDir(): string
     {
         return $this->uploadDir;
+    }
+
+    /**
+     * Usr
+     */
+    public function getUsr(): UserUid
+    {
+        return new UserUid($this->usr);
+    }
+
+    /**
+     * Purchase
+     */
+    public function isPurchase(): bool
+    {
+        return $this->purchase;
+    }
+
+    /**
+     * Profile
+     */
+    public function getProfile(): ?UserProfileUid
+    {
+        return $this->profile ? new UserProfileUid($this->profile) : null;
+    }
+
+    /**
+     * Product
+     */
+    public function getProduct(): ProductUid
+    {
+        return new ProductUid($this->product);
+    }
+
+    /**
+     * Offer
+     */
+    public function getOffer(): ?ProductOfferConst
+    {
+        return $this->offer ? new ProductOfferConst($this->offer) : null;
+    }
+
+    /**
+     * Variation
+     */
+    public function getVariation(): ?ProductVariationConst
+    {
+        return $this->variation ? new ProductVariationConst($this->variation) : null;
+    }
+
+    /**
+     * Modification
+     */
+    public function getModification(): ?ProductModificationConst
+    {
+        return $this->modification ? new ProductModificationConst($this->modification) : null;
+    }
+
+    /**
+     * Number
+     */
+    public function getNumber(): ?string
+    {
+        return $this->number;
+    }
+
+    /**
+     * Share
+     */
+    public function isNotShare(): bool
+    {
+        return $this->share;
     }
 }

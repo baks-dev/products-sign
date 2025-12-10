@@ -120,7 +120,11 @@ final class LinksListController extends AbstractController
                     'modification' => $productSign->getProductModificationConst()
                 ];
                 
-                $url = 'https://'.$host.$UrlGenerator->generate('products-sign:document.pdf.orders', $parameters);
+                $url = $UrlGenerator->generate(
+                    'products-sign:document.pdf.orders',
+                    $parameters,
+                    UrlGeneratorInterface::ABSOLUTE_URL
+                );
 
                 fwrite($handle, $productName.PHP_EOL.$url.PHP_EOL);
             }
