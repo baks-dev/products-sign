@@ -356,7 +356,7 @@ final class ProductSignNewRepository implements ProductSignNewInterface
             );
 
         /** Сортируем по дате, выбирая самый старый знак и мешок */
-        $orm->addOrderBy('modify.modDate');
+        //$orm->addOrderBy('modify.modDate');
         $orm->addOrderBy('invariable.part');
 
         $orm->setMaxResults(1);
