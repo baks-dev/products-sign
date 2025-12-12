@@ -68,13 +68,24 @@ final class ProductSignStatusHandler extends AbstractHandler
                 /** Присваиваем статус к предыдущему событию */
                 match (true)
                 {
-                    // Refund «Возврат» при статусе Done «Выполнен»
-                    $lastProductSignEvent->getStatus()->equals(ProductSignStatusDone::class) => $lastProductSignEvent->refund(),
-                    // New «Новый» при статусе Process «В резерве»
-                    $lastProductSignEvent->getStatus()->equals(ProductSignStatusProcess::class) => $lastProductSignEvent->cancel(),
-                };
 
-                $this->flush();
+                    // Refund «Возврат» при статусе Done «Выполнен»
+                    $lastProductSignEvent->getStatus()->equals(ProductSignStatusDone::class) =>
+                    function() use ($lastProductSignEvent) {
+                        $lastProductSignEvent->refund();
+                        $this->flush();
+                    },
+
+                    // New «Новый» при статусе Process «В резерве»
+                    $lastProductSignEvent->getStatus()->equals(ProductSignStatusProcess::class) =>
+                    function() use ($lastProductSignEvent) {
+                        $lastProductSignEvent->cancel();
+                        $this->flush();
+                    },
+
+                    default => 'Не изменяем предыдущее событие'
+
+                };
             }
         }
 
