@@ -92,6 +92,8 @@ final class ProductSignPdfForm extends AbstractType
             HiddenType::class
         );
 
+        $builder->add('isNew', CheckboxType::class, ['required' => false]);
+
 
         /** Все профили пользователя */
         $builder->addEventListener(

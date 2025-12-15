@@ -25,10 +25,10 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignScaner;
 
-
 use BaksDev\Barcode\Reader\BarcodeRead;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
+use BaksDev\Products\Product\Repository\ExistProductBarcode\ExistProductBarcodeInterface;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
@@ -54,6 +54,7 @@ final readonly class ProductSignScannerDispatcher
         private ProductSignHandler $productSignHandler,
         private BarcodeRead $barcodeRead,
         private Filesystem $filesystem,
+        private ExistProductBarcodeInterface $ExistProductBarcodeRepository,
     ) {}
 
     public function __invoke(ProductSignScannerMessage $message): void
@@ -73,7 +74,10 @@ final readonly class ProductSignScannerDispatcher
         if(!isset($current->getArguments()['name']))
         {
             $this->logger->critical(
-                sprintf('Невозможно определить название таблицы из класса сущности %s ', ProductSignCode::class),
+                sprintf(
+                    'Невозможно определить название таблицы из класса сущности %s ',
+                    ProductSignCode::class
+                ),
                 [self::class.':'.__LINE__],
             );
         }
@@ -115,19 +119,6 @@ final readonly class ProductSignScannerDispatcher
             $Imagick->setIteratorIndex($number);
             $Imagick->setImageFormat('png');
 
-            /**
-             * В некоторых случаях может вызывать ошибку,
-             * в таком случае сохраняем без рамки и пробуем отсканировать как есть
-             */
-            //            try
-            //            {
-            //                $Imagick->borderImage('white', 5, 5);
-            //            }
-            //            catch(Exception $e)
-            //            {
-            //                $this->logger->critical('products-sign: Ошибка при добавлении рамки к изображению. Пробуем отсканировать как есть.', [$e->getMessage()]);
-            //            }
-
             $Imagick->writeImage($fileTemp);
 
 
@@ -164,7 +155,63 @@ final readonly class ProductSignScannerDispatcher
                 $ProductSignDTO->setStatus(ProductSignStatusError::class);
             }
 
-            // $decode->isError() ? ++$errors : ++$counter;
+
+            /**
+             * Необходимо убедиться, что баркод соответствует выбранному продукту, однако только при условии, что ранее
+             * данному товару был присвоен баркод
+             */
+            if(false === $message->isNew())
+            {
+                /** Находим позицию первой закрывающей скобки */
+                $posClose = strpos($code, ')');
+
+                /** Найти позицию второй открывающей скобки после первой закрывающей */
+                $posOpen = strpos($code, '(', $posClose + 1);
+
+                if($posClose !== false && $posOpen !== false && $posOpen > $posClose)
+                {
+                    $barcode = substr($code, $posClose + 1, $posOpen - $posClose - 1);
+                }
+                else
+                {
+                    $this->logger->critical(
+                        sprintf('Не удалось получить баркод товара из честного знака %s', $code),
+                        [self::class.':'.__LINE__],
+                    );
+
+                    /** Удаляем после обработки файл PDF */
+                    $this->filesystem->remove($pdfPath);
+
+                    return;
+                }
+
+
+                /** Пытаемся проверить соответствие продукта и баркода в базе */
+                $result = $this->ExistProductBarcodeRepository
+                    ->forBarcode($barcode)
+                    ->forProduct($message->getProduct())
+                    ->forOffer($message->getOffer())
+                    ->forVariation($message->getVariation())
+                    ->forModification($message->getModification())
+                    ->exist();
+
+
+                /** Если баркод не соответствует торговому предложению - не сохраняем такой честный знак */
+                if(false === $result)
+                {
+                    $this->logger->warning(
+                        sprintf('Баркод %s не соответствует выбранному продукту', $code),
+                        [self::class.':'.__LINE__],
+                    );
+
+
+                    /** Удаляем после обработки файл PDF */
+                    $this->filesystem->remove($pdfPath);
+
+                    return;
+                }
+            }
+
 
             /**
              * Переименовываем директорию по коду честного знака (для уникальности)

@@ -87,6 +87,10 @@ final class ProductSignPdfDTO
     /** Грузовая таможенная декларация (номер) */
     private ?string $number = null;
 
+
+    /** Флаг "Добавлен как новый продукт" */
+    private ?bool $isNew = null;
+
     public function __construct()
     {
         $this->files = new ArrayCollection();
@@ -270,6 +274,17 @@ final class ProductSignPdfDTO
     public function setLinks(?string $links): self
     {
         $this->links = $links;
+        return $this;
+    }
+
+    public function IsNew(): bool
+    {
+        return true === $this->isNew;
+    }
+
+    public function setIsNew(?bool $isNew): self
+    {
+        $this->isNew = $isNew;
         return $this;
     }
 }

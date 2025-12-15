@@ -226,6 +226,7 @@ final readonly class ProductSignPdfHandler
                 $command->isPurchase(),
                 $command->isNotShare(),
                 $command->getNumber(),
+                $command->isNew(),
             ),
             transport: 'products-sign',
         );
