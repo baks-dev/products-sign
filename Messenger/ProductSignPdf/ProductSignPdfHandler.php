@@ -25,9 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignPdf;
 
-use BaksDev\Barcode\Reader\BarcodeRead;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
-use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignScaner\ProductSignScannerMessage;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Stocks\Entity\Stock\ProductStock;
@@ -37,15 +35,13 @@ use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockHandler;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use DateTimeImmutable;
 use DirectoryIterator;
-use Doctrine\ORM\Mapping\Table;
 use Imagick;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler(priority: 1)]
+#[AsMessageHandler]
 final readonly class ProductSignPdfHandler
 {
     public function __construct(
@@ -139,7 +135,7 @@ final readonly class ProductSignPdfHandler
 
                 share: $message->isNotShare(),
                 number: $message->getNumber(),
-
+                isNew: $message->isNew()
             );
 
             $this->messageDispatch->dispatch(

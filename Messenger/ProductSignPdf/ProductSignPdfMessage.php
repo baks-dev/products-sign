@@ -59,15 +59,6 @@ final class ProductSignPdfMessage
     #[Assert\Uuid]
     private readonly ?string $modification;
 
-    /** Добавить лист закупки */
-    private bool $purchase;
-
-    /** Доступен только владельцу */
-    private bool $share;
-
-    /** Грузовая таможенная декларация (номер) */
-    private ?string $number;
-
     public function __construct(
         UserUid $usr,
         ?UserProfileUid $profile,
@@ -75,9 +66,10 @@ final class ProductSignPdfMessage
         ?ProductOfferConst $offer,
         ?ProductVariationConst $variation,
         ?ProductModificationConst $modification,
-        bool $purchase,
-        bool $share,
-        ?string $number
+        private readonly bool $purchase,
+        private readonly bool $share,
+        private readonly ?string $number,
+        private readonly ?bool $isNew = null
     )
     {
         $this->usr = (string) $usr;
@@ -87,10 +79,6 @@ final class ProductSignPdfMessage
         $this->offer = $offer ? (string) $offer : null;
         $this->variation = $variation ? (string) $variation : null;
         $this->modification = $modification ? (string) $modification : null;
-
-        $this->purchase = $purchase;
-        $this->share = $share;
-        $this->number = $number;
     }
 
     /**
@@ -163,5 +151,10 @@ final class ProductSignPdfMessage
     public function isNotShare(): bool
     {
         return $this->share;
+    }
+
+    public function isNew(): bool
+    {
+        return true === $this->isNew;
     }
 }

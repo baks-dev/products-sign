@@ -77,7 +77,8 @@ final class ProductSignScannerMessage
         ?ProductVariationConst $variation,
         ?ProductModificationConst $modification,
         bool $share,
-        ?string $number
+        ?string $number,
+        private readonly bool $isNew
     )
     {
         $this->usr = (string) $usr;
@@ -165,5 +166,10 @@ final class ProductSignScannerMessage
     public function getPart(): string
     {
         return (string) $this->part;
+    }
+
+    public function isNew(): bool
+    {
+        return $this->isNew;
     }
 }
