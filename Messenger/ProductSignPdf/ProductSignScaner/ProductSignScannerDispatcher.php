@@ -168,9 +168,9 @@ final readonly class ProductSignScannerDispatcher
                 /** Найти позицию второй открывающей скобки после первой закрывающей */
                 $posOpen = strpos($code, '(', $posClose + 1);
 
-                if($posClose !== false && $posOpen !== false && $posOpen > $posClose)
+                if($posOpen === 18 && $posClose === 3)
                 {
-                    $barcode = substr($code, $posClose + 1, $posOpen - $posClose - 1);
+                    $barcode = substr($code, 4, 14);
                 }
                 else
                 {
