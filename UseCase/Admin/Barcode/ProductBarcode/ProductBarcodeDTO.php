@@ -29,11 +29,9 @@ use BaksDev\Products\Product\Entity\Info\ProductInfo;
 use BaksDev\Products\Product\Entity\Info\ProductInfoInterface;
 use BaksDev\Products\Product\Type\Barcode\ProductBarcode;
 use BaksDev\Products\Product\Type\Id\ProductUid;
-use BaksDev\Products\Product\Type\Offers\Variation\Modification\Id\ProductModificationUid;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductInfo */
-final class ProductBarcodeDTO implements ProductInfoInterface
+final readonly class ProductBarcodeDTO implements ProductInfoInterface
 {
     public function __construct(
         private ProductUid $id,
