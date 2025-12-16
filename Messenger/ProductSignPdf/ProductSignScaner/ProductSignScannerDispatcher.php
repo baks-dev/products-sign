@@ -95,17 +95,23 @@ final readonly class ProductSignScannerDispatcher
         /** Если директория загрузки не найдена - создаем с правами 0700 */
         $this->filesystem->exists($dirCode) ?: $this->filesystem->mkdir($dirCode);
 
+        $pdfPath = $message->getRealPath();
+
+        if(false === $this->filesystem->exists($pdfPath))
+        {
+            return;
+        }
 
         /**
          * Открываем PDF для подсчета страниц на случай если их несколько
          */
-        $pdfPath = $message->getRealPath();
-
-        Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
-        Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, 256);
 
         $Imagick = new Imagick();
-        $Imagick->clear();
+
+        $Imagick->setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
+        Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, (256 * 1024 * 1024));
+
+
 
         $Imagick->setResolution(500, 500);
         $Imagick->readImage($pdfPath);
@@ -120,6 +126,7 @@ final readonly class ProductSignScannerDispatcher
             $Imagick->setImageFormat('png');
 
             $Imagick->writeImage($fileTemp);
+            $Imagick->clear();
 
 
             /** Рассчитываем дайджест файла для перемещения */
@@ -292,6 +299,5 @@ final readonly class ProductSignScannerDispatcher
             }
         }
 
-        $Imagick->clear();
     }
 }
