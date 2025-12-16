@@ -218,6 +218,26 @@
 
             </div>
 
+
+            <div class="flex-grow-1">
+                <div class="d-flex radio-buttons" data-buttons="true">
+                    <label class="btn p-3 border-dotted rounded-3">
+                        <span class="d-flex align-items-center">
+                            <span class="flex-grow-1">
+                                <span class="h6">
+                                    <span class="form-check px-3 d-flex align-items-center">
+                                        {{ form_widget(form.isNew, { label: false }) }}
+                                        <span>
+                                            Добавить честные знаки для нового продукта (без проверки GTIN в карточке)
+                                        </span>
+                                    </span>
+                                </span>
+                            </span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
         </div>
 
 
@@ -229,33 +249,14 @@
 
             <div class="flex-grow-1">
                 <div class="d-flex radio-buttons" data-buttons="true">
-                    <label class="btn p-3 border-dotted rounded-3 active">
+                    <label class="btn p-3 border-dotted rounded-3">
                         <span class="d-flex align-items-center">
                             <span class="flex-grow-1">
-                                <span class="h5">
+                                <span class="h6">
                                     <span class="form-check px-3 d-flex align-items-center">
                                         {{ form_widget(form.purchase, { label: false }) }}
                                         <span>
                                             Создать лист закупки продукции
-                                        </span>
-                                    </span>
-                                </span>
-                            </span>
-                        </span>
-                    </label>
-                </div>
-            </div>
-
-            <div class="flex-grow-1">
-                <div class="d-flex radio-buttons" data-buttons="true">
-                    <label class="btn p-3 border-dotted rounded-3 active">
-                        <span class="d-flex align-items-center">
-                            <span class="flex-grow-1">
-                                <span class="h5">
-                                    <span class="form-check px-3 d-flex align-items-center">
-                                        {{ form_widget(form.isNew, { label: false }) }}
-                                        <span>
-                                            Добавить как новый продукт (без назначенного ранее баркода)
                                         </span>
                                     </span>
                                 </span>
