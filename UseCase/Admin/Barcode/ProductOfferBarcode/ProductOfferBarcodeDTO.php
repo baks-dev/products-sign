@@ -28,8 +28,6 @@ namespace BaksDev\Products\Sign\UseCase\Admin\Barcode\ProductOfferBarcode;
 use BaksDev\Products\Product\Entity\Offers\ProductOffersInterface;
 use BaksDev\Products\Product\Type\Barcode\ProductBarcode;
 use BaksDev\Products\Product\Type\Offers\Id\ProductOfferUid;
-use BaksDev\Products\Product\Type\Offers\Variation\Modification\Id\ProductModificationUid;
-use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductOffer */
 final readonly class ProductOfferBarcodeDTO implements ProductOffersInterface

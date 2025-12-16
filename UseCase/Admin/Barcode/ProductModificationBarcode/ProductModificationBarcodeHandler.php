@@ -25,9 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\UseCase\Admin\Barcode\ProductModificationBarcode;
 
-
 use BaksDev\Core\Entity\AbstractHandler;
-use BaksDev\Products\Product\Entity\Info\ProductInfo;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
 
 final class ProductModificationBarcodeHandler extends AbstractHandler

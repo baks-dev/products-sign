@@ -27,7 +27,6 @@ namespace BaksDev\Products\Sign\UseCase\Admin\Barcode\ProductVariationBarcode;
 
 
 use BaksDev\Core\Entity\AbstractHandler;
-use BaksDev\Products\Product\Entity\Offers\ProductOffer;
 use BaksDev\Products\Product\Entity\Offers\Variation\ProductVariation;
 
 final class ProductVariationBarcodeHandler extends AbstractHandler

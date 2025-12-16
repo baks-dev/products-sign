@@ -29,6 +29,7 @@ use BaksDev\Barcode\Reader\BarcodeRead;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Products\Product\Repository\ExistProductBarcode\ExistProductBarcodeInterface;
+use BaksDev\Products\Product\Type\Barcode\ProductBarcode;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
@@ -169,33 +170,9 @@ final readonly class ProductSignScannerDispatcher
              */
             if(false === $message->isNew())
             {
-                /** Находим позицию первой закрывающей скобки */
-                $posClose = strpos($code, ')');
-
-                /** Найти позицию второй открывающей скобки после первой закрывающей */
-                $posOpen = strpos($code, '(', $posClose + 1);
-
-                if($posOpen === 18 && $posClose === 3)
-                {
-                    $barcode = substr($code, 4, 14);
-                }
-                else
-                {
-                    $this->logger->critical(
-                        sprintf('Не удалось получить баркод товара из честного знака %s', $code),
-                        [self::class.':'.__LINE__],
-                    );
-
-                    /** Удаляем после обработки файл PDF */
-                    $this->filesystem->remove($pdfPath);
-
-                    return;
-                }
-
-
                 /** Пытаемся проверить соответствие продукта и баркода в базе */
                 $result = $this->ExistProductBarcodeRepository
-                    ->forBarcode($barcode)
+                    ->forBarcode(new ProductBarcode($code))
                     ->forProduct($message->getProduct())
                     ->forOffer($message->getOffer())
                     ->forVariation($message->getVariation())
