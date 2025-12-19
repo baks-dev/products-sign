@@ -238,6 +238,13 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
 
                 foreach($productItemsConst as $key => $OrderProductItemConst)
                 {
+                    /** Разбиваем партии по 100 шт */
+                    if((($key + 1) % 100) === 0)
+                    {
+                        /** Переопределяем группу */
+                        $ProductSignPart = new ProductSignUid();
+                    }
+
                     $ProductSignProcessMessage = new ProductSignProcessMessage(
                         order: $OrderUid,
                         part: $ProductSignPart,
@@ -250,14 +257,6 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
 
                         itemConst: $OrderProductItemConst
                     );
-
-                    $ProductSignProcessMessage->setPart($ProductSignPart);
-
-                    /** Разбиваем партии по 100 шт */
-                    if((($key + 1) % 100) === 0)
-                    {
-                        $ProductSignPart = new ProductSignUid();
-                    }
 
                     $this->MessageDispatch
                         ->dispatch(
