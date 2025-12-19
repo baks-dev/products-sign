@@ -178,7 +178,7 @@ final readonly class ProductSignProcessDispatcher
          */
 
 
-        $ProductSignProcessDTO = new ProductSignProcessDTO($message->getOrder(), $message->getOrderItemConst());
+        $ProductSignProcessDTO = new ProductSignProcessDTO($message->getOrder(), $message->getItemConst());
         $ProductSignInvariableDTO = $ProductSignProcessDTO->getInvariable();
 
 

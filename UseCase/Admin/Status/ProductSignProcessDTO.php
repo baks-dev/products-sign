@@ -59,16 +59,16 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
     /**
      * Константа единицы продукта
      */
-    private ?OrderProductItemConst $ordItem;
+    private ?OrderProductItemConst $product;
 
     #[Assert\Valid]
     private Invariable\ProductSignInvariableDTO $invariable;
 
 
-    public function __construct(OrderUid $ord, ?OrderProductItemConst $ordItem = null)
+    public function __construct(OrderUid $ord, ?OrderProductItemConst $product = null)
     {
         $this->ord = $ord;
-        $this->ordItem = $ordItem;
+        $this->product = $product;
 
         /** Статус Process «В резерве» */
         $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
@@ -105,9 +105,9 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
     }
 
 
-    public function getOrdItem(): ?OrderProductItemConst
+    public function getProduct(): ?OrderProductItemConst
     {
-        return $this->ordItem;
+        return $this->product;
     }
 
     /**
@@ -117,12 +117,4 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
     {
         return $this->invariable;
     }
-
-    //    /**
-    //     * Профиль пользователя
-    //     */
-    //    public function getProfile(): UserProfileUid
-    //    {
-    //        return $this->profile;
-    //    }
 }

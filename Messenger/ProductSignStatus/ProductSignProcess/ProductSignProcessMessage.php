@@ -43,7 +43,7 @@ final class ProductSignProcessMessage
 
     private readonly string $order;
 
-    private readonly string|null $orderItemConst;
+    private readonly string|null $itemConst;
 
     private readonly string $user;
 
@@ -69,13 +69,13 @@ final class ProductSignProcessMessage
         ProductVariationConst|null|false $variation,
         ProductModificationConst|null|false $modification,
 
-        OrderProductItemConst|null $orderItemConst = null,
+        OrderProductItemConst|null $itemConst = null,
     )
     {
         $this->part = (string) $part;
 
         $this->order = (string) $order;
-        $this->orderItemConst = null === $orderItemConst ? null : (string) $orderItemConst;
+        $this->itemConst = null === $itemConst ? null : (string) $itemConst;
 
         $this->user = (string) $user;
         $this->profile = (string) $profile;
@@ -97,9 +97,9 @@ final class ProductSignProcessMessage
     /**
      * OrderProductItemConst
      */
-    public function getOrderItemConst(): OrderProductItemConst|null
+    public function getItemConst(): OrderProductItemConst|null
     {
-        return $this->orderItemConst ? new OrderProductItemConst($this->orderItemConst) : null;
+        return $this->itemConst ? new OrderProductItemConst($this->itemConst) : null;
     }
 
     /**

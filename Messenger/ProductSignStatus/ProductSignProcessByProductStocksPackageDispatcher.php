@@ -186,11 +186,11 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
             $OrderUid = $ProductStockEvent->getOrder();
 
             /** Все единицы продукта из заказа */
-            $orderProductItemsConst = $this->allOrderProductItemConstRepository
+            $productItemsConst = $this->allOrderProductItemConstRepository
                 ->findAll($OrderUid);
 
             /** Если продукты в заказе НЕ РАЗДЕЛЕНЫ - резервируем Честные знаки по КОЛИЧЕСТВУ продукции */
-            if(false === $orderProductItemsConst)
+            if(false === $productItemsConst)
             {
                 $this->logger->info(
                     message: 'резервируем Честные знаки по КОЛИЧЕСТВУ продукции',
@@ -229,14 +229,14 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
             }
 
             /** Если продукты в заказе РАЗДЕЛЕНЫ - резервируем Честные знаки по ЕДИНИЦАМ продукции */
-            if(false !== $orderProductItemsConst)
+            if(false !== $productItemsConst)
             {
                 $this->logger->info(
                     message: 'резервируем Честные знаки по ЕДИНИЦАМ продукции',
                     context: [self::class.':'.__LINE__],
                 );
 
-                foreach($orderProductItemsConst as $key => $OrderProductItemConst)
+                foreach($productItemsConst as $key => $OrderProductItemConst)
                 {
                     $ProductSignProcessMessage = new ProductSignProcessMessage(
                         order: $OrderUid,
@@ -248,13 +248,15 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
                         variation: $product->getVariation(),
                         modification: $product->getModification(),
 
-                        orderItemConst: $OrderProductItemConst
+                        itemConst: $OrderProductItemConst
                     );
+
+                    $ProductSignProcessMessage->setPart($ProductSignPart);
 
                     /** Разбиваем партии по 100 шт */
                     if((($key + 1) % 100) === 0)
                     {
-                        $ProductSignProcessMessage->setPart(new ProductSignUid());
+                        $ProductSignPart = new ProductSignUid();
                     }
 
                     $this->MessageDispatch

@@ -50,7 +50,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'product_sign_event')]
-#[ORM\Index(columns: ['ord', 'status'])]
+#[ORM\Index(columns: ['ord', 'status', 'product'])]
 class ProductSignEvent extends EntityEvent
 {
     /**
@@ -103,8 +103,8 @@ class ProductSignEvent extends EntityEvent
     /**
      * Константа единицы продукта
      */
-    #[ORM\Column(name: 'ord_item', type: OrderProductItemConst::TYPE, nullable: true)]
-    private ?OrderProductItemConst $ordItem = null;
+    #[ORM\Column(type: OrderProductItemConst::TYPE, nullable: true)]
+    private ?OrderProductItemConst $product = null;
 
     /** Идентификатор поставки */
     #[ORM\OneToOne(targetEntity: ProductSignSupply::class, mappedBy: 'event', cascade: ['all'])]
