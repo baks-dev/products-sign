@@ -28,6 +28,7 @@ namespace BaksDev\Products\Sign\Messenger\ProductSignStatus;
 
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
+use BaksDev\Orders\Order\Repository\Items\AllOrderProductItemConst\AllOrderProductItemConstInterface;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignProcess\ProductSignProcessMessage;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
@@ -53,10 +54,11 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
 {
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
-        private ProductStocksEventInterface $ProductStocksEventRepository,
-        private UserByUserProfileInterface $userByUserProfile,
         private DeduplicatorInterface $deduplicator,
-        private MessageDispatchInterface $MessageDispatch
+        private MessageDispatchInterface $MessageDispatch,
+        private ProductStocksEventInterface $ProductStocksEventRepository,
+        private UserByUserProfileInterface $userByUserProfileRepository,
+        private AllOrderProductItemConstInterface $allOrderProductItemConstRepository,
     ) {}
 
     public function __invoke(ProductStockMessage $message): void
@@ -153,7 +155,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         $UserProfileUid = $ProductStockEvent->getInvariable()?->getProfile();
 
         $User = $this
-            ->userByUserProfile
+            ->userByUserProfileRepository
             ->forProfile($UserProfileUid)
             ->find();
 
@@ -177,41 +179,89 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
          *
          * @var ProductStockProduct $product
          */
-
-
-
         foreach($products as $product)
         {
             $ProductSignPart = new ProductSignUid();
 
-            $ProductSignProcessMessage = new ProductSignProcessMessage(
-                order: $ProductStockEvent->getOrder(),
-                part: $ProductSignPart,
-                user: $User->getId(),
-                profile: $UserProfileUid,
-                product: $product->getProduct(),
-                offer: $product->getOffer(),
-                variation: $product->getVariation(),
-                modification: $product->getModification(),
-            );
+            $OrderUid = $ProductStockEvent->getOrder();
 
-            $productTotal = $product->getTotal();
+            /** Все единицы продукта из заказа */
+            $orderProductItemsConst = $this->allOrderProductItemConstRepository
+                ->findAll($OrderUid);
 
-            for($i = 1; $i <= $productTotal; $i++)
+            /** Если продукты в заказе НЕ РАЗДЕЛЕНЫ - резервируем Честные знаки по КОЛИЧЕСТВУ продукции */
+            if(false === $orderProductItemsConst)
             {
-                $ProductSignProcessMessage->setPart($ProductSignPart);
+                $this->logger->info(
+                    message: 'резервируем Честные знаки по КОЛИЧЕСТВУ продукции',
+                    context: [self::class.':'.__LINE__],
+                );
 
-                $this->MessageDispatch
-                    ->dispatch(
-                        message: $ProductSignProcessMessage,
-                        transport: 'products-sign',
+                $ProductSignProcessMessage = new ProductSignProcessMessage(
+                    order: $OrderUid,
+                    part: $ProductSignPart,
+                    user: $User->getId(),
+                    profile: $UserProfileUid,
+                    product: $product->getProduct(),
+                    offer: $product->getOffer(),
+                    variation: $product->getVariation(),
+                    modification: $product->getModification(),
+                );
+
+                $productTotal = $product->getTotal();
+
+                for($i = 1; $i <= $productTotal; $i++)
+                {
+                    $ProductSignProcessMessage->setPart($ProductSignPart);
+
+                    $this->MessageDispatch
+                        ->dispatch(
+                            message: $ProductSignProcessMessage,
+                            transport: 'products-sign',
+                        );
+
+                    /** Разбиваем партии по 100 шт */
+                    if(($i % 100) === 0)
+                    {
+                        $ProductSignPart = new ProductSignUid();
+                    }
+                }
+            }
+
+            /** Если продукты в заказе РАЗДЕЛЕНЫ - резервируем Честные знаки по ЕДИНИЦАМ продукции */
+            if(false !== $orderProductItemsConst)
+            {
+                $this->logger->info(
+                    message: 'резервируем Честные знаки по ЕДИНИЦАМ продукции',
+                    context: [self::class.':'.__LINE__],
+                );
+
+                foreach($orderProductItemsConst as $key => $OrderProductItemConst)
+                {
+                    $ProductSignProcessMessage = new ProductSignProcessMessage(
+                        order: $OrderUid,
+                        part: $ProductSignPart,
+                        user: $User->getId(),
+                        profile: $UserProfileUid,
+                        product: $product->getProduct(),
+                        offer: $product->getOffer(),
+                        variation: $product->getVariation(),
+                        modification: $product->getModification(),
+
+                        orderItemConst: $OrderProductItemConst
                     );
 
-                /** Разбиваем партии по 100 шт */
+                    /** Разбиваем партии по 100 шт */
+                    if((($key + 1) % 100) === 0)
+                    {
+                        $ProductSignProcessMessage->setPart(new ProductSignUid());
+                    }
 
-                if(($i % 100) === 0)
-                {
-                    $ProductSignPart = new ProductSignUid();
+                    $this->MessageDispatch
+                        ->dispatch(
+                            message: $ProductSignProcessMessage,
+                            transport: 'products-sign',
+                        );
                 }
             }
         }

@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -27,6 +28,7 @@ namespace BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignProcess;
 
 
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Orders\Order\Type\Items\Const\OrderProductItemConst;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
@@ -40,12 +42,19 @@ final class ProductSignProcessMessage
     private string $part;
 
     private readonly string $order;
+
+    private readonly string|null $orderItemConst;
+
     private readonly string $user;
+
     private readonly string $profile;
+
     private readonly string $product;
 
     private readonly string|false $offer;
+
     private readonly string|false $variation;
+
     private readonly string|false $modification;
 
     public function __construct(
@@ -59,11 +68,15 @@ final class ProductSignProcessMessage
         ProductOfferConst|null|false $offer,
         ProductVariationConst|null|false $variation,
         ProductModificationConst|null|false $modification,
+
+        OrderProductItemConst|null $orderItemConst = null,
     )
     {
         $this->part = (string) $part;
 
         $this->order = (string) $order;
+        $this->orderItemConst = null === $orderItemConst ? null : (string) $orderItemConst;
+
         $this->user = (string) $user;
         $this->profile = (string) $profile;
 
@@ -79,6 +92,14 @@ final class ProductSignProcessMessage
     public function getOrder(): OrderUid
     {
         return new OrderUid($this->order);
+    }
+
+    /**
+     * OrderProductItemConst
+     */
+    public function getOrderItemConst(): OrderProductItemConst|null
+    {
+        return $this->orderItemConst ? new OrderProductItemConst($this->orderItemConst) : null;
     }
 
     /**

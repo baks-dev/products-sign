@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -29,7 +30,6 @@ namespace BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignProcess;
 use BaksDev\Core\Cache\AppCacheInterface;
 use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
-use BaksDev\Delivery\Type\Id\Choice\TypeDeliveryPickup;
 use BaksDev\Orders\Order\Entity\Event\OrderEvent;
 use BaksDev\Orders\Order\Repository\CurrentOrderEvent\CurrentOrderEventInterface;
 use BaksDev\Ozon\Orders\BaksDevOzonOrdersBundle;
@@ -178,7 +178,7 @@ final readonly class ProductSignProcessDispatcher
          */
 
 
-        $ProductSignProcessDTO = new ProductSignProcessDTO($message->getOrder());
+        $ProductSignProcessDTO = new ProductSignProcessDTO($message->getOrder(), $message->getOrderItemConst());
         $ProductSignInvariableDTO = $ProductSignProcessDTO->getInvariable();
 
 

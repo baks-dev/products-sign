@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -26,13 +27,11 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\UseCase\Admin\Status;
 
 use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Orders\Order\Type\Product\OrderProductUid;
-use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Orders\Order\Type\Items\Const\OrderProductItemConst;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductSignEvent */
@@ -57,13 +56,19 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
     #[Assert\NotBlank]
     private OrderUid $ord;
 
+    /**
+     * Константа единицы продукта
+     */
+    private ?OrderProductItemConst $ordItem;
+
     #[Assert\Valid]
     private Invariable\ProductSignInvariableDTO $invariable;
 
 
-    public function __construct(OrderUid $ord)
+    public function __construct(OrderUid $ord, ?OrderProductItemConst $ordItem = null)
     {
         $this->ord = $ord;
+        $this->ordItem = $ordItem;
 
         /** Статус Process «В резерве» */
         $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
@@ -92,19 +97,17 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
     }
 
     /**
-     * Профиль пользователя
-     */
-    public function getProfile(): UserProfileUid
-    {
-        return $this->profile;
-    }
-
-    /**
      * Идентификатор заказа
      */
     public function getOrd(): OrderUid
     {
         return $this->ord;
+    }
+
+
+    public function getOrdItem(): ?OrderProductItemConst
+    {
+        return $this->ordItem;
     }
 
     /**
@@ -115,4 +118,11 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
         return $this->invariable;
     }
 
+    //    /**
+    //     * Профиль пользователя
+    //     */
+    //    public function getProfile(): UserProfileUid
+    //    {
+    //        return $this->profile;
+    //    }
 }
