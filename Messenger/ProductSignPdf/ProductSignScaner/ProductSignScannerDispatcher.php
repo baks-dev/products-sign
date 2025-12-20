@@ -107,12 +107,11 @@ final readonly class ProductSignScannerDispatcher
          * Открываем PDF для подсчета страниц на случай если их несколько
          */
 
-        $Imagick = new Imagick();
 
-        $Imagick->setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
         Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, (256 * 1024 * 1024));
+        Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
 
-
+        $Imagick = new Imagick();
 
         $Imagick->setResolution(500, 500);
         $Imagick->readImage($pdfPath);
