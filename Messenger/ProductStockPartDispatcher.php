@@ -92,12 +92,16 @@ final readonly class ProductStockPartDispatcher
                 $render = strip_tags($render, ['path']);
                 $render = trim($render);
 
+
                 $this->BarcodeWrite->remove(); // удаляем после чтения
 
                 /** Заменяем префиксы в номерах заказов  */
                 $number = str_replace(['Y-', 'O-', 'M-', 'W-'], '', $order->number);
 
-                $sticker[(string) $order->id][$number]['sign'][] = $render;
+                $sticker[(string) $order->id][$number]['sign'][] = [
+                    'image' => $render,
+                    'code' => $ProductSignByOrderResult->getSmallCode(),
+                ];
             }
 
             $message->addSticker($sticker);
