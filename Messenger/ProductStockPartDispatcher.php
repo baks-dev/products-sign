@@ -36,7 +36,7 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /** Получаем стикер маркировки «Честный знак» для заказа для определенного продукта */
-#[AsMessageHandler(priority: 0)]
+#[AsMessageHandler(priority: 50)]
 final readonly class ProductStockPartDispatcher
 {
     public function __construct(
@@ -97,10 +97,7 @@ final readonly class ProductStockPartDispatcher
                 /** Заменяем префиксы в номерах заказов  */
                 $number = str_replace(['Y-', 'O-', 'M-', 'W-'], '', $order->number);
 
-                $sticker[(string) $order->id][] = [
-                    'number' => $number,
-                    'code' => $render,
-                ];
+                $sticker[(string) $order->id][$number]['sign'][] = $render;
             }
 
             $message->addSticker($sticker);
