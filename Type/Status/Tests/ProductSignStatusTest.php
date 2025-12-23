@@ -54,8 +54,6 @@ final class ProductSignStatusTest extends KernelTestCase
         /** @var ProductSignStatusCollection $ProductSignStatusCollection */
         $ProductSignStatusCollection = self::getContainer()->get(ProductSignStatusCollection::class);
 
-        dd($ProductSignStatusCollection->cases());
-
         /** @var ProductSignStatusInterface $case */
         foreach($ProductSignStatusCollection->cases() as $case)
         {

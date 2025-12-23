@@ -27,7 +27,9 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Entity\Event;
 
 use BaksDev\Core\Entity\EntityEvent;
+use BaksDev\Orders\Order\Entity\Items\OrderProductItem;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Orders\Order\Type\Items\Const\OrderProductItemConst;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\Supply\ProductSignSupply;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
@@ -48,7 +50,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'product_sign_event')]
-#[ORM\Index(columns: ['ord', 'status'])]
+#[ORM\Index(columns: ['ord', 'status', 'product'])]
 class ProductSignEvent extends EntityEvent
 {
     /**
@@ -97,6 +99,12 @@ class ProductSignEvent extends EntityEvent
      */
     #[ORM\Column(type: OrderUid::TYPE, nullable: true)]
     private ?OrderUid $ord = null;
+
+    /**
+     * Константа единицы продукта
+     */
+    #[ORM\Column(type: OrderProductItemConst::TYPE, nullable: true)]
+    private ?OrderProductItemConst $product = null;
 
     /** Идентификатор поставки */
     #[ORM\OneToOne(targetEntity: ProductSignSupply::class, mappedBy: 'event', cascade: ['all'])]
