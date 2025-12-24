@@ -70,7 +70,8 @@ final readonly class ProductSignLinkMessage
         ?ProductModificationConst $modification,
         private bool $purchase,
         private bool $share,
-        private ?string $number
+        private ?string $number,
+        private bool $isNew
     )
     {
         $this->usr = (string) $usr;
@@ -162,5 +163,10 @@ final readonly class ProductSignLinkMessage
     public function isNotShare(): bool
     {
         return $this->share;
+    }
+
+    public function isNew(): bool
+    {
+        return $this->isNew;
     }
 }
