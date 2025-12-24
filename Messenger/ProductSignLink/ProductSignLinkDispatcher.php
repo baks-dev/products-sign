@@ -118,6 +118,7 @@ final readonly class ProductSignLinkDispatcher
                 $message->isPurchase(),
                 $message->isNotShare(),
                 $message->getNumber(),
+                $message->isNew()
             ),
             transport: 'products-sign',
         );

@@ -174,19 +174,23 @@ final readonly class ProductSignPdfHandler
                 /** Если строка является ссылкой - пытаемся скачать  */
                 if(str_starts_with($line, 'https:'))
                 {
-                    $this->messageDispatch->dispatch(new ProductSignLinkMessage(
-                        $line,
-                        $uploadDir,
-                        $command->getUsr(),
-                        $command->getProfile(),
-                        $command->getProduct(),
-                        $command->getOffer(),
-                        $command->getVariation(),
-                        $command->getModification(),
-                        $command->isPurchase(),
-                        $command->isNotShare(),
-                        $command->getNumber(),
-                    ));
+                    $this->messageDispatch->dispatch(
+                        new ProductSignLinkMessage(
+                            $line,
+                            $uploadDir,
+                            $command->getUsr(),
+                            $command->getProfile(),
+                            $command->getProduct(),
+                            $command->getOffer(),
+                            $command->getVariation(),
+                            $command->getModification(),
+                            $command->isPurchase(),
+                            $command->isNotShare(),
+                            $command->getNumber(),
+                            $command->isNew()
+                        ),
+                        transport: 'products-sign',
+                    );
                 }
             }
         }
