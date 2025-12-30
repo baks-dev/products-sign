@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -68,23 +69,15 @@ final class ProductSignStatusHandler extends AbstractHandler
                 /** Присваиваем статус к предыдущему событию */
                 match (true)
                 {
-
                     // Refund «Возврат» при статусе Done «Выполнен»
-                    $lastProductSignEvent->getStatus()->equals(ProductSignStatusDone::class) =>
-                    function() use ($lastProductSignEvent) {
-                        $lastProductSignEvent->refund();
-                        $this->flush();
-                    },
+                    true === $lastProductSignEvent->getStatus()->equals(ProductSignStatusDone::class) =>
+                    $this->refund($lastProductSignEvent),
 
                     // New «Новый» при статусе Process «В резерве»
-                    $lastProductSignEvent->getStatus()->equals(ProductSignStatusProcess::class) =>
-                    function() use ($lastProductSignEvent) {
-                        $lastProductSignEvent->cancel();
-                        $this->flush();
-                    },
+                    true === $lastProductSignEvent->getStatus()->equals(ProductSignStatusProcess::class) =>
+                    $this->cancel($lastProductSignEvent),
 
                     default => 'Не изменяем предыдущее событие'
-
                 };
             }
         }
@@ -96,5 +89,17 @@ final class ProductSignStatusHandler extends AbstractHandler
         );
 
         return $this->main;
+    }
+
+    private function refund(ProductSignEvent $lastProductSignEvent): void
+    {
+        $lastProductSignEvent->refund();
+        $this->flush();
+    }
+
+    private function cancel(ProductSignEvent $lastProductSignEvent): void
+    {
+        $lastProductSignEvent->cancel();
+        $this->flush();
     }
 }

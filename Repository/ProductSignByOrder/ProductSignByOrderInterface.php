@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 namespace BaksDev\Products\Sign\Repository\ProductSignByOrder;
@@ -59,6 +60,9 @@ interface ProductSignByOrderInterface
      * Возвращает знаки со статусом Done «Выполнен»
      */
     public function withStatusDone(): self;
+
+    /** Честные знаки, у которых нет связи с единицей продукта */
+    public function withoutItem(): self;
 
     /**
      * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа

@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -26,7 +27,10 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Repository\ProductSignByOrder;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
+use BaksDev\Orders\Order\Entity\Event\OrderEvent;
+use BaksDev\Orders\Order\Entity\Items\OrderProductItem;
 use BaksDev\Orders\Order\Entity\Order;
+use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Entity\User\OrderUser;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Product\Entity\Product;
@@ -69,13 +73,14 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
 
     private string|false $part = false;
 
+    private bool $item = false;
+
 
     public function __construct(private readonly DBALQueryBuilder $DBALQueryBuilder)
     {
         /** По умолчанию возвращаем знаки со статусом Process «В резерве» */
         $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
     }
-
 
     /** Фильтр по продукту */
     public function product(Product|ProductUid|string $product): self
@@ -149,7 +154,6 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
         return $this;
     }
 
-
     public function profile(UserProfileUid|string|UserProfile $profile): self
     {
         if(is_string($profile))
@@ -201,6 +205,12 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
         return $this;
     }
 
+    /** Честные знаки, у которых нет связи с единицей продукта */
+    public function withoutItem(): self
+    {
+        $this->item = true;
+        return $this;
+    }
 
     /**
      * Метод возвращает все штрихкоды «Честный знак» для печати по идентификатору заказа
@@ -224,10 +234,11 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
 
         $dbal
             ->addSelect('event.comment')
+            ->addSelect('event.product')
             ->from(
-            ProductSignEvent::class,
-            'event'
-        );
+                ProductSignEvent::class,
+                'event'
+            );
 
         $dbal
             ->where('event.ord = :ord')
@@ -268,11 +279,11 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
             ->addSelect('main.id AS sign_id')
             ->addSelect('main.event AS sign_event')
             ->join(
-            'event',
-            ProductSign::class,
-            'main',
-            'main.id = event.main'
-        );
+                'event',
+                ProductSign::class,
+                'main',
+                'main.id = event.main'
+            );
 
 
         if($this->product)
@@ -335,10 +346,63 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                 'code.main = main.id'
             );
 
+        /** Есть ли на единицу продукции Честный знак */
+        if(true === $this->item)
+        {
+            /** Получаем все item по номеру заказа */
+            $item = $this->DBALQueryBuilder->createQueryBuilder(self::class);
+
+            $item
+                ->select('1')
+                ->from(Order::class, 'ord');
+
+            /** Событие */
+            $item
+                ->join(
+                    'ord',
+                    OrderEvent::class,
+                    'orders_event',
+                    '
+                        orders_event.id = ord.event AND
+                        orders_event.orders = :ord
+                        '
+                );
+
+            $item
+                ->setParameter(
+                    'ord',
+                    $this->order,
+                    OrderUid::TYPE
+                );
+
+
+            /** Продукт */
+            $item
+                ->join(
+                    'orders_event',
+                    OrderProduct::class,
+                    'orders_product',
+                    'orders_product.event = orders_event.id'
+                );
+
+            /** Единицы */
+            $item
+                ->join(
+                    'orders_product',
+                    OrderProductItem::class,
+                    'orders_product_item',
+                    'orders_product_item.product = orders_product.id'
+                );
+
+            /** Связь item с ЧЗ */
+            $item->where('orders_product_item.const = event.product');
+
+            /** Проверяем, что у ЧЗ нет связи с item */
+            $dbal->andWhere('NOT EXISTS('.$item->getSQL().')');
+        }
+
         $result = $dbal->fetchAllHydrate(ProductSignByOrderResult::class);
 
         return $result->valid() ? $result : false;
     }
-
-
 }
