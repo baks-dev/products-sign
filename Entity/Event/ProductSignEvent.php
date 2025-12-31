@@ -159,7 +159,8 @@ class ProductSignEvent extends EntityEvent
     public function cancel(): self
     {
         $this->status = new ProductSignStatus(ProductSignStatusNew::class);
-        $this->ord = null;
+        $this->ord = null; // удаляем связь с заказом
+        $this->product = null; // удаляем связь с продуктом в заказе
 
         return $this;
     }
