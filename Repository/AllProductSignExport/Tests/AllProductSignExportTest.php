@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,9 +27,14 @@ namespace BaksDev\Products\Sign\Repository\AllProductSignExport\Tests;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Products\Sign\Repository\AllProductSignExport\AllProductSignExportInterface;
+use BaksDev\Products\Sign\Repository\AllProductSignExport\ProductSignExportResult;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
+use ReflectionClass;
+use ReflectionMethod;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
@@ -39,15 +44,41 @@ class AllProductSignExportTest extends KernelTestCase
 {
     public function testUseCase(): void
     {
+        self::assertTrue(true);
+
         /** @var AllProductSignExportInterface $AllProductSignExportRepository */
         $AllProductSignExportRepository = self::getContainer()->get(AllProductSignExportInterface::class);
-        $handle = $AllProductSignExportRepository
-            ->forProfile()
-            ->dateFrom()
-            ->dateTo()
+
+        $results = $AllProductSignExportRepository
+            ->forProfile(new UserProfileUid(UserProfileUid::TEST))
+            ->dateFrom(new DateTimeImmutable())
+            ->dateTo(new DateTimeImmutable())
+            ->onlyTransfer()
             ->findAll();
 
-        self::assertTrue(($handle instanceof AllProductSignExportInterface), $handle.': Ошибка AllProductSignExportInterface');
+        if(false === $results || false === $results->valid())
+        {
+            return;
+        }
+
+        foreach($results as $ProductSignExportResult)
+        {
+            // Вызываем все геттеры
+            $reflectionClass = new ReflectionClass(ProductSignExportResult::class);
+            $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+
+            foreach($methods as $method)
+            {
+                // Методы без аргументов
+                if($method->getNumberOfParameters() === 0)
+                {
+                    // Вызываем метод
+                    $data = $method->invoke($ProductSignExportResult);
+                    // dump($data);
+                }
+            }
+
+        }
 
     }
 }
