@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@ namespace BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignProcess;
 
 
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Orders\Order\Type\Items\Const\OrderProductItemConst;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
@@ -40,12 +41,19 @@ final class ProductSignProcessMessage
     private string $part;
 
     private readonly string $order;
+
+    private readonly string|null $itemConst;
+
     private readonly string $user;
+
     private readonly string $profile;
+
     private readonly string $product;
 
     private readonly string|false $offer;
+
     private readonly string|false $variation;
+
     private readonly string|false $modification;
 
     public function __construct(
@@ -59,11 +67,15 @@ final class ProductSignProcessMessage
         ProductOfferConst|null|false $offer,
         ProductVariationConst|null|false $variation,
         ProductModificationConst|null|false $modification,
+
+        OrderProductItemConst|null $itemConst = null,
     )
     {
         $this->part = (string) $part;
 
         $this->order = (string) $order;
+        $this->itemConst = null === $itemConst ? null : (string) $itemConst;
+
         $this->user = (string) $user;
         $this->profile = (string) $profile;
 
@@ -79,6 +91,14 @@ final class ProductSignProcessMessage
     public function getOrder(): OrderUid
     {
         return new OrderUid($this->order);
+    }
+
+    /**
+     * OrderProductItemConst
+     */
+    public function getItemConst(): OrderProductItemConst|null
+    {
+        return $this->itemConst ? new OrderProductItemConst($this->itemConst) : null;
     }
 
     /**

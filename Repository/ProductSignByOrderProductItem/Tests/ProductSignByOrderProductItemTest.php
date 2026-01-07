@@ -21,33 +21,32 @@
  *  THE SOFTWARE.
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Sign\Repository\ProductSignByOrderProductItem\Tests;
 
-namespace BaksDev\Products\Sign\Repository\AllProductSignExport\Tests;
-
-use BaksDev\Products\Sign\Repository\AllProductSignExport\AllProductSignExportInterface;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use DateTimeImmutable;
+use BaksDev\Orders\Order\Type\Items\Const\OrderProductItemConst;
+use BaksDev\Products\Sign\Repository\ProductSignByOrderProductItem\ProductSignByOrderProductItemInterface;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
 #[Group('products-sign')]
 #[When(env: 'test')]
-class AllProductSignExportTest extends KernelTestCase
+class ProductSignByOrderProductItemTest extends KernelTestCase
 {
-    public function testUseCase(): void
+    public function testRepository(): void
     {
-        self::assertIsBool(true);
+        self::assertTrue(true);
 
-        /** @var AllProductSignExportInterface $AllProductSignExportRepository */
-        $AllProductSignExportRepository = self::getContainer()->get(AllProductSignExportInterface::class);
+        /** @var ProductSignByOrderProductItemInterface $ProductSignByOrderProductItemInterface */
+        $ProductSignByOrderProductItemInterface = self::getContainer()->get(ProductSignByOrderProductItemInterface::class);
 
-        $result = $AllProductSignExportRepository
-            ->forProfile(new UserProfileUid())
-            ->dateFrom(new DateTimeImmutable('now'))
-            ->dateTo(new DateTimeImmutable('+1 day'))
-            ->onlyDoneBuyer()
-            ->findAll();
+        $result = $ProductSignByOrderProductItemInterface
+            ->forStatuses(ProductSignStatusProcess::STATUS)
+            ->forStatuses(ProductSignStatusDone::STATUS)
+            ->forProductItem(new OrderProductItemConst(OrderProductItemConst::TEST))
+            ->find();
+
     }
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,13 +26,11 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\UseCase\Admin\Status;
 
 use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Orders\Order\Type\Product\OrderProductUid;
-use BaksDev\Products\Product\Type\Id\ProductUid;
+use BaksDev\Orders\Order\Type\Items\Const\OrderProductItemConst;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductSignEvent */
@@ -57,13 +55,19 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
     #[Assert\NotBlank]
     private OrderUid $ord;
 
+    /**
+     * Константа единицы продукта
+     */
+    private ?OrderProductItemConst $product;
+
     #[Assert\Valid]
     private Invariable\ProductSignInvariableDTO $invariable;
 
 
-    public function __construct(OrderUid $ord)
+    public function __construct(OrderUid $ord, ?OrderProductItemConst $product = null)
     {
         $this->ord = $ord;
+        $this->product = $product;
 
         /** Статус Process «В резерве» */
         $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
@@ -92,19 +96,17 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
     }
 
     /**
-     * Профиль пользователя
-     */
-    public function getProfile(): UserProfileUid
-    {
-        return $this->profile;
-    }
-
-    /**
      * Идентификатор заказа
      */
     public function getOrd(): OrderUid
     {
         return $this->ord;
+    }
+
+
+    public function getProduct(): ?OrderProductItemConst
+    {
+        return $this->product;
     }
 
     /**
@@ -114,5 +116,4 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
     {
         return $this->invariable;
     }
-
 }

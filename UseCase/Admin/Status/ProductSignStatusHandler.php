@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -68,23 +68,15 @@ final class ProductSignStatusHandler extends AbstractHandler
                 /** Присваиваем статус к предыдущему событию */
                 match (true)
                 {
-
                     // Refund «Возврат» при статусе Done «Выполнен»
-                    $lastProductSignEvent->getStatus()->equals(ProductSignStatusDone::class) =>
-                    function() use ($lastProductSignEvent) {
-                        $lastProductSignEvent->refund();
-                        $this->flush();
-                    },
+                    true === $lastProductSignEvent->getStatus()->equals(ProductSignStatusDone::class) =>
+                    $this->refund($lastProductSignEvent),
 
                     // New «Новый» при статусе Process «В резерве»
-                    $lastProductSignEvent->getStatus()->equals(ProductSignStatusProcess::class) =>
-                    function() use ($lastProductSignEvent) {
-                        $lastProductSignEvent->cancel();
-                        $this->flush();
-                    },
+                    true === $lastProductSignEvent->getStatus()->equals(ProductSignStatusProcess::class) =>
+                    $this->cancel($lastProductSignEvent),
 
                     default => 'Не изменяем предыдущее событие'
-
                 };
             }
         }
@@ -96,5 +88,17 @@ final class ProductSignStatusHandler extends AbstractHandler
         );
 
         return $this->main;
+    }
+
+    private function refund(ProductSignEvent $lastProductSignEvent): void
+    {
+        $lastProductSignEvent->refund();
+        $this->flush();
+    }
+
+    private function cancel(ProductSignEvent $lastProductSignEvent): void
+    {
+        $lastProductSignEvent->cancel();
+        $this->flush();
     }
 }

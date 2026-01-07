@@ -23,31 +23,22 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Repository\AllProductSignExport\Tests;
+namespace BaksDev\Products\Sign\Repository\ProductSignByOrderProductItem;
 
-use BaksDev\Products\Sign\Repository\AllProductSignExport\AllProductSignExportInterface;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use DateTimeImmutable;
-use PHPUnit\Framework\Attributes\Group;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\DependencyInjection\Attribute\When;
+use BaksDev\Orders\Order\Type\Items\Const\OrderProductItemConst;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
 
-#[Group('products-sign')]
-#[When(env: 'test')]
-class AllProductSignExportTest extends KernelTestCase
+interface ProductSignByOrderProductItemInterface
 {
-    public function testUseCase(): void
-    {
-        self::assertIsBool(true);
+    /** Единица продукта у которой есть ЧЗ */
+    public function forProductItem(OrderProductItemConst $productItem): self;
 
-        /** @var AllProductSignExportInterface $AllProductSignExportRepository */
-        $AllProductSignExportRepository = self::getContainer()->get(AllProductSignExportInterface::class);
+    /** Только статус ЧЗ - ProductSignStatusProcess */
+    public function forStatusProcess(): self;
 
-        $result = $AllProductSignExportRepository
-            ->forProfile(new UserProfileUid())
-            ->dateFrom(new DateTimeImmutable('now'))
-            ->dateTo(new DateTimeImmutable('+1 day'))
-            ->onlyDoneBuyer()
-            ->findAll();
-    }
+    /** Только из переданных статусов ЧЗ */
+    public function forStatuses(ProductSignStatus|ProductSignStatusInterface|string $status): self;
+
+    public function find(): ProductSignByOrderProductItemResult|false;
 }
