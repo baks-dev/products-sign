@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignScaner;
 
 use BaksDev\Barcode\Reader\BarcodeRead;
+use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Products\Product\Repository\ExistProductBarcode\ExistProductBarcodeInterface;
@@ -109,12 +110,12 @@ final readonly class ProductSignScannerDispatcher
          */
 
 
+        Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, (256 * 1024 * 1024));
         Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
-        Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, (1024 * 1024 * 256));
 
         $Imagick = new Imagick();
 
-        $Imagick->setResolution(400, 400);
+        $Imagick->setResolution(500, 500);
 
         try
         {
@@ -123,8 +124,9 @@ final readonly class ProductSignScannerDispatcher
         catch(Exception)
         {
             $this->messageDispatch->dispatch(
-                $message,
-                transport: 'products-sign-low',
+                message: $message,
+                stamps: [new MessageDelay('5 seconds')],
+                transport: 'products-sign',
             );
 
             return;

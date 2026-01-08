@@ -25,7 +25,6 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignLink;
 
-use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignPdfMessage;
 use Psr\Log\LoggerInterface;
@@ -50,17 +49,10 @@ final readonly class ProductSignLinkDispatcher
         if(200 !== $linkResponse->getStatusCode())
         {
             $this->Logger->critical(sprintf(
-                'products-sign: Не удается получить файл по ссылке %s: код %s',
+                'Не удается получить файл по ссылке %s: код %s',
                 $message->getLink(),
                 $linkResponse->getStatusCode()
             ));
-
-            /** Пробуем загрузить позже */
-            $this->MessageDispatch->dispatch(
-                message: $message,
-                stamps: [new MessageDelay('1 minutes')],
-                transport: 'products-sign',
-            );
 
             return;
         }
@@ -87,16 +79,10 @@ final readonly class ProductSignLinkDispatcher
 
         if(empty($name))
         {
-            $this->Logger->critical(
-                'products-sign: Ошибка при получении заголовков файла PDF честного знака. Пробуем загрузить позже.',
-                [self::class.':'.__LINE__],
-            );
-
             return;
         }
 
         $fileStream = fopen($message->getUploadDir().$name, 'w');
-
         foreach($this->HttpClient->stream($linkResponse) as $chunk)
         {
             fwrite($fileStream, $chunk->getContent());
@@ -111,20 +97,13 @@ final readonly class ProductSignLinkDispatcher
         if(false === $fileExists)
         {
             $this->Logger->critical(sprintf(
-                'products-sign: Файл PDF с честным знаком %s не был корректно сохранен',
+                'Файл PDF с честным знаком %s не был корректно сохранен',
                 $message->getUploadDir().$name
             ));
 
-            /** Пробуем загрузить позже */
-            $this->MessageDispatch->dispatch(
-                message: $message,
-                stamps: [new MessageDelay('1 minutes')],
-                transport: 'products-sign',
-            );
-
             return;
         }
-        
+
 
         /** @var ProductSignPdfMessage $message */
         /* Отправляем сообщение в шину для обработки файлов */
@@ -139,6 +118,7 @@ final readonly class ProductSignLinkDispatcher
                 $message->isPurchase(),
                 $message->isNotShare(),
                 $message->getNumber(),
+                $message->isNew(),
             ),
             transport: 'products-sign',
         );
