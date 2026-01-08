@@ -253,7 +253,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                 'event',
                 Order::class,
                 'ord',
-                'ord.id = event.ord'
+                'ord.id = event.ord',
             );
 
 
@@ -261,7 +261,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                 'ord',
                 OrderUser::class,
                 'ord_usr',
-                'ord_usr.event = ord.event'
+                'ord_usr.event = ord.event',
             );
 
             $dbal
@@ -269,7 +269,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                     'ord_usr',
                     UserProfileEvent::class,
                     'profile_event',
-                    'profile_event.id = ord_usr.profile AND profile_event.profile = :profile'
+                    'profile_event.id = ord_usr.profile AND profile_event.profile = :profile',
                 )
                 ->setParameter('profile', $this->profile, UserProfileUid::TYPE);
         }
@@ -307,12 +307,12 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                     invariable.offer '.$offerParam.' AND
                     invariable.variation '.$variationParam.' AND
                     invariable.modification '.$modificationParam.'
-                '.($this->part ? ' AND invariable.part = :part' : '')
+                '.($this->part ? ' AND invariable.part = :part' : ''),
                 )
                 ->setParameter(
                     key: 'product',
                     value: $this->product,
-                    type: ProductUid::TYPE
+                    type: ProductUid::TYPE,
                 );
 
             if($this->part)
@@ -333,7 +333,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                    THEN CONCAT ( '/upload/".$dbal->table(ProductSignCode::class)."' , '/', code.name)
                    ELSE NULL
                 END AS code_image
-            "
+            ",
             )
             ->addSelect("code.ext AS code_ext")
             ->addSelect("code.cdn AS code_cdn")
@@ -342,7 +342,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                 'event',
                 ProductSignCode::class,
                 'code',
-                'code.main = main.id'
+                'code.main = main.id',
             );
 
         /** Есть ли на единицу продукции Честный знак */
@@ -401,6 +401,17 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
         }
 
         $result = $dbal->fetchAllHydrate(ProductSignByOrderResult::class);
+
+        /** Сбрасываем фильтры */
+        $this->product = false;
+        $this->offer = false;
+        $this->variation = false;
+        $this->modification = false;
+        $this->order = false;
+        $this->profile = false;
+        $this->part = false;
+        $this->item = false;
+        $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
 
         return $result->valid() ? $result : false;
     }

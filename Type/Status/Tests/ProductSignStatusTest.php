@@ -56,7 +56,6 @@ final class ProductSignStatusTest extends KernelTestCase
         /** @var ProductSignStatusInterface $case */
         foreach($ProductSignStatusCollection->cases() as $case)
         {
-
             $OrderStatus = new ProductSignStatus($case->getValue());
 
             self::assertTrue($OrderStatus->equals($case::class)); // неймспейс интерфейса
