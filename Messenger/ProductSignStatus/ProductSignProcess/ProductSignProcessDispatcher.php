@@ -116,6 +116,8 @@ final readonly class ProductSignProcessDispatcher
              * должен определится честный знак у которого свойство SELLER === NULL
              * для этого передаем тестовый идентификатор профиля
              *
+             * @see ProductSignNewRepository:244
+             *
              */
 
             $ProductSignEvent = $this->ProductSignNew
