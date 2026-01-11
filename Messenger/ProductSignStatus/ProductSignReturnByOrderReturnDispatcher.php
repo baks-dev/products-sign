@@ -31,7 +31,8 @@ use BaksDev\Orders\Order\Entity\Event\OrderEvent;
 use BaksDev\Orders\Order\Messenger\OrderMessage;
 use BaksDev\Orders\Order\Repository\OrderEvent\OrderEventInterface;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusCanceled;
-use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignCancel\ProductSignCancelMessage;
+use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusReturn;
+use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignReturn\ProductSignReturnMessage;
 use BaksDev\Products\Sign\Repository\ProductSignProcessByOrder\ProductSignProcessByOrderInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use Psr\Log\LoggerInterface;
@@ -39,11 +40,11 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
- * Если статус заказа Canceled «Отменен» - снимаем резерв и применяем статус «Честного знака» на статус New «Новый»
- * Если заказ был выполнен - следовательно это возврат @see ProductSignReturnByOrderReturnDispatcher
+ * Если статус заказа Return «Возврат» - применяем статус «Честного знака» на статус Return «Возврат»
+ * Если заказ НЕ был выполнен - следовательно это отмена @see ProductSignReturnByOrderCancelDispatcher
  */
 #[AsMessageHandler(priority: 80)]
-final readonly class ProductSignCancelByOrderCanceledDispatcher
+final readonly class ProductSignReturnByOrderReturnDispatcher
 {
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
@@ -59,16 +60,16 @@ final readonly class ProductSignCancelByOrderCanceledDispatcher
 
         if(false === ($OrderEvent instanceof OrderEvent))
         {
-            $this->logger->critical('products-sign: Не найдено событие Order',
+            $this->logger->critical('products-sign: Не найдено событие OrderEvent',
                 [var_export($message, true), self::class.':'.__LINE__]);
 
             return;
         }
 
         /**
-         * Если статус не Canceled «Отмена» - завершаем обработчик
+         * Если статус не Return «Возврат» - завершаем обработчик
          */
-        if(false === $OrderEvent->isStatusEquals(OrderStatusCanceled::class))
+        if(false === $OrderEvent->isStatusEquals(OrderStatusReturn::class))
         {
             return;
         }
@@ -81,7 +82,7 @@ final readonly class ProductSignCancelByOrderCanceledDispatcher
         {
             $this->logger->warning
             (
-                sprintf('%s: Честные знаки для отмены заказа не найдены', $OrderEvent->getOrderNumber()),
+                sprintf('%s: Честные знаки для возврата заказа не найдены', $OrderEvent->getOrderNumber()),
                 [var_export($message, true), self::class.':'.__LINE__],
             );
 
@@ -91,7 +92,7 @@ final readonly class ProductSignCancelByOrderCanceledDispatcher
         /** @var ProductSignEventUid $event */
         foreach($ProductSignEvents as $ProductSignEventUid)
         {
-            $ProductSignCancelMessage = new ProductSignCancelMessage(
+            $ProductSignCancelMessage = new ProductSignReturnMessage(
                 $OrderEvent->getOrderProfile(),
                 $ProductSignEventUid,
             );

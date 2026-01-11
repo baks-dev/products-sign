@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -23,26 +23,40 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Type\Status\ProductSignStatus;
+namespace BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignReturn;
 
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
-use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 
-/**
- * Статус Refund «Возврат»
- */
-#[AutoconfigureTag('baks.product.sign.status')]
-class ProductSignStatusRefund implements ProductSignStatusInterface
+final class ProductSignReturnMessage
 {
-    public const string STATUS = 'refund';
+    private string $profile;
 
-    public function __toString(): string
+    private string $event;
+
+    public function __construct(
+        UserProfileUid|string $profile,
+        ProductSignEventUid|string $event
+    )
     {
-        return self::STATUS;
+        $this->profile = (string) $profile;
+        $this->event = (string) $event;
     }
 
-    public function getValue(): string
+    /**
+     * Profile
+     */
+    public function getProfile(): UserProfileUid
     {
-        return self::STATUS;
+        return new UserProfileUid($this->profile);
     }
+
+    /**
+     * Идентификатор события
+     */
+    public function getEvent(): ProductSignEventUid
+    {
+        return new ProductSignEventUid($this->event);
+    }
+
 }

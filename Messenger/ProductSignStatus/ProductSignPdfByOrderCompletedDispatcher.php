@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -58,11 +58,14 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
 
     ) {}
 
-    /**
-     * Генерируем PDF если статус заказа Completed «Выполнен»
-     */
     public function __invoke(OrderMessage $message): void
     {
+        /**
+         * TODO: переделать на очередь в отдельном транспорте
+         * + добавить в очередь удаление файла по истечении недели
+         */
+        return;
+
         $OrderUid = (string) $message->getId();
 
         $Deduplicator = $this->deduplicator
@@ -101,8 +104,8 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
         $current = current($ref->getAttributes(Table::class));
         $dirName = $current->getArguments()['name'] ?? 'barcode';
 
-        /** @var OrderProductResultDTO $product */
-        foreach($products as $product)
+
+        foreach($products as $OrderProductResult)
         {
             $paths = null;
             $paths[] = $this->projectDir;
@@ -110,11 +113,11 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
             $paths[] = 'upload';
             $paths[] = $dirName;
             $paths[] = $OrderUid;
-            $paths[] = (string) $product->getProduct();
+            $paths[] = (string) $OrderProductResult->getProduct();
 
-            false === ($product->getProductOfferConst() instanceof ProductOfferConst) ?: $paths[] = (string) $product->getProductOfferConst();
-            false === ($product->getProductVariationConst() instanceof ProductVariationConst) ?: $paths[] = (string) $product->getProductVariationConst();
-            false === ($product->getProductModificationConst() instanceof ProductModificationConst) ?: $paths[] = (string) $product->getProductModificationConst();
+            false === ($OrderProductResult->getProductOfferConst() instanceof ProductOfferConst) ?: $paths[] = (string) $OrderProductResult->getProductOfferConst();
+            false === ($OrderProductResult->getProductVariationConst() instanceof ProductVariationConst) ?: $paths[] = (string) $OrderProductResult->getProductVariationConst();
+            false === ($OrderProductResult->getProductModificationConst() instanceof ProductModificationConst) ?: $paths[] = (string) $OrderProductResult->getProductModificationConst();
 
             $uploadDir = implode(DIRECTORY_SEPARATOR, $paths);
             $uploadFile = $uploadDir.DIRECTORY_SEPARATOR.'output.pdf';
@@ -136,10 +139,10 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
 
             $codes = $this->productSignByOrder
                 ->forOrder($OrderUid)
-                ->product($product->getProduct())
-                ->offer($product->getProductOfferConst())
-                ->variation($product->getProductVariationConst())
-                ->modification($product->getProductModificationConst())
+                ->product($OrderProductResult->getProduct())
+                ->offer($OrderProductResult->getProductOfferConst())
+                ->variation($OrderProductResult->getProductVariationConst())
+                ->modification($OrderProductResult->getProductModificationConst())
                 ->findAll();
 
             if(false === $codes || false === $codes->valid())
@@ -176,6 +179,7 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
 
             $processCrop = new Process($Process);
             $processCrop->mustRun();
+
 
         }
 

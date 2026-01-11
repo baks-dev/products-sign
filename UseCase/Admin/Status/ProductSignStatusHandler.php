@@ -68,9 +68,9 @@ final class ProductSignStatusHandler extends AbstractHandler
                 /** Присваиваем статус к предыдущему событию */
                 match (true)
                 {
-                    // Refund «Возврат» при статусе Done «Выполнен»
+                    // Return «Возврат» при статусе Done «Выполнен»
                     true === $lastProductSignEvent->getStatus()->equals(ProductSignStatusDone::class) =>
-                    $this->refund($lastProductSignEvent),
+                    $this->return($lastProductSignEvent),
 
                     // New «Новый» при статусе Process «В резерве»
                     true === $lastProductSignEvent->getStatus()->equals(ProductSignStatusProcess::class) =>
@@ -90,9 +90,9 @@ final class ProductSignStatusHandler extends AbstractHandler
         return $this->main;
     }
 
-    private function refund(ProductSignEvent $lastProductSignEvent): void
+    private function return(ProductSignEvent $lastProductSignEvent): void
     {
-        $lastProductSignEvent->refund();
+        $lastProductSignEvent->return();
         $this->flush();
     }
 

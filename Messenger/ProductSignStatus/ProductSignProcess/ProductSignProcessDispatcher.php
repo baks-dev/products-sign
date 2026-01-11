@@ -72,7 +72,7 @@ final readonly class ProductSignProcessDispatcher
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
         private ProductSignStatusHandler $ProductSignStatusHandler,
-        private ProductSignNewInterface $ProductSignNew,
+        private ProductSignNewInterface $ProductSignNewRepository,
         private CurrentOrderEventInterface $CurrentOrderEvent,
         private CurrentUserProfileEventInterface $CurrentUserProfileEvent,
         private AppCacheInterface $cache,
@@ -120,7 +120,7 @@ final readonly class ProductSignProcessDispatcher
              *
              */
 
-            $ProductSignEvent = $this->ProductSignNew
+            $ProductSignEvent = $this->ProductSignNewRepository
                 ->forUser($message->getUser())
                 ->forProfile(new UserProfileUid(UserProfileUid::TEST)) // передаем тестовый идентификатор для поиска по NULL
                 ->forProduct($message->getProduct())
@@ -131,7 +131,7 @@ final readonly class ProductSignProcessDispatcher
         }
         else
         {
-            $ProductSignEvent = $this->ProductSignNew
+            $ProductSignEvent = $this->ProductSignNewRepository
                 ->forUser($message->getUser())
                 ->forProfile($message->getProfile())
                 ->forProduct($message->getProduct())

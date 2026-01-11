@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -35,12 +35,13 @@ use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\Modify\ProductSignModify;
 use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusReturn;
 use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Entity\User;
 use BaksDev\Users\User\Type\Id\UserUid;
+use Doctrine\DBAL\ArrayParameterType;
 use InvalidArgumentException;
 
 final class ProductSignNewRepository implements ProductSignNewInterface
@@ -311,6 +312,8 @@ final class ProductSignNewRepository implements ProductSignNewInterface
             'main.id = invariable.main',
         );
 
+
+        /** Получаем только если статус New «Новый» либо Return «Возврат» */
         $orm
             ->select('event')
             ->join(
@@ -319,13 +322,17 @@ final class ProductSignNewRepository implements ProductSignNewInterface
                 'WITH',
                 '
                 event.id = main.event AND 
-                event.status = :status
+                event.status IN (:status)
             ')
             ->setParameter(
                 key: 'status',
-                value: ProductSignStatusNew::class,
-                type: ProductSignStatus::TYPE,
+                value: [ProductSignStatusNew::STATUS, ProductSignStatusReturn::STATUS],
+                type: ArrayParameterType::STRING,
             );
+
+
+        // Repository
+
 
         //        // (event.profile IS NULL OR event.profile = :profile) AND
         //        ->setParameter(
