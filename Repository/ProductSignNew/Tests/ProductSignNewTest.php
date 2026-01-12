@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -33,9 +33,10 @@ use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductM
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Repository\ProductSignNew\ProductSignNewInterface;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusReturn;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
+use Doctrine\DBAL\ArrayParameterType;
 use PHPUnit\Framework\Attributes\DependsOnClass;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -71,19 +72,27 @@ class ProductSignNewTest extends KernelTestCase
         $dbal = $DBALQueryBuilder->createQueryBuilder(self::class);
 
         $result = $dbal
-            ->select('*')
+            ->select('invariable.usr')
+            ->addSelect('invariable.profile')
+            ->addSelect('invariable.product')
+            ->addSelect('invariable.offer')
+            ->addSelect('invariable.variation')
+            ->addSelect('invariable.modification')
             ->from(ProductSignInvariable::class, 'invariable')
-            ->leftJoin(
+            ->where('invariable.usr IS NOT NULL')
+            ->join(
                 'invariable',
                 ProductSignEvent::class,
                 'event',
-                'event.id = invariable.event AND event.status = :status AND event.profile IS NOT NULL',
+                'event.id = invariable.event AND event.status IN (:status)',
             )
-            ->setParameter('status', ProductSignStatusNew::class, ProductSignStatus::TYPE)
+            ->setParameter(
+                key: 'status',
+                value: [ProductSignStatusNew::STATUS, ProductSignStatusReturn::STATUS],
+                type: ArrayParameterType::STRING,
+            )
             ->setMaxResults(1)
             ->fetchAssociative();
-
-
 
         self::$user = $result['usr'] ?? false;
         self::$profile = $result['profile'] ?? false;

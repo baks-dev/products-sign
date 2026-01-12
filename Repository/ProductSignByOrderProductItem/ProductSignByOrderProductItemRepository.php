@@ -42,7 +42,7 @@ final class ProductSignByOrderProductItemRepository implements ProductSignByOrde
 
     private ProductSignStatus|false $status = false;
 
-    private array|false $statuses = false;
+    private array|null $statuses = null;
 
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder
@@ -118,7 +118,7 @@ final class ProductSignByOrderProductItemRepository implements ProductSignByOrde
                 ->setParameter('status', $this->status, ProductSignStatus::TYPE);
         }
 
-        if(false !== $this->statuses)
+        if(false === empty($this->statuses))
         {
             $dbal
                 ->andWhere('event.status IN (:statuses)')

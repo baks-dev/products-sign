@@ -34,6 +34,7 @@ final class ReturnProductSignStatusHandler extends AbstractHandler
 {
     public function handle(ReturnProductSignStatusDTO $command): string|ProductSign
     {
+
         $this
             ->setCommand($command)
             ->preEventPersistOrUpdate(ProductSign::class, ProductSignEvent::class);
@@ -44,14 +45,9 @@ final class ReturnProductSignStatusHandler extends AbstractHandler
             return $this->validatorCollection->getErrorUniqid();
         }
 
-        /** Валидация всех объектов */
-        if($this->validatorCollection->isInvalid())
-        {
-            return $this->validatorCollection->getErrorUniqid();
-        }
-
         /** Получаем все события */
         $events = $this->getRepository(ProductSignEvent::class)->findBy(['main' => $this->main->getId()]);
+
 
         foreach($events as $ProductSignEvent)
         {

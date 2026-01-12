@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\UseCase\Admin\Status\Return\Invariable;
 
+use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariableInterface;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use ReflectionProperty;
@@ -42,6 +43,10 @@ final class ReturnProductSignInvariableDTO implements ProductSignInvariableInter
      */
     #[Assert\Uuid]
     private readonly ?UserProfileUid $seller;
+
+    /** ID продукта */
+    #[Assert\Uuid]
+    private ?ProductUid $product;
 
     /**
      * Part
@@ -89,5 +94,18 @@ final class ReturnProductSignInvariableDTO implements ProductSignInvariableInter
         $this->seller = null;
         return $this;
     }
+
+    public function getProduct(): ?ProductUid
+    {
+        return $this->product;
+    }
+
+    public function setProduct(?ProductUid $product): self
+    {
+        $this->product = $product;
+        return $this;
+    }
+
+
 
 }
