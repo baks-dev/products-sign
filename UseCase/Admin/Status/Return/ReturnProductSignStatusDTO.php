@@ -19,23 +19,21 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
- *
  */
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\UseCase\Admin\Status;
+namespace BaksDev\Products\Sign\UseCase\Admin\Status\Return;
 
-use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Orders\Order\Type\Items\Const\OrderProductItemConst;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEventInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusReturn;
+use BaksDev\Products\Sign\UseCase\Admin\Status\Return\Invariable\ReturnProductSignInvariableDTO;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /** @see ProductSignEvent */
-final readonly class ProductSignProcessDTO implements ProductSignEventInterface
+final class ReturnProductSignStatusDTO implements ProductSignEventInterface
 {
     /**
      * Идентификатор события
@@ -48,31 +46,27 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
      * Статус
      */
     #[Assert\NotBlank]
-    private ProductSignStatus $status;
-
-    /**
-     * Идентификатор заказа
-     */
-    #[Assert\NotBlank]
-    private OrderUid $ord;
-
-    /**
-     * Константа единицы продукта
-     */
-    private ?OrderProductItemConst $product;
+    private readonly ProductSignStatus $status;
 
     #[Assert\Valid]
-    private Invariable\ProductSignInvariableDTO $invariable;
+    private readonly ReturnProductSignInvariableDTO $invariable;
 
+    private readonly null $ord;
 
-    public function __construct(OrderUid $ord, ?OrderProductItemConst $product = null)
+    private readonly null $product;
+
+    public function __construct()
     {
-        $this->ord = $ord;
-        $this->product = $product;
+        /** В случае возврата присваиваем статус Return «Возврат» и сбрасываем идентификтор продукции в заказе */
+        $this->status = new ProductSignStatus(ProductSignStatusReturn::class);
 
-        /** Статус Process «В резерве» */
-        $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
-        $this->invariable = new Invariable\ProductSignInvariableDTO();
+        /** Всегда сбрасываем идентификатор заказа и связь на продукт */
+        $this->ord = null;
+
+        $this->product = null;
+
+        /** Сбрасываем продавца */
+        $this->invariable = new ReturnProductSignInvariableDTO()->setNullSeller();
     }
 
     /**
@@ -83,37 +77,32 @@ final readonly class ProductSignProcessDTO implements ProductSignEventInterface
         return $this->id;
     }
 
-    public function setId(ProductSignEventUid $id): void
+    public function setId(ProductSignEventUid $id): self
     {
         $this->id = $id;
+        return $this;
     }
 
-    /**
-     * Статус
-     */
     public function getStatus(): ProductSignStatus
     {
         return $this->status;
     }
 
     /**
-     * Идентификатор заказа
+     * Ord
      */
-    public function getOrd(): OrderUid
+    public function getOrd(): null
     {
         return $this->ord;
     }
 
-
-    public function getProduct(): ?OrderProductItemConst
+    public function getProduct(): null
     {
         return $this->product;
     }
 
-    /**
-     * Invariable
-     */
-    public function getInvariable(): Invariable\ProductSignInvariableDTO
+
+    public function getInvariable(): ReturnProductSignInvariableDTO
     {
         return $this->invariable;
     }

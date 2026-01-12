@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,6 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
- *
  */
 
 declare(strict_types=1);
@@ -35,6 +34,7 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use Doctrine\DBAL\ArrayParameterType;
+use InvalidArgumentException;
 
 final class ProductSignByOrderProductItemRepository implements ProductSignByOrderProductItemInterface
 {
@@ -42,7 +42,7 @@ final class ProductSignByOrderProductItemRepository implements ProductSignByOrde
 
     private ProductSignStatus|false $status = false;
 
-    private array|false $statuses = false;
+    private array|null $statuses = null;
 
     public function __construct(
         private readonly DBALQueryBuilder $DBALQueryBuilder
@@ -81,7 +81,7 @@ final class ProductSignByOrderProductItemRepository implements ProductSignByOrde
     {
         if(false === ($this->productItem instanceof OrderProductItemConst))
         {
-            throw new \InvalidArgumentException('Не передан обязательный параметр запроса productItem');
+            throw new InvalidArgumentException('Не передан обязательный параметр запроса productItem');
         }
 
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
@@ -97,7 +97,7 @@ final class ProductSignByOrderProductItemRepository implements ProductSignByOrde
                 '
                     event.id = main.event AND
                     event.product = :productItem
-                    '
+                    ',
             );
 
         $dbal->setParameter('productItem', $this->productItem, OrderProductItemConst::TYPE);
@@ -108,7 +108,7 @@ final class ProductSignByOrderProductItemRepository implements ProductSignByOrde
                 'event',
                 ProductSignCode::class,
                 'product_sign_code',
-                'product_sign_code.event = event.id'
+                'product_sign_code.event = event.id',
             );
 
         if(true === $this->status instanceof ProductSignStatus)
@@ -118,7 +118,7 @@ final class ProductSignByOrderProductItemRepository implements ProductSignByOrde
                 ->setParameter('status', $this->status, ProductSignStatus::TYPE);
         }
 
-        if(false !== $this->statuses)
+        if(false === empty($this->statuses))
         {
             $dbal
                 ->andWhere('event.status IN (:statuses)')

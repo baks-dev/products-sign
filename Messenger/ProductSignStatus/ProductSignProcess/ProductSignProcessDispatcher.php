@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -73,7 +73,7 @@ final readonly class ProductSignProcessDispatcher
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
         private ProductSignStatusHandler $ProductSignStatusHandler,
-        private ProductSignNewInterface $ProductSignNew,
+        private ProductSignNewInterface $ProductSignNewRepository,
         private CurrentOrderEventInterface $CurrentOrderEvent,
         private CurrentUserProfileEventInterface $CurrentUserProfileEvent,
         private AppCacheInterface $cache,
@@ -117,9 +117,11 @@ final readonly class ProductSignProcessDispatcher
              * должен определится честный знак у которого свойство SELLER === NULL
              * для этого передаем тестовый идентификатор профиля
              *
+             * @see ProductSignNewRepository:244
+             *
              */
 
-            $ProductSignEvent = $this->ProductSignNew
+            $ProductSignEvent = $this->ProductSignNewRepository
                 ->forUser($message->getUser())
                 ->forProfile(new UserProfileUid(UserProfileUid::TEST)) // передаем тестовый идентификатор для поиска по NULL
                 ->forProduct($message->getProduct())
@@ -130,7 +132,7 @@ final readonly class ProductSignProcessDispatcher
         }
         else
         {
-            $ProductSignEvent = $this->ProductSignNew
+            $ProductSignEvent = $this->ProductSignNewRepository
                 ->forUser($message->getUser())
                 ->forProfile($message->getProfile())
                 ->forProduct($message->getProduct())

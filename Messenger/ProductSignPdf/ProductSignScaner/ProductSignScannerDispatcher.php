@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignScaner;
 
 use BaksDev\Barcode\Reader\BarcodeRead;
+use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Products\Product\Repository\ExistProductBarcode\ExistProductBarcodeInterface;
@@ -36,6 +37,7 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignDTO;
 use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignHandler;
 use Doctrine\ORM\Mapping\Table;
+use Exception;
 use Imagick;
 use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
@@ -114,7 +116,22 @@ final readonly class ProductSignScannerDispatcher
         $Imagick = new Imagick();
 
         $Imagick->setResolution(500, 500);
-        $Imagick->readImage($pdfPath);
+
+        try
+        {
+            $Imagick->readImage($pdfPath);
+        }
+        catch(Exception)
+        {
+            $this->messageDispatch->dispatch(
+                message: $message,
+                stamps: [new MessageDelay('5 seconds')],
+                transport: 'products-sign',
+            );
+
+            return;
+        }
+
         $pages = $Imagick->getNumberImages(); // количество страниц в файле
 
         for($number = 0; $number < $pages; $number++)

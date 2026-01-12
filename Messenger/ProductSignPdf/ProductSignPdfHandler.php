@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@ use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockHandler;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use DateTimeImmutable;
 use DirectoryIterator;
+use Exception;
 use Imagick;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
@@ -97,6 +98,7 @@ final readonly class ProductSignPdfHandler
         $totalPurchase = 0;
 
         Imagick::setResourceLimit(Imagick::RESOURCETYPE_TIME, 3600);
+        Imagick::setResourceLimit(Imagick::RESOURCETYPE_MEMORY, (1024 * 1024 * 256));
 
         foreach(new DirectoryIterator($uploadDir) as $SignFile)
         {
@@ -157,7 +159,20 @@ final readonly class ProductSignPdfHandler
 
             $Imagick = new Imagick();
             $Imagick->setResolution(50, 50); // устанавливаем малое разрешение
-            $Imagick->readImage($pdfPath);
+
+            try
+            {
+                $Imagick->readImage($pdfPath);
+            }
+            catch(Exception)
+            {
+                $this->messageDispatch->dispatch(
+                    $message,
+                    transport: 'products-sign-low',
+                );
+
+                return;
+            }
 
             $totalPurchase += $Imagick->getNumberImages(); // количество страниц в файле
 

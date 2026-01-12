@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -31,13 +31,7 @@ use Twig\TwigFunction;
 
 final class ProductSignStatusExtension extends AbstractExtension
 {
-    private string $project_dir;
-
-    public function __construct(
-        #[Autowire('%kernel.project_dir%')] string $project_dir,
-    ) {
-        $this->project_dir = $project_dir;
-    }
+    public function __construct(#[Autowire('%kernel.project_dir%')] private readonly string $project_dir) {}
 
     public function getFunctions(): array
     {
@@ -45,27 +39,26 @@ final class ProductSignStatusExtension extends AbstractExtension
             new TwigFunction(
                 'product_sign_status',
                 [$this, 'status'],
-                ['needs_environment' => true, 'is_safe' => ['html']]
+                ['needs_environment' => true, 'is_safe' => ['html']],
             ),
         ];
     }
 
     public function status(Environment $twig, ?string $status): string
     {
-        if($status)
+        if(empty($status))
         {
-            $ProductSignStatus = new ProductSignStatus($status);
-
-            if(file_exists($this->project_dir.'/templates/products-sign/twig/status/status.html.twig'))
-            {
-                return $twig->render('@Template/products-sign/twig/status/status.html.twig', ['status' => $ProductSignStatus->getProductSignStatusValue()]);
-            }
-
-            return $twig->render('@products-sign/twig/status/status.html.twig', ['status' => $ProductSignStatus->getProductSignStatusValue()]);
+            return '';
         }
 
-        return '';
+        $ProductSignStatus = new ProductSignStatus($status);
+
+        if(file_exists($this->project_dir.'/templates/products-sign/twig/status/status.html.twig'))
+        {
+            return $twig->render('@Template/products-sign/twig/status/status.html.twig', ['status' => $ProductSignStatus->getProductSignStatusValue()]);
+        }
+
+        return $twig->render('@products-sign/twig/status/status.html.twig', ['status' => $ProductSignStatus->getProductSignStatusValue()]);
+
     }
-
-
 }

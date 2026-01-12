@@ -6,7 +6,7 @@ error: 'Ошибка'
 cancel: 'Отменен'
 process: 'В резерве'
 delete: 'Удален'
-refund: 'Возврат'
+return: 'Возврат'
 
 # Поставка
 supply: 'Поставка'

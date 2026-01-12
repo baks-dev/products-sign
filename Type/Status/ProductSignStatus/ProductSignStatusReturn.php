@@ -21,33 +21,28 @@
  *  THE SOFTWARE.
  */
 
-namespace BaksDev\Products\Sign\Repository\AllProductSignExport;
+declare(strict_types=1);
 
-use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileIndividual;
-use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileOrganization;
-use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileUser;
-use BaksDev\Users\Profile\UserProfile\Entity\UserProfile;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use DateTimeImmutable;
-use Generator;
+namespace BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 
-interface AllProductSignExportInterface
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
+use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
+
+/**
+ * Статус Return «Возврат»
+ */
+#[AutoconfigureTag('baks.product.sign.status')]
+class ProductSignStatusReturn implements ProductSignStatusInterface
 {
-    public function forProfile(UserProfile|UserProfileUid|string $profile): self;
+    public const string STATUS = 'return';
 
-    public function dateFrom(DateTimeImmutable|string $from): self;
+    public function __toString(): string
+    {
+        return self::STATUS;
+    }
 
-    public function dateTo(DateTimeImmutable|string $to): self;
-
-    /** Честные знаки для передачи */
-    public function onlyTransfer(): self;
-
-    /**
-     * Честные знаки для вывода из оборота (покупатель)
-     */
-    public function onlyDoneBuyer(): self;
-
-
-    /** @return Generator<ProductSignExportResult>|false */
-    public function findAll(): Generator|false;
+    public function getValue(): string
+    {
+        return self::STATUS;
+    }
 }

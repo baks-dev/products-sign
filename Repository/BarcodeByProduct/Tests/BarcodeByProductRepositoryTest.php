@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -55,8 +55,6 @@ class BarcodeByProductRepositoryTest extends KernelTestCase
             ->forVariationConst(new ProductVariationConst('01876b34-ecce-7c46-9f63-fc184b6527ee'))
             ->forModificationConst(new ProductModificationConst('01876b34-ecd2-762c-9834-b6a914a020ba'))
             ->find();
-
-        // dd($ProductBarcode);
 
         self::assertTrue($ProductBarcode instanceof ProductBarcode || $ProductBarcode === false);
 

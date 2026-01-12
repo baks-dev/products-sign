@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,6 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
- *
  */
 
 declare(strict_types=1);
@@ -69,9 +68,9 @@ final class ProductSignStatusHandler extends AbstractHandler
                 /** Присваиваем статус к предыдущему событию */
                 match (true)
                 {
-                    // Refund «Возврат» при статусе Done «Выполнен»
+                    // Return «Возврат» при статусе Done «Выполнен»
                     true === $lastProductSignEvent->getStatus()->equals(ProductSignStatusDone::class) =>
-                    $this->refund($lastProductSignEvent),
+                    $this->return($lastProductSignEvent),
 
                     // New «Новый» при статусе Process «В резерве»
                     true === $lastProductSignEvent->getStatus()->equals(ProductSignStatusProcess::class) =>
@@ -91,9 +90,9 @@ final class ProductSignStatusHandler extends AbstractHandler
         return $this->main;
     }
 
-    private function refund(ProductSignEvent $lastProductSignEvent): void
+    private function return(ProductSignEvent $lastProductSignEvent): void
     {
-        $lastProductSignEvent->refund();
+        $lastProductSignEvent->return();
         $this->flush();
     }
 

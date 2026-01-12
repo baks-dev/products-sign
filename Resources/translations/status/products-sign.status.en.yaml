@@ -6,7 +6,7 @@ error: 'Error'
 cancel: 'Cancelled'
 process: 'In reserve'
 delete: 'Deleted'
-refund: 'Refund'
+return: 'Return'
 
 # Supply
 supply: 'Delivery'

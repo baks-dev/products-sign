@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,6 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
- *
  */
 
 declare(strict_types=1);
@@ -39,7 +38,7 @@ use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusRefund;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusReturn;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -148,10 +147,10 @@ class ProductSignEvent extends EntityEvent
         return $this->id;
     }
 
-    /** Присваиваем статус Refund «Возврат» */
-    public function refund(): self
+    /** Присваиваем статус Return «Возврат» */
+    public function return(): self
     {
-        $this->status = new ProductSignStatus(ProductSignStatusRefund::class);
+        $this->status = new ProductSignStatus(ProductSignStatusReturn::class);
         return $this;
     }
 

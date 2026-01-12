@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -19,7 +19,6 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
- *
  */
 
 declare(strict_types=1);
@@ -237,7 +236,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
             ->addSelect('event.product')
             ->from(
                 ProductSignEvent::class,
-                'event'
+                'event',
             );
 
         $dbal
@@ -254,7 +253,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                 'event',
                 Order::class,
                 'ord',
-                'ord.id = event.ord'
+                'ord.id = event.ord',
             );
 
 
@@ -262,7 +261,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                 'ord',
                 OrderUser::class,
                 'ord_usr',
-                'ord_usr.event = ord.event'
+                'ord_usr.event = ord.event',
             );
 
             $dbal
@@ -270,7 +269,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                     'ord_usr',
                     UserProfileEvent::class,
                     'profile_event',
-                    'profile_event.id = ord_usr.profile AND profile_event.profile = :profile'
+                    'profile_event.id = ord_usr.profile AND profile_event.profile = :profile',
                 )
                 ->setParameter('profile', $this->profile, UserProfileUid::TYPE);
         }
@@ -282,7 +281,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                 'event',
                 ProductSign::class,
                 'main',
-                'main.id = event.main'
+                'main.id = event.main',
             );
 
 
@@ -308,12 +307,12 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                     invariable.offer '.$offerParam.' AND
                     invariable.variation '.$variationParam.' AND
                     invariable.modification '.$modificationParam.'
-                '.($this->part ? ' AND invariable.part = :part' : '')
+                '.($this->part ? ' AND invariable.part = :part' : ''),
                 )
                 ->setParameter(
                     key: 'product',
                     value: $this->product,
-                    type: ProductUid::TYPE
+                    type: ProductUid::TYPE,
                 );
 
             if($this->part)
@@ -334,7 +333,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                    THEN CONCAT ( '/upload/".$dbal->table(ProductSignCode::class)."' , '/', code.name)
                    ELSE NULL
                 END AS code_image
-            "
+            ",
             )
             ->addSelect("code.ext AS code_ext")
             ->addSelect("code.cdn AS code_cdn")
@@ -343,7 +342,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                 'event',
                 ProductSignCode::class,
                 'code',
-                'code.main = main.id'
+                'code.main = main.id',
             );
 
         /** Есть ли на единицу продукции Честный знак */
@@ -365,14 +364,14 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                     '
                         orders_event.id = ord.event AND
                         orders_event.orders = :ord
-                        '
+                        ',
                 );
 
             $item
                 ->setParameter(
                     'ord',
                     $this->order,
-                    OrderUid::TYPE
+                    OrderUid::TYPE,
                 );
 
 
@@ -382,7 +381,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                     'orders_event',
                     OrderProduct::class,
                     'orders_product',
-                    'orders_product.event = orders_event.id'
+                    'orders_product.event = orders_event.id',
                 );
 
             /** Единицы */
@@ -391,7 +390,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                     'orders_product',
                     OrderProductItem::class,
                     'orders_product_item',
-                    'orders_product_item.product = orders_product.id'
+                    'orders_product_item.product = orders_product.id',
                 );
 
             /** Связь item с ЧЗ */
@@ -402,6 +401,17 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
         }
 
         $result = $dbal->fetchAllHydrate(ProductSignByOrderResult::class);
+
+        /** Сбрасываем фильтры */
+        $this->product = false;
+        $this->offer = false;
+        $this->variation = false;
+        $this->modification = false;
+        $this->order = false;
+        $this->profile = false;
+        $this->part = false;
+        $this->item = false;
+        $this->status = new ProductSignStatus(ProductSignStatusProcess::class);
 
         return $result->valid() ? $result : false;
     }
