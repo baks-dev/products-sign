@@ -95,6 +95,11 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
             return;
         }
 
+        /**
+         * Если заявка уже выполнена - происходит возврат
+         *
+         * @see ProductSignReturnByOrderReturnDispatcher
+         */
         if(true === $ProductStockEvent->equalsProductStockStatus(ProductStockStatusCompleted::class))
         {
             return;
