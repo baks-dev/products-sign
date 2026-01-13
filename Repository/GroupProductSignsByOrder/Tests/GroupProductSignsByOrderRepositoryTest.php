@@ -22,34 +22,29 @@
  *
  */
 
-namespace BaksDev\Products\Sign\Repository\ProductSignByOrderProductItem\Tests;
+namespace BaksDev\Products\Sign\Repository\GroupProductSignsByOrder\Tests;
 
-use BaksDev\Orders\Order\Type\Items\Const\OrderProductItemConst;
-use BaksDev\Products\Sign\Repository\ProductSignByOrderProductItem\ProductSignByOrderProductItemInterface;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
+use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Sign\Repository\GroupProductSignsByOrder\GroupProductSignsByOrderInterface;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
 #[Group('products-sign')]
 #[When(env: 'test')]
-class ProductSignByOrderProductItemTest extends KernelTestCase
+class GroupProductSignsByOrderRepositoryTest extends KernelTestCase
 {
     public function testRepository(): void
     {
-        // @TODO не используется
         self::assertTrue(true);
-        return;
 
-        /** @var ProductSignByOrderProductItemInterface $ProductSignByOrderProductItemInterface */
-        $ProductSignByOrderProductItemInterface = self::getContainer()->get(ProductSignByOrderProductItemInterface::class);
+        /** @var GroupProductSignsByOrderInterface $GroupProductSignsByOrderInterface */
+        $GroupProductSignsByOrderInterface = self::getContainer()->get(GroupProductSignsByOrderInterface::class);
 
-        $result = $ProductSignByOrderProductItemInterface
-            ->forStatuses(ProductSignStatusProcess::STATUS)
-            ->forStatuses(ProductSignStatusDone::STATUS)
-            ->forProductItem(new OrderProductItemConst(OrderProductItemConst::TEST))
-            ->find();
+        $result = $GroupProductSignsByOrderInterface
+            ->forOrder(new OrderUid)
+            ->findAll();
+
 
     }
 }
