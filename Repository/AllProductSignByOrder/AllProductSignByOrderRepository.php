@@ -27,7 +27,6 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Repository\AllProductSignByOrder;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
-use BaksDev\Orders\Order\Entity\Event\OrderEvent;
 use BaksDev\Orders\Order\Entity\Items\OrderProductItem;
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Entity\Products\OrderProduct;
@@ -139,6 +138,9 @@ final class AllProductSignByOrderRepository implements AllProductSignByOrderInte
                 ->andWhere('product_sign_event.status IN (:statuses)')
                 ->setParameter('statuses', $this->statuses, ArrayParameterType::STRING);
         }
+
+        $this->order = false;
+        $this->statuses = null;
 
         return $dbal->fetchAllIndexHydrate(AllProductSignByOrderResult::class);
     }
