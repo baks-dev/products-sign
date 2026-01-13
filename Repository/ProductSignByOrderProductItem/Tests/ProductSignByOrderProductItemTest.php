@@ -26,6 +26,7 @@ namespace BaksDev\Products\Sign\Repository\ProductSignByOrderProductItem\Tests;
 
 use BaksDev\Orders\Order\Type\Items\Const\OrderProductItemConst;
 use BaksDev\Products\Sign\Repository\ProductSignByOrderProductItem\ProductSignByOrderProductItemInterface;
+use BaksDev\Products\Sign\Repository\ProductSignByOrderProductItem\ProductSignByOrderProductItemResult;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use PHPUnit\Framework\Attributes\Group;
@@ -50,6 +51,27 @@ class ProductSignByOrderProductItemTest extends KernelTestCase
             ->forStatuses(ProductSignStatusDone::STATUS)
             ->forProductItem(new OrderProductItemConst(OrderProductItemConst::TEST))
             ->find();
+
+        if(false === ($result instanceof ProductSignByOrderProductItemResult))
+        {
+            return;
+        }
+
+        // Вызываем все геттеры
+        $reflectionClass = new \ReflectionClass(ProductSignByOrderProductItemResult::class);
+        $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+        foreach($methods as $method)
+        {
+            // Методы без аргументов
+            if($method->getNumberOfParameters() === 0)
+            {
+                // Вызываем метод
+                $data = $method->invoke($result);
+                // dump($data);
+            }
+        }
+
 
     }
 }

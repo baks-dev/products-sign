@@ -22,9 +22,11 @@
  *
  */
 
-namespace BaksDev\Products\Sign\Repository\AllProductSignByOrder;
+namespace BaksDev\Products\Sign\Repository\AllProductSignByOrder\Tests;
 
 use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Sign\Repository\AllProductSignByOrder\AllProductSignByOrderRepository;
+use BaksDev\Products\Sign\Repository\AllProductSignByOrder\AllProductSignByOrderResult;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
@@ -43,6 +45,26 @@ class AllProductSignByOrderRepositoryTest extends KernelTestCase
         $result = $AllProductSignByOrderRepository
             ->forOrder(new OrderUid)
             ->findAll();
+
+        if(false === $result)
+        {
+            return;
+        }
+
+        // Вызываем все геттеры
+        $reflectionClass = new \ReflectionClass(AllProductSignByOrderResult::class);
+        $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+        foreach($methods as $method)
+        {
+            // Методы без аргументов
+            if($method->getNumberOfParameters() === 0)
+            {
+                // Вызываем метод
+                $data = $method->invoke($result);
+                // dump($data);
+            }
+        }
 
     }
 }

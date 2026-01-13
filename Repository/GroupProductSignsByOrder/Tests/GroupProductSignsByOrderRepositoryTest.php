@@ -26,6 +26,7 @@ namespace BaksDev\Products\Sign\Repository\GroupProductSignsByOrder\Tests;
 
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Repository\GroupProductSignsByOrder\GroupProductSignsByOrderInterface;
+use BaksDev\Products\Sign\Repository\GroupProductSignsByOrder\GroupProductSignsByOrderResult;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
@@ -45,6 +46,25 @@ class GroupProductSignsByOrderRepositoryTest extends KernelTestCase
             ->forOrder(new OrderUid)
             ->findAll();
 
+        if(false === $result || false === $result->valid())
+        {
+            return;
+        }
+
+        // Вызываем все геттеры
+        $reflectionClass = new \ReflectionClass(GroupProductSignsByOrderResult::class);
+        $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+        foreach($methods as $method)
+        {
+            // Методы без аргументов
+            if($method->getNumberOfParameters() === 0)
+            {
+                // Вызываем метод
+                $data = $method->invoke($result);
+                // dump($data);
+            }
+        }
 
     }
 }
