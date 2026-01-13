@@ -22,33 +22,49 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Sign\Repository\GroupProductSignsByOrder\Tests;
 
-namespace BaksDev\Products\Sign\Repository\AllProductSignExport\Tests;
-
-use BaksDev\Products\Sign\Repository\AllProductSignExport\AllProductSignExportInterface;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use DateTimeImmutable;
+use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Sign\Repository\GroupProductSignsByOrder\GroupProductSignsByOrderInterface;
+use BaksDev\Products\Sign\Repository\GroupProductSignsByOrder\GroupProductSignsByOrderResult;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
 #[Group('products-sign')]
 #[When(env: 'test')]
-class AllProductSignExportTest extends KernelTestCase
+class GroupProductSignsByOrderRepositoryTest extends KernelTestCase
 {
-    public function testUseCase(): void
+    public function testRepository(): void
     {
-        self::assertIsBool(true);
+        self::assertTrue(true);
 
-        /** @var AllProductSignExportInterface $AllProductSignExportRepository */
-        $AllProductSignExportRepository = self::getContainer()->get(AllProductSignExportInterface::class);
+        /** @var GroupProductSignsByOrderInterface $GroupProductSignsByOrderInterface */
+        $GroupProductSignsByOrderInterface = self::getContainer()->get(GroupProductSignsByOrderInterface::class);
 
-        $result = $AllProductSignExportRepository
-            ->forProfile(new UserProfileUid())
-            ->dateFrom(new DateTimeImmutable('now'))
-            ->dateTo(new DateTimeImmutable('+1 day'))
-            ->onlyDoneBuyer()
+        $result = $GroupProductSignsByOrderInterface
+            ->forOrder(new OrderUid)
             ->findAll();
+
+        if(false === $result || false === $result->valid())
+        {
+            return;
+        }
+
+        // Вызываем все геттеры
+        $reflectionClass = new \ReflectionClass(GroupProductSignsByOrderResult::class);
+        $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+        foreach($methods as $method)
+        {
+            // Методы без аргументов
+            if($method->getNumberOfParameters() === 0)
+            {
+                // Вызываем метод
+                $data = $method->invoke($result);
+                // dump($data);
+            }
+        }
+
     }
 }

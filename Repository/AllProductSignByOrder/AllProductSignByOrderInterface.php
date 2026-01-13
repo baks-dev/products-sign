@@ -24,31 +24,23 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Repository\AllProductSignExport\Tests;
+namespace BaksDev\Products\Sign\Repository\AllProductSignByOrder;
 
-use BaksDev\Products\Sign\Repository\AllProductSignExport\AllProductSignExportInterface;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use DateTimeImmutable;
-use PHPUnit\Framework\Attributes\Group;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\DependencyInjection\Attribute\When;
+use BaksDev\Orders\Order\Entity\Order;
+use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
 
-#[Group('products-sign')]
-#[When(env: 'test')]
-class AllProductSignExportTest extends KernelTestCase
+interface AllProductSignByOrderInterface
 {
-    public function testUseCase(): void
-    {
-        self::assertIsBool(true);
+    /** ЧЗ, связанные с продуктом из заказа */
+    public function forOrder(Order|OrderUid $order): self;
 
-        /** @var AllProductSignExportInterface $AllProductSignExportRepository */
-        $AllProductSignExportRepository = self::getContainer()->get(AllProductSignExportInterface::class);
+    /** Фильтр по статусу ЧЗ */
+    public function forStatus(ProductSignStatus|ProductSignStatusInterface|string $status): self;
 
-        $result = $AllProductSignExportRepository
-            ->forProfile(new UserProfileUid())
-            ->dateFrom(new DateTimeImmutable('now'))
-            ->dateTo(new DateTimeImmutable('+1 day'))
-            ->onlyDoneBuyer()
-            ->findAll();
-    }
+    /**
+     * Информация о Честном знаке
+     */
+    public function findAll(): array|false;
 }

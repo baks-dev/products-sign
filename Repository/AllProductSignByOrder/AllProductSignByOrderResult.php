@@ -24,49 +24,28 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Repository\ProductSignByOrder;
+namespace BaksDev\Products\Sign\Repository\AllProductSignByOrder;
 
-use BaksDev\Orders\Order\Type\Items\Const\OrderProductItemConst;
-use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 
-/** @see ProductSignByOrderResult */
-final readonly class ProductSignByOrderResult
+final readonly class AllProductSignByOrderResult
 {
-
     public function __construct(
-        private string $sign_id, // " => "0195396e-7f26-742d-8fbf-a9ed36a2d029"
-        private string $sign_event, // " => "0195b796-9b6c-7654-a557-774d4bede31a"
-
-        private string $code_string,
-        // " => "(01)04603766681672(21)5t<!--Za6ucZhTb(91)EE10(92)ej/Cgv8P4Yf7cLJC4Jaf5lc+BEcL6pae05tsT2+TiMc="-->
-
-        private string $code_image, // " => "/upload/product_sign_code/0a58f0ee235e31dc73b5551299a4af88"
-        private string $code_ext, // " => "webp"
-        private bool $code_cdn, // " => true
-        private ?string $comment,
-
-        private ?string $product = null,
+        private string $code,
+        private string $status,
     ) {}
 
-    public function getSignId(): ProductSignUid
+    public function getCode(): string
     {
-        return new ProductSignUid($this->sign_id);
-    }
-
-    public function getSignEvent(): ProductSignEventUid
-    {
-        return new ProductSignEventUid($this->sign_event);
+        return $this->code;
     }
 
     public function getSmallCode(): string
     {
-        preg_match('/^(.*?)\(\d{2}\).{4}\(\d{2}\)/', $this->code_string, $matches);
-
+        preg_match('/^(.*?)\(\d{2}\).{4}\(\d{2}\)/', $this->code, $matches);
 
         if(isset($matches[1]))
         {
-
             // Преобразуем строку в массив символов
             $chars = str_split($matches[1]);
 
@@ -99,39 +78,18 @@ final readonly class ProductSignByOrderResult
 
         }
 
-        return $this->code_string;
-
+        return $this->code;
     }
 
     public function getBigCode(): string
     {
         $subChar = "";
-        preg_match_all('/\((\d{2})\)((?:(?!\(\d{2}\)).)*)/', $this->code_string, $matches, PREG_SET_ORDER);
+        preg_match_all('/\((\d{2})\)((?:(?!\(\d{2}\)).)*)/', $this->code, $matches, PREG_SET_ORDER);
         return $matches[0][1].$matches[0][2].$matches[1][1].$matches[1][2].$subChar.$matches[2][1].$matches[2][2].$subChar.$matches[3][1].$matches[3][2];
     }
 
-    public function getCodeImage(): string
+    public function getStatus(): ProductSignStatus
     {
-        return $this->code_image;
-    }
-
-    public function getCodeExt(): string
-    {
-        return $this->code_ext;
-    }
-
-    public function isCodeCdn(): bool
-    {
-        return $this->code_cdn === true;
-    }
-
-    public function getComment(): ?string
-    {
-        return $this->comment;
-    }
-
-    public function getProduct(): ?OrderProductItemConst
-    {
-        return true === empty($this->product) ? null : new OrderProductItemConst($this->product);
+        return new ProductSignStatus($this->status);
     }
 }

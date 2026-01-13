@@ -22,33 +22,49 @@
  *
  */
 
-declare(strict_types=1);
+namespace BaksDev\Products\Sign\Repository\AllProductSignByOrder\Tests;
 
-namespace BaksDev\Products\Sign\Repository\AllProductSignExport\Tests;
-
-use BaksDev\Products\Sign\Repository\AllProductSignExport\AllProductSignExportInterface;
-use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
-use DateTimeImmutable;
+use BaksDev\Orders\Order\Type\Id\OrderUid;
+use BaksDev\Products\Sign\Repository\AllProductSignByOrder\AllProductSignByOrderRepository;
+use BaksDev\Products\Sign\Repository\AllProductSignByOrder\AllProductSignByOrderResult;
 use PHPUnit\Framework\Attributes\Group;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
 #[Group('products-sign')]
 #[When(env: 'test')]
-class AllProductSignExportTest extends KernelTestCase
+class AllProductSignByOrderRepositoryTest extends KernelTestCase
 {
-    public function testUseCase(): void
+    public function testRepository(): void
     {
-        self::assertIsBool(true);
+        self::assertTrue(true);
 
-        /** @var AllProductSignExportInterface $AllProductSignExportRepository */
-        $AllProductSignExportRepository = self::getContainer()->get(AllProductSignExportInterface::class);
+        /** @var AllProductSignByOrderRepository $AllProductSignByOrderRepository */
+        $AllProductSignByOrderRepository = self::getContainer()->get(AllProductSignByOrderRepository::class);
 
-        $result = $AllProductSignExportRepository
-            ->forProfile(new UserProfileUid())
-            ->dateFrom(new DateTimeImmutable('now'))
-            ->dateTo(new DateTimeImmutable('+1 day'))
-            ->onlyDoneBuyer()
+        $result = $AllProductSignByOrderRepository
+            ->forOrder(new OrderUid)
             ->findAll();
+
+        if(false === $result)
+        {
+            return;
+        }
+
+        // Вызываем все геттеры
+        $reflectionClass = new \ReflectionClass(AllProductSignByOrderResult::class);
+        $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
+
+        foreach($methods as $method)
+        {
+            // Методы без аргументов
+            if($method->getNumberOfParameters() === 0)
+            {
+                // Вызываем метод
+                $data = $method->invoke($result);
+                // dump($data);
+            }
+        }
+
     }
 }
