@@ -87,35 +87,24 @@ final class AllProductSignByOrderRepository implements AllProductSignByOrderInte
 
         $dbal->from(Order::class, 'ord');
 
-        /** Активное событие заказа */
         $dbal
-            ->join(
-                'ord',
-                OrderEvent::class,
-                'orders_event',
-                '
-                    orders_event.id = ord.event AND
-                    orders_event.orders = :ord
-                    ',
-            );
-
-        $dbal->setParameter('ord', $this->order, OrderUid::TYPE);
+            ->where('ord.id = :ord')
+            ->setParameter('ord', $this->order, OrderUid::TYPE);
 
         /** Продукты в заказе */
         $dbal
             ->join(
-                'orders_event',
+                'ord',
                 OrderProduct::class,
                 'orders_product',
-                'orders_product.event = orders_event.id',
+                'orders_product.event = ord.event',
             );
-
 
         /** Единицы продукции */
         $dbal
             ->select('orders_product_item.const AS const')
             ->join(
-                'orders_event',
+                'ord',
                 OrderProductItem::class,
                 'orders_product_item',
                 'orders_product_item.product = orders_product.id',
@@ -125,11 +114,11 @@ final class AllProductSignByOrderRepository implements AllProductSignByOrderInte
         $dbal
             ->addSelect('product_sign_event.status AS status')
             ->join(
-                'orders_event',
+                'ord',
                 ProductSignEvent::class,
                 'product_sign_event',
                 '
-                    product_sign_event.ord = orders_event.orders AND
+                    product_sign_event.ord = ord.id AND
                     product_sign_event.product = orders_product_item.const
                     ',
             );
