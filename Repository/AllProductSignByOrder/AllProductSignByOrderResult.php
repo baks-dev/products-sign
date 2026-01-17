@@ -19,7 +19,6 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
- *
  */
 
 declare(strict_types=1);
@@ -33,6 +32,7 @@ final readonly class AllProductSignByOrderResult
     public function __construct(
         private string $code,
         private string $status,
+        private ?string $comment,
     ) {}
 
     public function getCode(): string
@@ -91,5 +91,10 @@ final readonly class AllProductSignByOrderResult
     public function getStatus(): ProductSignStatus
     {
         return new ProductSignStatus($this->status);
+    }
+
+    public function getComment(): ?string
+    {
+        return $this->comment;
     }
 }

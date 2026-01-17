@@ -39,6 +39,7 @@ use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusReturn;
+use BaksDev\Products\Supply\Type\ProductSign\Status\ProductSignStatusSupply;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -206,6 +207,12 @@ class ProductSignEvent extends EntityEvent
     {
         return $this->status;
     }
+
+    public function isStatusEquals(mixed $status): bool
+    {
+        return $this->status->equals($status);
+    }
+
 
     public function deleteCode(): void
     {
