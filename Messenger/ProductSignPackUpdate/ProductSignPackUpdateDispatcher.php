@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -52,6 +52,11 @@ final class ProductSignPackUpdateDispatcher
 
     public function __invoke(ProductSignPackUpdateMessage $message): void
     {
+        if(false === str_starts_with($message->getCode(), '('))
+        {
+            return;
+        }
+
         $Deduplicator = $this->deduplicator
             ->namespace('products-sign')
             ->deduplication([$message->getCode()]);
@@ -64,6 +69,11 @@ final class ProductSignPackUpdateDispatcher
         /** Пробуем повторить попытку через время */
         if(false === ($ProductSignUid instanceof ProductSignUid))
         {
+            $this->logger->warning(
+                'products-sign: Код маркировки не найден. Пробуем повторить попытку через время',
+                [self::class.':'.__LINE__, $message->getCode()],
+            );
+
             $this->messageDispatch->dispatch(
                 message: $message,
                 stamps: [new MessageDelay('1 minutes')],
@@ -82,6 +92,11 @@ final class ProductSignPackUpdateDispatcher
 
         if(true === $ProductSignInvariable)
         {
+            $this->logger->debug(sprintf(
+                "%s => %s", $ProductSignUid, $message->getPack(),
+            ), [self::class.':'.__LINE__]);
+
+            $Deduplicator->save();
             return;
         }
 
@@ -105,7 +120,7 @@ final class ProductSignPackUpdateDispatcher
             "%s => %s", $ProductSignUid, $message->getPack(),
         ), [self::class.':'.__LINE__]);
 
-        /** Удаляем дедубликатор для другого сканирования PDF */
-        $Deduplicator->delete();
+        $Deduplicator->save();
+
     }
 }

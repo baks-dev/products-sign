@@ -99,12 +99,6 @@ final readonly class ProductSignXlsxHandler
             return;
         }
 
-        /** Обрабатываем файлы EXEL */
-
-        $Deduplicator = $this->deduplicator
-            ->namespace('products-sign')
-            ->expiresAfter('1 day');
-
         foreach(new DirectoryIterator($uploadDir) as $SignFileExel)
         {
             if($SignFileExel->getExtension() !== 'xlsx')
@@ -143,14 +137,6 @@ final readonly class ProductSignXlsxHandler
                         continue;
                     }
 
-                    $Deduplicator->deduplication([$valueCode]);
-
-                    // Код добавлен в список обработки (либо уже обработан)
-                    if($Deduplicator->isExecuted())
-                    {
-                        continue;
-                    }
-
                     // 2. Получаем вторую ячейку (колонка D) Код упаковки
                     $cellPack = $worksheet->getCell('D'.$rowIndex);
                     $valuePack = $cellPack->getValue();
@@ -175,14 +161,6 @@ final readonly class ProductSignXlsxHandler
                         stamps: [new MessageDelay('1 minutes')],
                         transport: 'barcode-low',
                     );
-
-                    /**
-                     * Сохраняем дудубликатор кода, чтобы избежать повторной обработки
-                     * Если код не будет найден в базе - он будет удален из дедубликатора для следующего сканера
-                     *
-                     * @see ProductSignPackUpdateDispatcher
-                     */
-                    $Deduplicator->save();
                 }
             }
 

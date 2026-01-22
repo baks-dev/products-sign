@@ -109,7 +109,7 @@
         {% else %}
 
             {# {% if item.sign_status == 'process' %} #}
-                <span class="badge text-bg-warning">{{ item.seller_username }}</span>
+            <span class="badge text-bg-warning">{{ item.seller_username }}</span>
             {# {% endif %}
 
             {% if item.sign_status == 'done' or item.sign_status == 'decommission' %}
@@ -123,14 +123,37 @@
     <td class="text-nowrap text-nowrap">
         <div class="d-flex gap-1">
 
-            {% if (item.sign_status != 'new' and item.sign_status != 'error') and (is_granted('ROLE_PRODUCT_SIGN') or is_granted('ROLE_ADMIN')) %}
+            {% if (item.sign_status != 'new' and item.sign_status != 'return' and item.sign_status != 'error') and (is_granted('ROLE_PRODUCT_SIGN') or is_granted('ROLE_ADMIN')) %}
 
                 {% set print_path = null %}
 
                 {% if item.sign_status == 'decommission' %}
                     {% set print_path = path('products-sign:admin.print.parts', { part: item.sign_part }) %}
                 {% else %}
-                    {% set print_path = path('products-sign:document.print.orders', { order: item.order_id }) %}
+
+                    {% if item.order_id is empty %}
+
+                        <button
+                                class="btn btn-sm btn-outline-danger disabled"
+                                role="tooltip"
+                                data-password-meter-generator="true"
+                                data-bs-toggle="tooltip"
+                                data-bs-placement="bottom"
+                                data-bs-delay='{"show":600,"hide":100}'
+                                title="Номер заказа не определен"
+
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                                 class="bi bi-exclamation-diamond-fill" viewBox="0 0 16 16">
+                                <path d="M9.05.435c-.58-.58-1.52-.58-2.1 0L.436 6.95c-.58.58-.58 1.519 0 2.098l6.516 6.516c.58.58 1.519.58 2.098 0l6.516-6.516c.58-.58.58-1.519 0-2.098zM8 4c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995A.905.905 0 0 1 8 4m.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+                            </svg>
+
+                        </button>
+
+                    {% else %}
+                        {% set print_path = path('products-sign:document.print.orders', { order: item.order_id }) %}
+                    {% endif %}
+
                 {% endif %}
 
                 <a href="{{ print_path }}"
@@ -164,7 +187,7 @@
 
             {# EXEL #}
 
-            {% if (item.sign_status != 'new' and item.sign_status != 'error') and (is_granted('ROLE_PRODUCT_SIGN') or is_granted('ROLE_ADMIN')) %}
+            {% if (item.sign_status != 'new' and item.sign_status != 'return' and item.sign_status != 'error') and (is_granted('ROLE_PRODUCT_SIGN') or is_granted('ROLE_ADMIN')) %}
 
 
                 {% set document_small_txt = null %}
@@ -179,7 +202,7 @@
 
                 {% else %}
 
-                    {% set document_pdf = path('products-sign:document.pdf.orders', {
+                    {# {% set document_pdf = path('products-sign:document.pdf.orders', {
                         article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
                         part: item.sign_part,
                         order: item.order_id,
@@ -207,7 +230,7 @@
                         offer: item.product_offer_const,
                         variation: item.product_variation_const,
                         modification: item.product_modification_const
-                    }) %}
+                    }) %} #}
 
                 {% endif %}
 
