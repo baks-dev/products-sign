@@ -123,7 +123,12 @@
     <td class="text-nowrap text-nowrap">
         <div class="d-flex gap-1">
 
-            {% if (item.sign_status != 'new' and item.sign_status != 'return' and item.sign_status != 'error') and (is_granted('ROLE_PRODUCT_SIGN') or is_granted('ROLE_ADMIN')) %}
+            {% if (
+                item.sign_status != 'new'
+                and item.sign_status != 'return'
+                and item.sign_status != 'error'
+                and item.sign_status != 'supply'
+                ) and (is_granted('ROLE_PRODUCT_SIGN') or is_granted('ROLE_ADMIN')) %}
 
                 {% set print_path = null %}
 
@@ -136,7 +141,6 @@
                         <button
                                 class="btn btn-sm btn-outline-danger disabled"
                                 role="tooltip"
-                                data-password-meter-generator="true"
                                 data-bs-toggle="tooltip"
                                 data-bs-placement="bottom"
                                 data-bs-delay='{"show":600,"hide":100}'
