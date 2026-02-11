@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@ namespace BaksDev\Products\Sign\Repository\AllProductSign;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Services\Paginator\PaginatorInterface;
+use BaksDev\Orders\Order\Entity\Invariable\OrderInvariable;
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Products\Category\Entity\CategoryProduct;
 use BaksDev\Products\Category\Entity\Info\CategoryProductInfo;
@@ -207,15 +208,15 @@ final class AllProductSignRepository implements AllProductSignInterface
             }
         }
 
-
         $dbal
-            ->addSelect('orders.number AS order_number')
+            ->addSelect('orders_invariable.number AS order_number')
             ->leftJoin(
                 'event',
-                Order::class,
-                'orders',
-                'orders.id = event.ord'
+                OrderInvariable::class,
+                'orders_invariable',
+                'orders_invariable.main = event.ord',
             );
+
 
         // Product
         $dbal->addSelect('product.id as product_id'); //->addGroupBy('product.id');
@@ -536,7 +537,7 @@ final class AllProductSignRepository implements AllProductSignInterface
             $dbal
                 ->createSearchQueryBuilder($this->search)
                 ->addSearchLike('code.code')
-                ->addSearchLike('orders.number')
+                ->addSearchLike('orders_invariable.number')
                 ->addSearchLike('product_modification.article')
                 ->addSearchLike('product_variation.article')
                 ->addSearchLike('product_offer.article')

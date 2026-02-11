@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ namespace BaksDev\Products\Sign\Repository\GroupProductSigns;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Services\Paginator\PaginatorInterface;
-use BaksDev\Orders\Order\Entity\Order;
+use BaksDev\Orders\Order\Entity\Invariable\OrderInvariable;
 use BaksDev\Products\Category\Entity\CategoryProduct;
 use BaksDev\Products\Category\Entity\Info\CategoryProductInfo;
 use BaksDev\Products\Category\Entity\Offers\CategoryProductOffers;
@@ -211,12 +211,12 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
 
 
         $dbal
-            ->addSelect('orders.number AS order_number')
+            ->addSelect('orders_invariable.number AS order_number')
             ->leftJoin(
                 'event',
-                Order::class,
-                'orders',
-                'orders.id = event.ord'
+                OrderInvariable::class,
+                'orders_invariable',
+                'orders_invariable.main = event.ord',
             );
 
 
@@ -588,7 +588,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
 
                 $dbal
                     ->createSearchQueryBuilder($this->search)
-                    ->addSearchLike('orders.number');
+                    ->addSearchLike('orders_invariable.number');
             }
 
             // поиск по номеру ГТД формата 10702070/190725/5247456
@@ -604,7 +604,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 $dbal
                     ->createSearchQueryBuilder($this->search)
                     ->addSearchLike('code.code')
-                    ->addSearchLike('orders.number')
+                    ->addSearchLike('orders_invariable.number')
                     ->addSearchLike('invariable.number')
                     ->addSearchLike('product_modification.article')
                     ->addSearchLike('product_variation.article')
