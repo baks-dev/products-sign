@@ -33,6 +33,7 @@ final readonly class AllProductSignByOrderResult
         private string $code,
         private string $status,
         private ?string $comment,
+        private ?string $number,
     ) {}
 
     public function getCode(): string
@@ -91,6 +92,11 @@ final readonly class AllProductSignByOrderResult
     public function getStatus(): ProductSignStatus
     {
         return new ProductSignStatus($this->status);
+    }
+
+    public function getNumber(): ?string
+    {
+        return $this->number;
     }
 
     public function getComment(): ?string

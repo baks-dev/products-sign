@@ -18,21 +18,21 @@ undefined: 'Не определен'
 
 
 {% if status == 'new' %}
-    <h6 class="lh-normal m-0">
+    <h6 class="lh-normal m-0 h6 small">
 		<span class="badge bg-primary shadow">
 			{{ status|trans }}
 		</span>
     </h6>
 
 {% elseif status == 'decommission' %}
-    <h6 class="lh-normal m-0">
+    <h6 class="lh-normal m-0 h6 small">
 		<span class="badge bg-light shadow text-dark">
 			{{ status|trans }}
 		</span>
     </h6>
 
 {% elseif status == 'process' %}
-    <h6 class="lh-normal m-0">
+    <h6 class="lh-normal m-0 h6 small">
 		<span class="badge bg-secondary shadow">
 			{{ status|trans }}
 		</span>
@@ -40,28 +40,28 @@ undefined: 'Не определен'
 
 
 {% elseif status == 'done' %}
-    <h6 class="lh-normal m-0">
+    <h6 class="lh-normal m-0 h6 small">
 		<span class="badge bg-success shadow">
 			{{ status|trans }}
 		</span>
     </h6>
 
 {% elseif status == 'cancel' or status == 'error' %}
-    <h6 class="lh-normal m-0">
+    <h6 class="lh-normal m-0 h6 small">
 		<span class="badge bg-danger shadow">
 			{{ status|trans }}
         </span>
     </h6>
 
 {% elseif status == 'supply' %}
-    <h6 class="lh-normal m-0">
+    <h6 class="lh-normal m-0 h6 small">
 		<span class="badge text-white bg-info shadow">
 			{{ status|trans }}
 		</span>
     </h6>
 
 {% elseif status == 'undefined' %}
-    <h6 class="lh-normal m-0">
+    <h6 class="lh-normal m-0 h6 small">
 		<span class="badge text-bg-secondary shadow">
 			{{ status|trans }}
 		</span>
@@ -69,7 +69,7 @@ undefined: 'Не определен'
 
 {% else %}
 
-    <h6 class="lh-normal m-0">
+    <h6 class="lh-normal m-0 h6 small">
         <span class="badge bg-info shadow">
             {{ status|trans }}
         </span>

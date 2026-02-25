@@ -32,6 +32,7 @@ use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
 use Doctrine\DBAL\ArrayParameterType;
@@ -120,6 +121,16 @@ final class AllProductSignByOrderRepository implements AllProductSignByOrderInte
                     product_sign_event.ord = ord.id AND
                     product_sign_event.product = orders_product_item.const
                     ',
+            );
+
+
+        $dbal
+            ->addSelect('product_sign_invariable.number AS number')
+            ->join(
+                'product_sign_event',
+                ProductSignInvariable::class,
+                'product_sign_invariable',
+                'product_sign_invariable.main = product_sign_event.main',
             );
 
         /** Кодировка ЧЗ */
