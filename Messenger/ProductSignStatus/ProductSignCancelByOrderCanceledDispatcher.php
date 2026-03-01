@@ -35,6 +35,7 @@ use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignCancel\ProductS
 use BaksDev\Products\Sign\Repository\ProductSignProcessByOrder\ProductSignProcessByOrderInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -42,6 +43,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * Если статус заказа Canceled «Отменен» - снимаем резерв и применяем статус «Честного знака» на статус New «Новый»
  * Если заказ был выполнен - следовательно это возврат @see ProductSignReturnByOrderReturnDispatcher
  */
+#[Autoconfigure(public: true)]
 #[AsMessageHandler(priority: 80)]
 final readonly class ProductSignCancelByOrderCanceledDispatcher
 {

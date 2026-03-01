@@ -40,11 +40,13 @@ use DirectoryIterator;
 use Doctrine\ORM\Mapping\Table;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+#[Autoconfigure(public: true)]
 #[AsMessageHandler(priority: 0)]
 final readonly class ProductSignXlsxHandler
 {
@@ -52,7 +54,6 @@ final readonly class ProductSignXlsxHandler
         #[Target('productsSignLogger')] private LoggerInterface $logger,
         #[Autowire('%kernel.project_dir%')] private string $upload,
         private MessageDispatchInterface $MessageDispatch,
-        private DeduplicatorInterface $deduplicator,
         private Filesystem $filesystem,
     ) {}
 
