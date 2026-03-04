@@ -27,25 +27,14 @@ namespace BaksDev\Products\Sign\Controller\Admin;
 
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
-use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Orders\Order\Entity\Event\OrderEvent;
-use BaksDev\Orders\Order\Entity\Order;
-use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Repository\ExistOrderEventByStatus\ExistOrderEventByStatusInterface;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusCompleted;
 use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusPackage;
-use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierByEventInterface;
-use BaksDev\Products\Product\Type\Id\ProductUid;
-use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
-use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
-use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
 use BaksDev\Products\Sign\Forms\ProductsSignsReissue\ProductsSignsReissueDTO;
 use BaksDev\Products\Sign\Forms\ProductsSignsReissue\ProductsSignsReissueForm;
-use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignCancel\ProductSignCancelMessage;
-use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignProcess\ProductSignProcessMessage;
-use BaksDev\Products\Sign\Repository\ProductSignProcessByOrder\ProductSignProcessByOrderInterface;
-use BaksDev\Products\Sign\Type\Id\ProductSignUid;
+use BaksDev\Products\Sign\Messenger\ProductSignReissue\ProductsSignsReissueMessage;
 use JsonException;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -63,16 +52,14 @@ final class ReissueController extends AbstractController
      */
     #[Route('/admin/product/signs/reissue/{id}', name: 'admin.reissue', methods: ['GET', 'POST'])]
     public function reissue(
-        #[MapEntity] OrderEvent $OrderEvent,
+        #[MapEntity] OrderEvent $orderEvent,
         Request $request,
         MessageDispatchInterface $MessageDispatch,
-        ProductSignProcessByOrderInterface $ProductSignProcessByOrderRepository,
-        ExistOrderEventByStatusInterface $ExistOrderEventByStatusRepository,
-        CurrentProductIdentifierByEventInterface $CurrentProductIdentifierRepository,
+        ExistOrderEventByStatusInterface $ExistOrderEventByStatusRepository
     ): Response
     {
         $productsSignsReissueDTO = new ProductsSignsReissueDTO()
-            ->setOrder($OrderEvent->getMain());
+            ->setOrder($orderEvent->getMain());
 
         $form = $this
             ->createForm(
@@ -80,7 +67,7 @@ final class ReissueController extends AbstractController
                 data: $productsSignsReissueDTO,
                 options: ['action' => $this->generateUrl(
                     'products-sign:admin.reissue',
-                    ['id' => $OrderEvent->getId()],
+                    ['id' => $orderEvent->getId()],
                 )],
             )
             ->handleRequest($request);
@@ -92,7 +79,7 @@ final class ReissueController extends AbstractController
              */
 
             $existsPackageStatus = $ExistOrderEventByStatusRepository
-                ->forOrder($OrderEvent->getMain())
+                ->forOrder($orderEvent->getMain())
                 ->forStatus(OrderStatusPackage::STATUS)
                 ->isExists();
 
@@ -114,7 +101,7 @@ final class ReissueController extends AbstractController
              */
 
             $existsCompletedStatus = $ExistOrderEventByStatusRepository
-                ->forOrder($OrderEvent->getMain())
+                ->forOrder($orderEvent->getMain())
                 ->forStatus(OrderStatusCompleted::STATUS)
                 ->isExists();
 
@@ -130,73 +117,19 @@ final class ReissueController extends AbstractController
                 return new JsonResponse('Cannot reissue product signs on order completed', 400);
             }
 
-            /**
-             * Получаем все честные знаки для данного заказа
-             */
-
-            $signs = $ProductSignProcessByOrderRepository
-                ->forOrder($OrderEvent->getMain())
-                ->findAll();
-
-            foreach($signs as $ProductSignEventUid)
-            {
-                /** Отменяем честный знак */
-                $MessageDispatch->dispatch(
-                    message: new ProductSignCancelMessage(
-                        $this->getProfileUid(),
-                        $ProductSignEventUid,
-                    ),
-                    transport: 'products-sign',
-                );
-            }
 
             /**
-             * Отправляем запросы на повторное резервирование
+             * Отправляем сообщение на обработку всех честных знаков для данного заказа
              */
 
-            foreach($OrderEvent->getProduct() as $OrderProduct)
-            {
-                /** Получаем текущие идентификаторы */
-                $CurrentProductIdentifierResult = $CurrentProductIdentifierRepository
-                    ->forEvent($OrderProduct->getProduct())
-                    ->forOffer($OrderProduct->getOffer())
-                    ->forVariation($OrderProduct->getVariation())
-                    ->forModification($OrderProduct->getModification())
-                    ->find();
-
-                $ProductSignPart = new ProductSignUid();
-
-                $ProductSignProcessMessage = new ProductSignProcessMessage(
-                    order: $OrderEvent->getMain(),
-                    part: $ProductSignPart,
-                    user: $this->getUsr()?->getId(),
-                    profile: $this->getProfileUid(),
-                    product: $CurrentProductIdentifierResult->getProduct(),
-                    offer: $CurrentProductIdentifierResult->getOfferConst(),
-                    variation: $CurrentProductIdentifierResult->getVariationConst(),
-                    modification: $CurrentProductIdentifierResult->getModificationConst(),
-                );
-
-                $productTotal = $OrderProduct->getTotal();
-
-                for($i = 1; $i <= $productTotal; $i++)
-                {
-                    $ProductSignProcessMessage->setPart($ProductSignPart);
-
-                    $MessageDispatch
-                        ->dispatch(
-                            message: $ProductSignProcessMessage,
-                            stamps: [new MessageDelay('5 seconds')],
-                            transport: 'products-sign',
-                        );
-
-                    /** Разбиваем по 100 шт */
-                    if(($i % 100) === 0)
-                    {
-                        $ProductSignPart = new ProductSignUid();
-                    }
-                }
-            }
+            $MessageDispatch->dispatch(
+                message: new ProductsSignsReissueMessage(
+                    $orderEvent->getMain(),
+                    $this->getUsr()->getId(),
+                    $this->getProfileUid()
+                ),
+                transport: 'products-sign'
+            );
 
             $this->addFlash
             (
