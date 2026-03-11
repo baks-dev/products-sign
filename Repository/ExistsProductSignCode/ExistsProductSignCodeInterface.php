@@ -26,7 +26,7 @@ namespace BaksDev\Products\Sign\Repository\ExistsProductSignCode;
 use BaksDev\Users\User\Type\Id\UserUid;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 
-#[Autoconfigure(public: true)]
+// #[Autoconfigure(public: true)]
 interface ExistsProductSignCodeInterface
 {
     /** Метод проверяет, имеется ли у пользователя такой код (Без ошибки)  */

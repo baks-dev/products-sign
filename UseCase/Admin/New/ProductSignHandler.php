@@ -40,7 +40,7 @@ use BaksDev\Products\Sign\Repository\ExistsProductSignCode\ExistsProductSignCode
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 
-#[Autoconfigure(public: true)]
+// #[Autoconfigure(public: true)]
 final class ProductSignHandler extends AbstractHandler
 {
     public function __construct(

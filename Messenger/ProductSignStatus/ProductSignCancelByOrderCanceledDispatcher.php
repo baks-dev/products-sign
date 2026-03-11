@@ -43,7 +43,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * Если статус заказа Canceled «Отменен» - снимаем резерв и применяем статус «Честного знака» на статус New «Новый»
  * Если заказ был выполнен - следовательно это возврат @see ProductSignReturnByOrderReturnDispatcher
  */
-#[Autoconfigure(public: true)]
+// #[Autoconfigure(public: true)]
 #[AsMessageHandler(priority: 80)]
 final readonly class ProductSignCancelByOrderCanceledDispatcher
 {
