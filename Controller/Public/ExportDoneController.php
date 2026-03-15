@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -97,6 +97,7 @@ final class ExportDoneController extends AbstractController
         {
             /** Номер заказа */
             $rows[$key]['number'] = $item->getOrderNumber();
+            $rows[$key]['type'] = $item->getDeliveryName();
 
             /** Дата доставки в формате ISO8601 */
             $datetime = $item->getDeliveryDate();
@@ -105,9 +106,23 @@ final class ExportDoneController extends AbstractController
             /** Полная стоимость заказа */
             $rows[$key]['documentamount'] = $item->getOrderTotalPrice()->getValue();
 
-            $item->getInn() ? $rows[$key]['clientInn'] = $item->getInn() : null;
-            $item->getKpp() ? $rows[$key]['clientKpp'] = $item->getKpp() : null;
-            $item->getOkpo() ? $rows[$key]['clientOkpo'] = $item->getOkpo() : null;
+
+            /** владелец */
+            $rows[$key]['ownerInn'] = $item->getOwnerInn();
+            $rows[$key]['ownerKpp'] = $item->getOwnerKpp();
+            $rows[$key]['ownerOkpo'] = $item->getOwnerOkpo();
+
+
+            /** продавец */
+            $rows[$key]['sellerInn'] = $item->getSellerInn();
+            $rows[$key]['sellerKpp'] = $item->getSellerKpp();
+            $rows[$key]['sellerOkpo'] = $item->getSellerOkpo();
+
+
+            /** клиент */
+            $rows[$key]['clientInn'] = $item->getInn() ? $item->getInn() : false;
+            $rows[$key]['clientKpp'] = $item->getKpp() ? $item->getKpp() : false;
+            $rows[$key]['clientOkpo'] = $item->getOkpo() ? $item->getOkpo() : false;
 
 
             /** Перечисляем все заказы и их честный знак */
@@ -120,7 +135,6 @@ final class ExportDoneController extends AbstractController
 
                 if(isset($matches[1]))
                 {
-
                     // Преобразуем строку в массив символов
                     $chars = str_split($matches[1]);
 
@@ -135,7 +149,6 @@ final class ExportDoneController extends AbstractController
                     {
                         unset($chars[3]);
                     }
-
 
                     // 19 символ (индекс 18)
                     if($chars[18] === '(')
@@ -152,12 +165,14 @@ final class ExportDoneController extends AbstractController
                 }
 
                 return [
-                    'good' => $item->article,
+                    'product' => $item->name,
+                    'article' => $item->article,
                     'count' => 1,
                     'price' => new Money($item->price, true)->getValue(),
                     'amount' => new Money($item->price, true)->getValue(),
                     'markingcode' => $chars ? implode('', $chars) : false,
                 ];
+
             }, $item->getProducts());
 
 

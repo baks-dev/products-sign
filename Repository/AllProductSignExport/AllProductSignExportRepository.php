@@ -1,6 +1,6 @@
 <?php
 /*
- *  Copyright 2025.  Baks.dev <admin@baks.dev>
+ *  Copyright 2026.  Baks.dev <admin@baks.dev>
  *  
  *  Permission is hereby granted, free of charge, to any person obtaining a copy
  *  of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,8 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Repository\AllProductSignExport;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
+use BaksDev\Delivery\Entity\Event\DeliveryEvent;
+use BaksDev\Delivery\Entity\Trans\DeliveryTrans;
 use BaksDev\Field\Pack\Inn\Type\InnField;
 use BaksDev\Field\Pack\Kpp\Type\KppField;
 use BaksDev\Field\Pack\Okpo\Type\OkpoField;
@@ -36,9 +38,11 @@ use BaksDev\Orders\Order\Entity\Products\OrderProduct;
 use BaksDev\Orders\Order\Entity\Products\Price\OrderPrice;
 use BaksDev\Orders\Order\Entity\User\Delivery\OrderDelivery;
 use BaksDev\Orders\Order\Entity\User\OrderUser;
+use BaksDev\Products\Product\Entity\Event\ProductEvent;
 use BaksDev\Products\Product\Entity\Offers\ProductOffer;
 use BaksDev\Products\Product\Entity\Offers\Variation\Modification\ProductModification;
 use BaksDev\Products\Product\Entity\Offers\Variation\ProductVariation;
+use BaksDev\Products\Product\Entity\Trans\ProductTrans;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
@@ -212,19 +216,24 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
                 'main.id = sign_event.ord',
             );
 
+
+        if($this->profile instanceof UserProfileUid)
+        {
+            $dbal->setParameter(
+                key: 'profile',
+                value: $this->profile,
+                type: UserProfileUid::TYPE,
+            );
+        }
+
         $dbal
             ->addSelect('order_invariable.number')
             ->join(
                 'main',
                 OrderInvariable::class,
                 'order_invariable',
-                'order_invariable.main = main.id 
-                AND order_invariable.profile = :profile',
-            )
-            ->setParameter(
-                key: 'profile',
-                value: $this->profile,
-                type: UserProfileUid::TYPE,
+                'order_invariable.main = main.id'
+                .($this->profile instanceof UserProfileUid ? ' AND order_invariable.profile = :profile' : ''),
             );
 
         $dbal
@@ -243,6 +252,25 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
                 'order_delivery',
                 'order_delivery.usr = order_user.id',
             );
+
+
+        $dbal->leftJoin(
+            'order_delivery',
+            DeliveryEvent::class,
+            'delivery_event',
+            'delivery_event.id = order_delivery.event AND delivery_event.main = order_delivery.delivery',
+        );
+
+
+        $dbal
+            ->addSelect('delivery_trans.name AS delivery_name')
+            ->leftJoin(
+                'delivery_event',
+                DeliveryTrans::class,
+                'delivery_trans',
+                'delivery_trans.event = delivery_event.id AND delivery_trans.local = :local',
+            );
+
 
         $dbal
             ->leftJoin(
@@ -269,6 +297,15 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
                 'order_price.product = order_product.id',
             );
 
+
+        $dbal
+            ->leftJoin(
+                'order_product',
+                ProductEvent::class,
+                'product_event',
+                'product_event.id = order_product.product AND product_event.main = sign_invariable.product',
+            );
+
         $dbal
             ->leftJoin(
                 'order_product',
@@ -293,8 +330,122 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
                 'product_modification.id = order_product.modification AND product_modification.const = sign_invariable.modification',
             );
 
+
+        $dbal
+            ->leftJoin(
+                'product_event',
+                ProductTrans::class,
+                'product_trans',
+                'product_trans.event = product_event.id AND product_trans.local = :local',
+            );
+
+
+        /**
+         * Владелец
+         */
         $dbal
             ->join(
+                'sign_invariable',
+                UserProfile::class,
+                'owner_user_profile',
+                'owner_user_profile.id = sign_invariable.profile',
+            );
+
+        $dbal
+            ->leftJoin(
+                'owner_user_profile',
+                UserProfileValue::class,
+                'owner_user_profile_value',
+                'owner_user_profile_value.event = owner_user_profile.event',
+            );
+
+        /** Выбираем только необходимые поля */
+        $dbal
+            ->leftJoin(
+                'owner_user_profile',
+                TypeProfileSectionField::class,
+                'owner_type_section_field',
+                '
+                owner_type_section_field.id = owner_user_profile_value.field AND
+                owner_type_section_field.type IN (:fields)
+            ')
+            ->setParameter(
+                key: 'fields',
+                value: [InnField::TYPE, KppField::TYPE, OkpoField::TYPE],
+                type: ArrayParameterType::STRING,
+            );
+
+        $dbal->addSelect(
+            "JSON_AGG
+                    ( DISTINCT
+        
+                        JSONB_BUILD_OBJECT
+                        (
+                            'type', owner_type_section_field.type,
+                            'value', owner_user_profile_value.value
+                        )
+        
+                    ) AS owner",
+        );
+
+
+        /**
+         * Продавец
+         */
+
+
+        $dbal
+            ->leftJoin(
+                'sign_invariable',
+                UserProfile::class,
+                'seller_user_profile',
+                'seller_user_profile.id = sign_invariable.seller',
+            );
+
+        $dbal
+            ->leftJoin(
+                'seller_user_profile',
+                UserProfileValue::class,
+                'seller_user_profile_value',
+                'seller_user_profile_value.event = seller_user_profile.event',
+            );
+
+        /** Выбираем только необходимые поля */
+        $dbal
+            ->leftJoin(
+                'seller_user_profile',
+                TypeProfileSectionField::class,
+                'seller_type_section_field',
+                '
+                    seller_type_section_field.id = seller_user_profile_value.field AND
+                    seller_type_section_field.type IN (:fields)
+            ')
+            ->setParameter(
+                key: 'fields',
+                value: [InnField::TYPE, KppField::TYPE, OkpoField::TYPE],
+                type: ArrayParameterType::STRING,
+            );
+
+        $dbal->addSelect(
+            "JSON_AGG
+                    ( DISTINCT
+        
+                        JSONB_BUILD_OBJECT
+                        (
+                            'type', seller_type_section_field.type,
+                            'value', seller_user_profile_value.value
+                        )
+        
+                    ) AS seller",
+        );
+
+
+        /**
+         * Покупатель
+         */
+
+        $dbal
+            ->leftJoin(
                 'order_user',
                 UserProfileEvent::class,
                 'user_profile_event',
@@ -314,9 +465,9 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
                 'user_profile_value.event = order_user.profile',
             );
 
-        /** Выбираем только контакт и номер телефон */
+        /** Выбираем только необходимые поля */
         $dbal
-            ->join(
+            ->leftJoin(
                 'user_profile_value',
                 TypeProfileSectionField::class,
                 'type_section_field_client',
@@ -337,11 +488,14 @@ final class AllProductSignExportRepository implements AllProductSignExportInterf
         
                             JSONB_BUILD_OBJECT
                             (
+                                'name', product_trans.name,
+                                
                                 'article', COALESCE(
                                     product_modification.article,
                                     product_variation.article,
                                     product_offer.article
                                 ),
+                                
                                 'price', order_price.price,
                                 'total', order_price.total,
                                 'code', sign_code.code
