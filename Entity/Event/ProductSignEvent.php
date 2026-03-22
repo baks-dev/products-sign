@@ -51,6 +51,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity]
 #[ORM\Table(name: 'product_sign_event')]
 #[ORM\Index(columns: ['ord', 'status', 'product'])]
+#[ORM\Index(columns: ['ord', 'product'])]
 class ProductSignEvent extends EntityEvent
 {
     /**
@@ -143,11 +144,6 @@ class ProductSignEvent extends EntityEvent
         return (string) $this->id;
     }
 
-    public function getId(): ProductSignEventUid
-    {
-        return $this->id;
-    }
-
     /** Присваиваем статус Return «Возврат» */
     public function return(): self
     {
@@ -165,6 +161,11 @@ class ProductSignEvent extends EntityEvent
         return $this;
     }
 
+    public function getMain(): ?ProductSignUid
+    {
+        return $this->main;
+    }
+
     /**
      * Идентификатор ProductSign
      */
@@ -178,18 +179,9 @@ class ProductSignEvent extends EntityEvent
         $this->main = $main instanceof ProductSign ? $main->getId() : $main;
     }
 
-
-    public function getMain(): ?ProductSignUid
+    public function getId(): ProductSignEventUid
     {
-        return $this->main;
-    }
-
-    /**
-     * Profile
-     */
-    public function getProfile(): UserProfileUid
-    {
-        return $this->profile;
+        return $this->id;
     }
 
     /**
@@ -198,6 +190,14 @@ class ProductSignEvent extends EntityEvent
     public function getOwnerSignProfile(): UserProfileUid
     {
         return $this->invariable->getProfile();
+    }
+
+    /**
+     * Profile
+     */
+    public function getProfile(): UserProfileUid
+    {
+        return $this->profile;
     }
 
     /**

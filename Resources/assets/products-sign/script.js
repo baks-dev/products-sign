@@ -42,13 +42,15 @@
 
 var limit_mBdrnGXdN = 1000;
 
-setTimeout(function init_wUgQTMHU() {
+setTimeout(function init_wUgQTMHU()
+{
 
-    var object_product = document.getElementById('product_sign_form_code_product');
+    var object_product = document.getElementById("product_sign_form_code_product");
 
-    if (object_product) {
+    if(object_product)
+    {
 
-        object_product.addEventListener('change', changeObjectProduct, false);
+        object_product.addEventListener("change", changeObjectProduct, false);
 
         //let $addButtonStock = document.getElementById('product_sign_form_addPurchase');
 
@@ -58,7 +60,7 @@ setTimeout(function init_wUgQTMHU() {
         let purchaseForm = document.forms.product_sign_form;
 
 
-        let forms = object_product.closest('form');
+        let forms = object_product.closest("form");
 
 
         /* событие отправки формы */
@@ -67,18 +69,20 @@ setTimeout(function init_wUgQTMHU() {
         //     return false;
         // });
 
-        document.getElementById('product_sign_form_product_sign')
-            .addEventListener('click', function (event) {
-                if (event.key !== "Enter") {
-                    submitModalForm(forms);
-                }
-                return false;
-            });
+        document.getElementById("product_sign_form_product_sign").addEventListener("click", function(event)
+        {
+            if(event.key !== "Enter")
+            {
+                submitModalForm(forms);
+            }
+            return false;
+        });
 
         return;
     }
 
-    if (limit_mBdrnGXdN > 1000) {
+    if(limit_mBdrnGXdN > 1000)
+    {
         return;
     }
 
@@ -127,9 +131,10 @@ setTimeout(function init_wUgQTMHU() {
 //});
 
 
-function changeObjectProduct() {
+function changeObjectProduct()
+{
 
-    let replaceId = 'product_sign_form_code_offer';
+    let replaceId = "product_sign_form_code_offer";
 
 
     /* Создаём объект класса XMLHttpRequest */
@@ -139,35 +144,39 @@ function changeObjectProduct() {
     /* Имя формы */
     let purchaseForm = document.forms.product_sign_form;
     let formData = new FormData();
-    formData.append(this.getAttribute('name'), this.value);
+    formData.append(this.getAttribute("name"), this.value);
 
-    requestModalName.open(purchaseForm.getAttribute('method'), purchaseForm.getAttribute('action'), true);
+    requestModalName.open(purchaseForm.getAttribute("method"), purchaseForm.getAttribute("action"), true);
 
     /* Указываем заголовки для сервера */
-    requestModalName.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    requestModalName.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
     /* Получаем ответ от сервера на запрос*/
-    requestModalName.addEventListener("readystatechange", function () {
+    requestModalName.addEventListener("readystatechange", function()
+    {
         /* request.readyState - возвращает текущее состояние объекта XHR(XMLHttpRequest) */
-        if (requestModalName.readyState === 4 && requestModalName.status === 200) {
+        if(requestModalName.readyState === 4 && requestModalName.status === 200)
+        {
 
-            let result = requestModalName.response.getElementById('offer');
+            let result = requestModalName.response.getElementById("offer");
 
 
-            document.getElementById('offer').replaceWith(result);
+            document.getElementById("offer").replaceWith(result);
 
             let replacer = document.getElementById(replaceId);
 
-            if (replacer.tagName === 'SELECT') {
-                new NiceSelect(replacer, {searchable: true, id: 'select2-' + replaceId});
+            if(replacer.tagName === "SELECT")
+            {
+                new NiceSelect(replacer, {searchable : true, id : "select2-" + replaceId});
 
                 /** Событие на изменение торгового предложения */
-                let offerChange = document.getElementById('product_sign_form_code_offer');
+                let offerChange = document.getElementById("product_sign_form_code_offer");
 
-                if (offerChange) {
-                    offerChange.addEventListener('change', changeObjectOffer, false);
+                if(offerChange)
+                {
+                    offerChange.addEventListener("change", changeObjectOffer, false);
 
-                    let focus = document.getElementById(replaceId + '_select2');
+                    let focus = document.getElementById(replaceId + "_select2");
                     focus ? focus.click() : null;
 
                 }
@@ -183,10 +192,11 @@ function changeObjectProduct() {
 }
 
 
-function changeObjectOffer() {
+function changeObjectOffer()
+{
 
 
-    let replaceId = 'product_sign_form_code_variation';
+    let replaceId = "product_sign_form_code_variation";
 
     /* Создаём объект класса XMLHttpRequest */
     const requestModalName = new XMLHttpRequest();
@@ -195,43 +205,48 @@ function changeObjectOffer() {
     /* Имя формы */
     let purchaseForm = document.forms.product_sign_form;
     let formData = new FormData();
-    formData.append(this.getAttribute('name'), this.value);
+    formData.append(this.getAttribute("name"), this.value);
 
-    requestModalName.open(purchaseForm.getAttribute('method'), purchaseForm.getAttribute('action'), true);
+    requestModalName.open(purchaseForm.getAttribute("method"), purchaseForm.getAttribute("action"), true);
 
     /* Указываем заголовки для сервера */
-    requestModalName.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    requestModalName.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
     /* Получаем ответ от сервера на запрос*/
-    requestModalName.addEventListener("readystatechange", function () {
+    requestModalName.addEventListener("readystatechange", function()
+    {
         /* request.readyState - возвращает текущее состояние объекта XHR(XMLHttpRequest) */
-        if (requestModalName.readyState === 4 && requestModalName.status === 200) {
+        if(requestModalName.readyState === 4 && requestModalName.status === 200)
+        {
 
 
-            let result = requestModalName.response.getElementById('variation');
+            let result = requestModalName.response.getElementById("variation");
 
-            document.getElementById('variation').replaceWith(result);
+            document.getElementById("variation").replaceWith(result);
 
             let replacer = document.getElementById(replaceId);
 
             /* Удаляем предыдущий Select2 */
-            let select2 = document.getElementById(replaceId + '_select2');
+            let select2 = document.getElementById(replaceId + "_select2");
 
-            if (select2) {
+            if(select2)
+            {
                 select2.remove();
             }
 
-            if (replacer.tagName === 'SELECT') {
-                new NiceSelect(document.getElementById(replaceId), {searchable: true, id: 'select2-' + replaceId});
+            if(replacer.tagName === "SELECT")
+            {
+                new NiceSelect(document.getElementById(replaceId), {searchable : true, id : "select2-" + replaceId});
 
                 /** Событие на изменение множественного варианта предложения */
-                let offerVariation = document.getElementById('product_sign_form_code_variation');
+                let offerVariation = document.getElementById("product_sign_form_code_variation");
 
-                if (offerVariation) {
-                    offerVariation.addEventListener('change', changeObjectVariation, false);
+                if(offerVariation)
+                {
+                    offerVariation.addEventListener("change", changeObjectVariation, false);
                 }
 
-                let focus = document.getElementById(replaceId + '_select2');
+                let focus = document.getElementById(replaceId + "_select2");
                 focus ? focus.click() : null;
             }
 
@@ -244,9 +259,10 @@ function changeObjectOffer() {
 }
 
 
-function changeObjectVariation() {
+function changeObjectVariation()
+{
 
-    let replaceId = 'product_sign_form_code_modification';
+    let replaceId = "product_sign_form_code_modification";
 
     /* Создаём объект класса XMLHttpRequest */
     const requestModalName = new XMLHttpRequest();
@@ -255,34 +271,37 @@ function changeObjectVariation() {
     /* Имя формы */
     let purchaseForm = document.forms.product_sign_form;
     let formData = new FormData();
-    formData.append(this.getAttribute('name'), this.value);
+    formData.append(this.getAttribute("name"), this.value);
 
-    requestModalName.open(purchaseForm.getAttribute('method'), purchaseForm.getAttribute('action'), true);
+    requestModalName.open(purchaseForm.getAttribute("method"), purchaseForm.getAttribute("action"), true);
 
     /* Указываем заголовки для сервера */
-    requestModalName.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    requestModalName.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 
     /* Получаем ответ от сервера на запрос*/
-    requestModalName.addEventListener("readystatechange", function () {
+    requestModalName.addEventListener("readystatechange", function()
+    {
         /* request.readyState - возвращает текущее состояние объекта XHR(XMLHttpRequest) */
-        if (requestModalName.readyState === 4 && requestModalName.status === 200) {
+        if(requestModalName.readyState === 4 && requestModalName.status === 200)
+        {
 
-            let result = requestModalName.response.getElementById('modification');
+            let result = requestModalName.response.getElementById("modification");
 
-            document.getElementById('modification').replaceWith(result);
+            document.getElementById("modification").replaceWith(result);
 
             let replacer = document.getElementById(replaceId);
 
-            if (replacer.tagName === 'SELECT') {
-                new NiceSelect(document.getElementById(replaceId), {searchable: true, id: 'select2-' + replaceId});
+            if(replacer.tagName === "SELECT")
+            {
+                new NiceSelect(document.getElementById(replaceId), {searchable : true, id : "select2-" + replaceId});
             }
 
-            let focus = document.getElementById(replaceId + '_select2');
+            let focus = document.getElementById(replaceId + "_select2");
             focus ? focus.click() : null;
 
 
             /** Событие на изменение множественного варианта предложения */
-            let offerModification = document.getElementById('product_sign_form_code_modification');
+            let offerModification = document.getElementById("product_sign_form_code_modification");
 
             // if (offerModification) {
             //

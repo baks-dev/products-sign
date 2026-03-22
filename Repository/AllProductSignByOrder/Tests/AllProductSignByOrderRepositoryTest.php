@@ -28,6 +28,8 @@ use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Repository\AllProductSignByOrder\AllProductSignByOrderRepository;
 use BaksDev\Products\Sign\Repository\AllProductSignByOrder\AllProductSignByOrderResult;
 use PHPUnit\Framework\Attributes\Group;
+use ReflectionClass;
+use ReflectionMethod;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\DependencyInjection\Attribute\When;
 
@@ -43,7 +45,7 @@ class AllProductSignByOrderRepositoryTest extends KernelTestCase
         $AllProductSignByOrderRepository = self::getContainer()->get(AllProductSignByOrderRepository::class);
 
         $result = $AllProductSignByOrderRepository
-            ->forOrder(new OrderUid)
+            ->forOrder(new OrderUid('019bcd69-2d4c-7bca-96f5-75c6415c3b8e'))
             ->findAll();
 
         if(false === $result)
@@ -51,20 +53,22 @@ class AllProductSignByOrderRepositoryTest extends KernelTestCase
             return;
         }
 
-        // Вызываем все геттеры
-        $reflectionClass = new \ReflectionClass(AllProductSignByOrderResult::class);
-        $methods = $reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC);
-
-        foreach($methods as $method)
+        foreach($result as $AllProductSignByOrderResult)
         {
-            // Методы без аргументов
-            if($method->getNumberOfParameters() === 0)
+            // Вызываем все геттеры
+            $reflectionClass = new ReflectionClass(AllProductSignByOrderResult::class);
+            $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+
+            foreach($methods as $method)
             {
-                // Вызываем метод
-                $data = $method->invoke($result);
-                // dump($data);
+                // Методы без аргументов
+                if($method->getNumberOfParameters() === 0)
+                {
+                    // Вызываем метод
+                    $data = $method->invoke($AllProductSignByOrderResult);
+                    dump($data);
+                }
             }
         }
-
     }
 }

@@ -58,14 +58,14 @@ class ExistsProductSignCodeTest extends KernelTestCase
                 'sign',
                 ProductSignCode::class,
                 'code',
-                'code.main = sign.id'
+                'code.main = sign.id',
             )
             ->addSelect('invariable.usr')
             ->leftJoin(
                 'sign',
                 ProductSignInvariable::class,
                 'invariable',
-                'invariable.main = sign.id'
+                'invariable.main = sign.id',
             )->fetchAssociative();
 
 
@@ -82,7 +82,7 @@ class ExistsProductSignCodeTest extends KernelTestCase
             $ExistsProductSignCodeInterface = self::getContainer()->get(ExistsProductSignCodeInterface::class);
             $ExistsProductSignCodeEvent = $ExistsProductSignCodeInterface->isExists(
                 self::$usr,
-                self::$code
+                self::$code,
             );
 
             self::assertTrue($ExistsProductSignCodeEvent);

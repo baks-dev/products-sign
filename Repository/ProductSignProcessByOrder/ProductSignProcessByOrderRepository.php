@@ -96,7 +96,7 @@ final class ProductSignProcessByOrderRepository implements ProductSignProcessByO
             'event',
             ProductSignInvariable::class,
             'invariable',
-            'invariable.event = event.id'
+            'invariable.event = event.id',
         );
 
         $dbal
@@ -104,7 +104,7 @@ final class ProductSignProcessByOrderRepository implements ProductSignProcessByO
             ->setParameter(
                 'ord',
                 $this->order,
-                OrderUid::TYPE
+                OrderUid::TYPE,
             );
 
         if(true === $this->onlyProcess)
@@ -123,7 +123,7 @@ final class ProductSignProcessByOrderRepository implements ProductSignProcessByO
                 'event',
                 ProductSign::class,
                 'main',
-                'main.event = event.id'
+                'main.event = event.id',
             );
 
         $dbal->addSelect("JSON_AGG

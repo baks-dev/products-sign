@@ -23,4 +23,4 @@
 
 namespace BaksDev\Products\Sign\Entity\Invariable;
 
-interface ProductSignInvariableInterface {}
+interface ProductSignInvariableInterface { }

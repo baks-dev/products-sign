@@ -111,7 +111,7 @@ final class AllProductSignRepository implements AllProductSignInterface
         $dbal
             ->from(
                 ProductSignInvariable::class,
-                'invariable'
+                'invariable',
             )
             ->andWhere('invariable.usr = :usr')
             ->setParameter('usr', $user, UserUid::TYPE);
@@ -123,7 +123,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'invariable',
                 ProductSign::class,
                 'main',
-                'main.id = invariable.main'
+                'main.id = invariable.main',
             );
 
         $dbal
@@ -135,7 +135,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'invariable',
                 ProductSignCode::class,
                 'code',
-                'code.main = invariable.main'
+                'code.main = invariable.main',
             );
 
 
@@ -147,7 +147,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'code',
                 ProductSignEvent::class,
                 'event',
-                'event.id = main.event'
+                'event.id = main.event',
             );
 
         if($this->status?->getStatus())
@@ -180,7 +180,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'code',
                 ProductSignModify::class,
                 'modify',
-                'modify.event = main.event'
+                'modify.event = main.event',
             );
 
 
@@ -225,14 +225,14 @@ final class AllProductSignRepository implements AllProductSignInterface
             'invariable',
             Product::class,
             'product',
-            'product.id = invariable.product'
+            'product.id = invariable.product',
         );
 
         $dbal->join(
             'product',
             ProductEvent::class,
             'product_event',
-            'product_event.id = product.event'
+            'product_event.id = product.event',
         );
 
         $dbal
@@ -241,7 +241,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'product',
                 ProductInfo::class,
                 'product_info',
-                'product_info.product = product.id'
+                'product_info.product = product.id',
             );
 
 
@@ -251,7 +251,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'product',
                 ProductTrans::class,
                 'product_trans',
-                'product_trans.event = product.event AND product_trans.local = :local'
+                'product_trans.event = product.event AND product_trans.local = :local',
             );
 
 
@@ -267,7 +267,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'product',
                 ProductOffer::class,
                 'product_offer',
-                'product_offer.event = product.event AND product_offer.const = invariable.offer'
+                'product_offer.event = product.event AND product_offer.const = invariable.offer',
             );
 
 
@@ -285,7 +285,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'product_offer',
                 CategoryProductOffers::class,
                 'category_offer',
-                'category_offer.id = product_offer.category_offer'
+                'category_offer.id = product_offer.category_offer',
             );
 
         // Множественные варианты торгового предложения
@@ -297,7 +297,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'product_offer',
                 ProductVariation::class,
                 'product_variation',
-                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation'
+                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation',
             );
 
         if($this->filter?->getVariation())
@@ -313,7 +313,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'product_variation',
                 CategoryProductVariation::class,
                 'category_variation',
-                'category_variation.id = product_variation.category_variation'
+                'category_variation.id = product_variation.category_variation',
             );
 
 
@@ -327,7 +327,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'product_variation',
                 ProductModification::class,
                 'product_modification',
-                'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification'
+                'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification',
             );
 
         if($this->filter?->getModification())
@@ -343,7 +343,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'product_modification',
                 CategoryProductModification::class,
                 'category_offer_modification',
-                'category_offer_modification.id = product_modification.category_modification'
+                'category_offer_modification.id = product_modification.category_modification',
             );
 
         // Артикул продукта
@@ -354,7 +354,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 product_variation.article,
                 product_offer.article,
                 product_info.article
-            ) AS product_article'
+            ) AS product_article',
         );
 
 
@@ -367,7 +367,7 @@ final class AllProductSignRepository implements AllProductSignInterface
             '
                 product_modification_image.modification = product_modification.id AND
                 product_modification_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -377,7 +377,7 @@ final class AllProductSignRepository implements AllProductSignInterface
             '
                 product_variation_image.variation = product_variation.id AND
                 product_variation_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -388,7 +388,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 product_variation_image.name IS NULL AND
                 product_offer_images.offer = product_offer.id AND
                 product_offer_images.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -399,7 +399,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 product_offer_images.name IS NULL AND
                 product_photo.event = product.event AND
                 product_photo.root = true
-			'
+			',
         );
 
 
@@ -417,7 +417,7 @@ final class AllProductSignRepository implements AllProductSignInterface
 					CONCAT ( '/upload/".$dbal->table(ProductPhoto::class)."' , '/', product_photo.name)
 			   ELSE NULL
 			END AS product_image
-		"
+		",
         );
 
 
@@ -429,7 +429,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 product_variation_image.ext,
                 product_offer_images.ext,
                 product_photo.ext
-            ) AS product_image_ext'
+            ) AS product_image_ext',
         );
 
 
@@ -440,7 +440,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 product_variation_image.cdn,
                 product_offer_images.cdn,
                 product_photo.cdn
-            ) AS product_image_cdn'
+            ) AS product_image_cdn',
         );
 
 
@@ -449,7 +449,7 @@ final class AllProductSignRepository implements AllProductSignInterface
             'product_event',
             ProductCategory::class,
             'product_event_category',
-            'product_event_category.event = product_event.id AND product_event_category.root = true'
+            'product_event_category.event = product_event.id AND product_event_category.root = true',
         );
 
         if($this->filter?->getCategory())
@@ -462,7 +462,7 @@ final class AllProductSignRepository implements AllProductSignInterface
             'product_event_category',
             CategoryProduct::class,
             'category',
-            'category.id = product_event_category.category'
+            'category.id = product_event_category.category',
         );
 
         $dbal
@@ -471,7 +471,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'category',
                 CategoryProductInfo::class,
                 'category_info',
-                'category_info.event = category.event'
+                'category_info.event = category.event',
             );
 
         /*$dbal
@@ -491,7 +491,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'event',
                 UserProfile::class,
                 'users_profile',
-                'users_profile.id = event.profile'
+                'users_profile.id = event.profile',
             );
 
 
@@ -502,7 +502,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                 'users_profile',
                 UserProfilePersonal::class,
                 'users_profile_personal',
-                'users_profile_personal.event = users_profile.event'
+                'users_profile_personal.event = users_profile.event',
             );
 
 
@@ -522,7 +522,7 @@ final class AllProductSignRepository implements AllProductSignInterface
                         'product_property_'.$property->getType(),
                         'product_property_'.$property->getType().'.event = product.event AND 
                         product_property_'.$property->getType().'.field = :'.$property->getType().'_const AND 
-                        product_property_'.$property->getType().'.value = :'.$property->getType().'_value'
+                        product_property_'.$property->getType().'.value = :'.$property->getType().'_value',
                     );
 
                     $dbal->setParameter($property->getType().'_const', $property->getConst());

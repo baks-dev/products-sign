@@ -22,11 +22,13 @@
  *
  */
 
-namespace BaksDev\Products\Sign\Repository\GroupProductSignsByOrder\Tests;
+namespace BaksDev\Products\Sign\Repository\ProductSignByOrderProductItem\Tests;
 
-use BaksDev\Orders\Order\Type\Id\OrderUid;
-use BaksDev\Products\Sign\Repository\GroupProductSignsByOrder\GroupProductSignsByOrderInterface;
-use BaksDev\Products\Sign\Repository\GroupProductSignsByOrder\GroupProductSignsByOrderResult;
+use BaksDev\Orders\Order\Type\Items\Const\OrderProductItemConst;
+use BaksDev\Products\Sign\Repository\ProductSignByOrderProductItem\ProductSignByOrderProductItemInterface;
+use BaksDev\Products\Sign\Repository\ProductSignByOrderProductItem\ProductSignByOrderProductItemResult;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
+use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusProcess;
 use PHPUnit\Framework\Attributes\Group;
 use ReflectionClass;
 use ReflectionMethod;
@@ -35,26 +37,30 @@ use Symfony\Component\DependencyInjection\Attribute\When;
 
 #[Group('products-sign')]
 #[When(env: 'test')]
-class GroupProductSignsByOrderRepositoryTest extends KernelTestCase
+class ProductSignByOrderProductItemTest extends KernelTestCase
 {
     public function testRepository(): void
     {
+
         self::assertTrue(true);
+        return;
 
-        /** @var GroupProductSignsByOrderInterface $GroupProductSignsByOrderInterface */
-        $GroupProductSignsByOrderInterface = self::getContainer()->get(GroupProductSignsByOrderInterface::class);
+        /** @var ProductSignByOrderProductItemInterface $ProductSignByOrderProductItemInterface */
+        $ProductSignByOrderProductItemInterface = self::getContainer()->get(ProductSignByOrderProductItemInterface::class);
 
-        $result = $GroupProductSignsByOrderInterface
-            ->forOrder(new OrderUid)
-            ->findAll();
+        $result = $ProductSignByOrderProductItemInterface
+            ->forStatuses(ProductSignStatusProcess::STATUS)
+            ->forStatuses(ProductSignStatusDone::STATUS)
+            ->forProductItem(new OrderProductItemConst(OrderProductItemConst::TEST))
+            ->find();
 
-        if(false === $result || false === $result->valid())
+        if(false === ($result instanceof ProductSignByOrderProductItemResult))
         {
             return;
         }
 
         // Вызываем все геттеры
-        $reflectionClass = new ReflectionClass(GroupProductSignsByOrderResult::class);
+        $reflectionClass = new ReflectionClass(ProductSignByOrderProductItemResult::class);
         $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
 
         foreach($methods as $method)
@@ -67,6 +73,7 @@ class GroupProductSignsByOrderRepositoryTest extends KernelTestCase
                 // dump($data);
             }
         }
+
 
     }
 }

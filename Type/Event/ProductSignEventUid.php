@@ -52,7 +52,8 @@ final class ProductSignEventUid extends Uid
         mixed $property = null,
         mixed $characteristic = null,
         ?string $params = null,
-    ) {
+    )
+    {
         parent::__construct($value);
 
         $this->attr = $attr;

@@ -126,9 +126,9 @@ final class ReissueController extends AbstractController
                 message: new ProductsSignsReissueMessage(
                     $orderEvent->getMain(),
                     $this->getUsr()->getId(),
-                    $this->getProfileUid()
+                    $this->getProfileUid(),
                 ),
-                transport: 'products-sign'
+                transport: 'products-sign',
             );
 
             $this->addFlash

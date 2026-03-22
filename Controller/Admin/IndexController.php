@@ -57,7 +57,7 @@ final class IndexController extends AbstractController
             ->createForm(
                 type: SearchForm::class,
                 data: $search,
-                options: ['action' => $this->generateUrl('products-sign:admin.index')]
+                options: ['action' => $this->generateUrl('products-sign:admin.index')],
             )
             ->handleRequest($request);
 
@@ -73,7 +73,7 @@ final class IndexController extends AbstractController
             ->createForm(
                 type: ProductFilterForm::class,
                 data: $filter,
-                options: ['action' => $this->generateUrl('products-sign:admin.index'),]
+                options: ['action' => $this->generateUrl('products-sign:admin.index'),],
             )
             ->handleRequest($request);
 
@@ -86,7 +86,7 @@ final class IndexController extends AbstractController
             ->createForm(
                 type: ProductSignFilterForm::class,
                 data: $filterSign,
-                options: ['action' => $this->generateUrl('products-sign:admin.index'),]
+                options: ['action' => $this->generateUrl('products-sign:admin.index'),],
             )
             ->handleRequest($request);
 
@@ -104,7 +104,7 @@ final class IndexController extends AbstractController
                 'search' => $searchForm->createView(),
                 'filter' => $filterForm->createView(),
                 'status' => $filterSignForm->createView(),
-            ]
+            ],
         );
     }
 }

@@ -48,7 +48,8 @@ final class ProductSignFilterForm extends AbstractType
     public function __construct(
         private readonly ProductSignStatusCollection $status,
         private readonly RequestStack $request
-    ) {
+    )
+    {
         $this->sessionKey = md5(self::class);
     }
 
@@ -59,14 +60,14 @@ final class ProductSignFilterForm extends AbstractType
 
         $builder->add('status', ChoiceType::class, [
             'choices' => $this->status->cases(),
-            'choice_value' => function (?ProductSignStatusInterface $region) {
+            'choice_value' => function(?ProductSignStatusInterface $region) {
                 return $region?->getValue();
             },
-            'choice_label' => function (ProductSignStatusInterface $region) {
+            'choice_label' => function(ProductSignStatusInterface $region) {
                 return $region->getValue();
             },
             'label' => false,
-            'translation_domain' => 'products-sign.status'
+            'translation_domain' => 'products-sign.status',
         ]);
 
 
@@ -91,7 +92,7 @@ final class ProductSignFilterForm extends AbstractType
 
         $builder->addEventListener(
             FormEvents::PRE_SET_DATA,
-            function (FormEvent $event): void {
+            function(FormEvent $event): void {
                 /** @var ProductSignFilterDTO $data */
                 $data = $event->getData();
 
@@ -122,12 +123,12 @@ final class ProductSignFilterForm extends AbstractType
                     $data->setFrom($sessionArray['from']['date'] ?? null);
                     $data->setTo($sessionArray['to']['date'] ?? null);
                 }
-            }
+            },
         );
 
         $builder->addEventListener(
             FormEvents::POST_SUBMIT,
-            function (FormEvent $event): void {
+            function(FormEvent $event): void {
                 /** @var ProductSignFilterDTO $data */
                 $data = $event->getData();
 
@@ -155,7 +156,7 @@ final class ProductSignFilterForm extends AbstractType
                     $this->request->getSession()->remove($this->sessionKey);
 
                 }
-            }
+            },
         );
 
 

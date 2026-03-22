@@ -99,6 +99,12 @@ final class ProductSignPdfDTO
         $this->addFiles($ProductSignFileDTO);
     }
 
+    public function addFiles(ProductSignFileDTO $file): self
+    {
+        $this->files->add($file);
+        return $this;
+    }
+
     /**
      * Number
      */
@@ -119,12 +125,6 @@ final class ProductSignPdfDTO
     public function getFiles(): ArrayCollection
     {
         return $this->files;
-    }
-
-    public function addFiles(ProductSignFileDTO $file): self
-    {
-        $this->files->add($file);
-        return $this;
     }
 
     public function setFiles(ArrayCollection $files): self

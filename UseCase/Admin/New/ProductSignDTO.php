@@ -147,6 +147,11 @@ final class ProductSignDTO implements ProductSignEventInterface
         return $this;
     }
 
+    /**  @deprecated переносится в ProductSignInvariable */
+    public function getProfile(): ?UserProfileUid
+    {
+        return $this->profile;
+    }
 
     /**
      * Profile
@@ -157,11 +162,5 @@ final class ProductSignDTO implements ProductSignEventInterface
     {
         $this->profile = $profile;
         return $this;
-    }
-
-    /**  @deprecated переносится в ProductSignInvariable */
-    public function getProfile(): ?UserProfileUid
-    {
-        return $this->profile;
     }
 }

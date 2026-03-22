@@ -59,7 +59,8 @@ final class PdfController extends AbstractController
         #[ParamConverter(ProductOfferConst::class)] $offer = null,
         #[ParamConverter(ProductVariationConst::class)] $variation = null,
         #[ParamConverter(ProductModificationConst::class)] $modification = null
-    ): Response {
+    ): Response
+    {
 
         $ProductSignPdfDTO = new ProductSignPdfDTO();
         $ProductSignPdfDTO->setCategory($category);
@@ -87,7 +88,7 @@ final class PdfController extends AbstractController
             $this->addFlash(
                 'page.pdf',
                 $handle === true ? 'success.pdf' : 'danger.pdf',
-                'products-sign.admin'
+                'products-sign.admin',
             );
 
             return $this->redirectToReferer();

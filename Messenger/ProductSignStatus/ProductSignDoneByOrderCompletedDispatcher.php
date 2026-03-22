@@ -62,7 +62,7 @@ final readonly class ProductSignDoneByOrderCompletedDispatcher
             ->deduplication([
                 (string) $message->getId(),
                 ProductSignStatusDone::STATUS,
-                self::class
+                self::class,
             ]);
 
         if($Deduplicator->isExecuted())
@@ -78,7 +78,7 @@ final readonly class ProductSignDoneByOrderCompletedDispatcher
         {
             $this->logger->critical(
                 'products-sign: Не найдено событие Order',
-                [var_export($message, true), self::class.':'.__LINE__]
+                [var_export($message, true), self::class.':'.__LINE__],
             );
 
             return;
@@ -115,8 +115,8 @@ final readonly class ProductSignDoneByOrderCompletedDispatcher
                         'offer' => (string) $product->getOffer(),
                         'variation' => (string) $product->getVariation(),
                         'modification' => (string) $product->getModification(),
-                        self::class.':'.__LINE__
-                    ]
+                        self::class.':'.__LINE__,
+                    ],
                 );
 
                 continue;
@@ -140,7 +140,7 @@ final readonly class ProductSignDoneByOrderCompletedDispatcher
             {
                 $this->MessageDispatch->dispatch(
                     message: $ProductSignDoneMessage,
-                    transport: 'products-sign'
+                    transport: 'products-sign',
                 );
             }
         }

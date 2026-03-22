@@ -39,7 +39,7 @@ final class ProductSignCancelForm extends AbstractType
         $builder->add(
             'product_sign_cancel',
             SubmitType::class,
-            ['label' => 'Cancel', 'label_html' => true, 'attr' => ['class' => 'btn-danger']]
+            ['label' => 'Cancel', 'label_html' => true, 'attr' => ['class' => 'btn-danger']],
         );
     }
 

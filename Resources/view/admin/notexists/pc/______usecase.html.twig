@@ -20,18 +20,18 @@
 
 
 {# Чекбокс #}
-{#<label>
+{# <label>
     <input class="form-check-input ms-3 p-2" type="checkbox"
-            #}{# onchange=checkedItem(); #}{#
-           value="{{ item.sign_event }}">
-</label>#}
+#}{# onchange=checkedItem(); #}{#
+value="{{ item.sign_event }}">
+</label> #}
 
 
 <div id="usecase-{{ key }}-content" class="d-none">
     <ul class="leader list-group list-group-flush ">
 
         {# Отмена #}
-        {#{% if item.sign_status == 'process' and is_granted(ROLE~'_STATUS') or is_granted('ROLE_ADMIN') %}
+        {# {% if item.sign_status == 'process' and is_granted(ROLE~'_STATUS') or is_granted('ROLE_ADMIN') %}
             <li class="list-group-item d-flex justify-content-between bg-transparent border-0 text-truncate rounded-5">
                 <a href="{{ path('products-sign:admin.cancel', { id: item.sign_event }) }}"
                    class="text-decoration-none text-dark w-100 modal-link disabled"
@@ -41,11 +41,11 @@
                     {{ 'btn.cancel'|trans({}, 'core.btn') }}
                 </a>
             </li>
-        {% endif %}#}
+        {% endif %} #}
 
 
         {# Удалить #}
-        {#{% if  is_granted(ROLE~'_DELETE') or is_granted('ROLE_ADMIN') %}
+        {# {% if  is_granted(ROLE~'_DELETE') or is_granted('ROLE_ADMIN') %}
             <li class="list-group-item d-flex justify-content-between bg-transparent border-0 text-truncate rounded-5">
 
                 <a href="{{ path('products-sign:admin.delete', { id: item.sign_event }) }}"
@@ -56,7 +56,7 @@
                     {{ 'btn.delete'|trans({}, 'core.btn') }}
                 </a>
             </li>
-        {% endif %}#}
+        {% endif %} #}
 
 
     </ul>

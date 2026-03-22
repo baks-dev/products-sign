@@ -66,14 +66,6 @@ class ProductSign
     }
 
     /**
-     * Идентификатор
-     */
-    public function getId(): ProductSignUid
-    {
-        return $this->id;
-    }
-
-    /**
      * Идентификатор События
      */
     public function getEvent(): ProductSignEventUid
@@ -89,5 +81,13 @@ class ProductSign
         }
 
         $this->event = $event instanceof ProductSignEvent ? $event->getId() : $event;
+    }
+
+    /**
+     * Идентификатор
+     */
+    public function getId(): ProductSignUid
+    {
+        return $this->id;
     }
 }

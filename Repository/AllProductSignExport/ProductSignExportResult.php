@@ -61,26 +61,54 @@ final class ProductSignExportResult
     /**
      * @throws JsonException
      */
-    private function getRequisite(): array|false
+    public function getSellerInn(): int|false
     {
-        if(is_null($this->requisite_decode))
+        $requisite = $this->getSeller();
+
+        $field = array_filter($requisite, static fn($element) => $element->type === InnField::TYPE);
+
+        $current = current($field);
+
+        return $current ? (int) $current->value : $this->getOwnerInn();
+    }
+
+    /**
+     * @throws JsonException
+     */
+    private function getSeller(): array|false
+    {
+        if(is_null($this->seller_decode))
         {
-            if(empty($this->requisite))
+            if(empty($this->seller))
             {
-                $this->requisite_decode = false;
+                $this->seller_decode = false;
                 return false;
             }
 
-            if(false === json_validate($this->requisite))
+            if(false === json_validate($this->seller))
             {
-                $this->requisite_decode = false;
+                $this->seller_decode = false;
                 return false;
             }
 
-            $this->requisite_decode = json_decode($this->requisite, false, 512, JSON_THROW_ON_ERROR);
+            $this->seller_decode = json_decode($this->seller, false, 512, JSON_THROW_ON_ERROR);
         }
 
-        return $this->requisite_decode;
+        return $this->seller_decode;
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function getOwnerInn(): int|false
+    {
+        $requisite = $this->getOwner();
+
+        $field = array_filter($requisite, static fn($element) => $element->type === InnField::TYPE);
+
+        $current = current($field);
+
+        return $current ? (int) $current->value : false;
     }
 
     /**
@@ -111,41 +139,15 @@ final class ProductSignExportResult
     /**
      * @throws JsonException
      */
-    private function getSeller(): array|false
+    public function getSellerKpp(): int|false
     {
-        if(is_null($this->seller_decode))
-        {
-            if(empty($this->seller))
-            {
-                $this->seller_decode = false;
-                return false;
-            }
+        $requisite = $this->getSeller();
 
-            if(false === json_validate($this->seller))
-            {
-                $this->seller_decode = false;
-                return false;
-            }
-
-            $this->seller_decode = json_decode($this->seller, false, 512, JSON_THROW_ON_ERROR);
-        }
-
-        return $this->seller_decode;
-    }
-
-
-    /**
-     * @throws JsonException
-     */
-    public function getOwnerInn(): int|false
-    {
-        $requisite = $this->getOwner();
-
-        $field = array_filter($requisite, static fn($element) => $element->type === InnField::TYPE);
+        $field = array_filter($requisite, static fn($element) => $element->type === KppField::TYPE);
 
         $current = current($field);
 
-        return $current ? (int) $current->value : false;
+        return $current ? (int) $current->value : $this->getOwnerKpp();
     }
 
     /**
@@ -165,49 +167,6 @@ final class ProductSignExportResult
     /**
      * @throws JsonException
      */
-    public function getOwnerOkpo(): int|false
-    {
-        $requisite = $this->getOwner();
-
-        $field = array_filter($requisite, static fn($element) => $element->type === OkpoField::TYPE);
-
-        $current = current($field);
-
-        return $current ? (int) $current->value : false;
-    }
-
-
-    /**
-     * @throws JsonException
-     */
-    public function getSellerInn(): int|false
-    {
-        $requisite = $this->getSeller();
-
-        $field = array_filter($requisite, static fn($element) => $element->type === InnField::TYPE);
-
-        $current = current($field);
-
-        return $current ? (int) $current->value : $this->getOwnerInn();
-    }
-
-    /**
-     * @throws JsonException
-     */
-    public function getSellerKpp(): int|false
-    {
-        $requisite = $this->getSeller();
-
-        $field = array_filter($requisite, static fn($element) => $element->type === KppField::TYPE);
-
-        $current = current($field);
-
-        return $current ? (int) $current->value : $this->getOwnerKpp();
-    }
-
-    /**
-     * @throws JsonException
-     */
     public function getSellerOkpo(): int|false
     {
         $requisite = $this->getSeller();
@@ -219,6 +178,19 @@ final class ProductSignExportResult
         return $current ? (int) $current->value : $this->getOwnerOkpo();
     }
 
+    /**
+     * @throws JsonException
+     */
+    public function getOwnerOkpo(): int|false
+    {
+        $requisite = $this->getOwner();
+
+        $field = array_filter($requisite, static fn($element) => $element->type === OkpoField::TYPE);
+
+        $current = current($field);
+
+        return $current ? (int) $current->value : false;
+    }
 
     /**
      * @throws JsonException
@@ -232,6 +204,31 @@ final class ProductSignExportResult
         $current = current($field);
 
         return $current ? (int) $current->value : false;
+    }
+
+    /**
+     * @throws JsonException
+     */
+    private function getRequisite(): array|false
+    {
+        if(is_null($this->requisite_decode))
+        {
+            if(empty($this->requisite))
+            {
+                $this->requisite_decode = false;
+                return false;
+            }
+
+            if(false === json_validate($this->requisite))
+            {
+                $this->requisite_decode = false;
+                return false;
+            }
+
+            $this->requisite_decode = json_decode($this->requisite, false, 512, JSON_THROW_ON_ERROR);
+        }
+
+        return $this->requisite_decode;
     }
 
     /**

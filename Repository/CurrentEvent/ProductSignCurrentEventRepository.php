@@ -78,7 +78,7 @@ final class ProductSignCurrentEventRepository implements ProductSignCurrentEvent
             ->setParameter(
                 key: 'main',
                 value: $this->sign,
-                type: ProductSignUid::TYPE
+                type: ProductSignUid::TYPE,
             );
 
         $orm
@@ -87,7 +87,7 @@ final class ProductSignCurrentEventRepository implements ProductSignCurrentEvent
                 ProductSignEvent::class,
                 'event',
                 'WITH',
-                'event.id = main.event'
+                'event.id = main.event',
             );
 
         return $orm->getOneOrNullResult() ?: false;

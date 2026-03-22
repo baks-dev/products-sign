@@ -169,7 +169,7 @@ final readonly class ProductSignPdfHandler
             /** Разделение текста на строки */
             $lines = preg_split('/\r\n|\r|\n/', $text);
 
-            foreach ($lines as $line)
+            foreach($lines as $line)
             {
                 /** Если строка является ссылкой - пытаемся скачать  */
                 if(str_starts_with($line, 'https:'))

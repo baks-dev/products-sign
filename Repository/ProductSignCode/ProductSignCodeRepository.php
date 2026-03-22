@@ -53,8 +53,7 @@ final class ProductSignCodeRepository implements ProductSignCodeInterface
             ->addSelect('code.qr AS sign_qr')
             ->from(ProductSignCode::class, 'code')
             ->where('code.main = :sign')
-            ->setParameter('sign', $sign, ProductSignUid::TYPE)
-        ;
+            ->setParameter('sign', $sign, ProductSignUid::TYPE);
 
         return $dbal
             ->fetchAssociative();

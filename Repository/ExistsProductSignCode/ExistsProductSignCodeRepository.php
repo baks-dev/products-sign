@@ -40,7 +40,8 @@ final class ExistsProductSignCodeRepository implements ExistsProductSignCodeInte
 
     public function __construct(
         DBALQueryBuilder $DBALQueryBuilder,
-    ) {
+    )
+    {
         $this->DBALQueryBuilder = $DBALQueryBuilder;
     }
 
@@ -59,7 +60,7 @@ final class ExistsProductSignCodeRepository implements ExistsProductSignCodeInte
                 'sign_code',
                 ProductSign::class,
                 'sign',
-                'sign.id = sign_code.main'
+                'sign.id = sign_code.main',
             );
 
         $dbal
@@ -67,12 +68,12 @@ final class ExistsProductSignCodeRepository implements ExistsProductSignCodeInte
                 'sign_code',
                 ProductSignInvariable::class,
                 'invariable',
-                'invariable.main = sign_code.main AND invariable.usr = :usr'
+                'invariable.main = sign_code.main AND invariable.usr = :usr',
             )
             ->setParameter(
                 'usr',
                 $user,
-                UserUid::TYPE
+                UserUid::TYPE,
             );
 
 
@@ -81,12 +82,12 @@ final class ExistsProductSignCodeRepository implements ExistsProductSignCodeInte
                 'sign',
                 ProductSignEvent::class,
                 'event',
-                'event.id = sign.event AND event.status != :status'
+                'event.id = sign.event AND event.status != :status',
             )
             ->setParameter(
                 'status',
                 ProductSignStatusError::class,
-                ProductSignStatus::TYPE
+                ProductSignStatus::TYPE,
             );
 
         return $dbal->fetchExist();

@@ -116,7 +116,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             //->addSelect('invariable.number AS sign_number')
             ->from(
                 ProductSignInvariable::class,
-                'invariable'
+                'invariable',
             )
             ->andWhere('invariable.usr = :usr')
             ->setParameter('usr', $user, UserUid::TYPE);
@@ -134,7 +134,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'invariable',
                 ProductSignCode::class,
                 'code',
-                'code.main = invariable.main'
+                'code.main = invariable.main',
             );
 
 
@@ -145,7 +145,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'invariable',
                 ProductSign::class,
                 'main',
-                'main.id = invariable.main'
+                'main.id = invariable.main',
             );
 
 
@@ -157,7 +157,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'main',
                 ProductSignEvent::class,
                 'event',
-                'event.id = main.event'
+                'event.id = main.event',
             );
 
         if($this->status?->getStatus())
@@ -181,7 +181,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'main',
                 ProductSignModify::class,
                 'modify',
-                'modify.event = main.event'
+                'modify.event = main.event',
             );
 
 
@@ -227,14 +227,14 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             'invariable',
             Product::class,
             'product',
-            'product.id = invariable.product'
+            'product.id = invariable.product',
         );
 
         $dbal->join(
             'product',
             ProductEvent::class,
             'product_event',
-            'product_event.id = product.event'
+            'product_event.id = product.event',
         );
 
         $dbal
@@ -243,7 +243,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'product',
                 ProductInfo::class,
                 'product_info',
-                'product_info.product = product.id'
+                'product_info.product = product.id',
             );
 
 
@@ -253,7 +253,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'product',
                 ProductTrans::class,
                 'product_trans',
-                'product_trans.event = product.event AND product_trans.local = :local'
+                'product_trans.event = product.event AND product_trans.local = :local',
             );
 
 
@@ -270,7 +270,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'product',
                 ProductOffer::class,
                 'product_offer',
-                'product_offer.event = product.event AND product_offer.const = invariable.offer'
+                'product_offer.event = product.event AND product_offer.const = invariable.offer',
             );
 
 
@@ -288,7 +288,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'product_offer',
                 CategoryProductOffers::class,
                 'category_offer',
-                'category_offer.id = product_offer.category_offer'
+                'category_offer.id = product_offer.category_offer',
             );
 
         // Множественные варианты торгового предложения
@@ -302,7 +302,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'product_offer',
                 ProductVariation::class,
                 'product_variation',
-                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation'
+                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation',
             );
 
         if($this->filter?->getVariation())
@@ -318,7 +318,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'product_variation',
                 CategoryProductVariation::class,
                 'category_variation',
-                'category_variation.id = product_variation.category_variation'
+                'category_variation.id = product_variation.category_variation',
             );
 
 
@@ -333,7 +333,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'product_variation',
                 ProductModification::class,
                 'product_modification',
-                'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification'
+                'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification',
             );
 
         if($this->filter?->getModification())
@@ -349,7 +349,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'product_modification',
                 CategoryProductModification::class,
                 'category_offer_modification',
-                'category_offer_modification.id = product_modification.category_modification'
+                'category_offer_modification.id = product_modification.category_modification',
             );
 
         // Артикул продукта
@@ -360,7 +360,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 product_variation.article,
                 product_offer.article,
                 product_info.article
-            ) AS product_article'
+            ) AS product_article',
         );
 
 
@@ -373,7 +373,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             '
                 product_modification_image.modification = product_modification.id AND
                 product_modification_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -383,7 +383,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             '
                 product_variation_image.variation = product_variation.id AND
                 product_variation_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -394,7 +394,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 product_variation_image.name IS NULL AND
                 product_offer_images.offer = product_offer.id AND
                 product_offer_images.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -405,7 +405,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 product_offer_images.name IS NULL AND
                 product_photo.event = product.event AND
                 product_photo.root = true
-			'
+			',
         );
 
 
@@ -423,7 +423,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
 					CONCAT ( '/upload/".$dbal->table(ProductPhoto::class)."' , '/', product_photo.name)
 			   ELSE NULL
 			END AS product_image
-		"
+		",
         );
 
 
@@ -435,7 +435,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 product_variation_image.ext,
                 product_offer_images.ext,
                 product_photo.ext
-            ) AS product_image_ext'
+            ) AS product_image_ext',
         );
 
 
@@ -446,7 +446,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 product_variation_image.cdn,
                 product_offer_images.cdn,
                 product_photo.cdn
-            ) AS product_image_cdn'
+            ) AS product_image_cdn',
         );
 
 
@@ -457,7 +457,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'product_event',
                 ProductCategory::class,
                 'product_event_category',
-                'product_event_category.event = product_event.id AND product_event_category.root = true'
+                'product_event_category.event = product_event.id AND product_event_category.root = true',
             );
 
         if($this->filter?->getCategory())
@@ -470,7 +470,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             'product_event_category',
             CategoryProduct::class,
             'category',
-            'category.id = product_event_category.category'
+            'category.id = product_event_category.category',
         );
 
         $dbal
@@ -479,7 +479,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'category',
                 CategoryProductInfo::class,
                 'category_info',
-                'category_info.event = category.event'
+                'category_info.event = category.event',
             );
 
 
@@ -502,7 +502,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 'users_profile',
                 UserProfilePersonal::class,
                 'users_profile_personal',
-                'users_profile_personal.event = users_profile.event'
+                'users_profile_personal.event = users_profile.event',
             );
 
 
@@ -529,7 +529,6 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
             );
 
 
-
         /**
          * Фильтр по свойства продукта
          */
@@ -546,7 +545,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                         'product_property_'.$property->getType(),
                         'product_property_'.$property->getType().'.event = product.event AND 
                         product_property_'.$property->getType().'.field = :'.$property->getType().'_const AND 
-                        product_property_'.$property->getType().'.value = :'.$property->getType().'_value'
+                        product_property_'.$property->getType().'.value = :'.$property->getType().'_value',
                     );
 
                     $dbal->setParameter($property->getType().'_const', $property->getConst());

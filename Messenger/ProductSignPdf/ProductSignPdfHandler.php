@@ -137,7 +137,7 @@ final readonly class ProductSignPdfHandler
 
                 share: $message->isNotShare(),
                 number: $message->getNumber(),
-                isNew: $message->isNew()
+                isNew: $message->isNew(),
             );
 
             $this->messageDispatch->dispatch(

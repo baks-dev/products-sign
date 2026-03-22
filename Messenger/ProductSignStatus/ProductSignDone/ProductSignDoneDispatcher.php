@@ -59,7 +59,7 @@ final readonly class ProductSignDoneDispatcher
         {
             $this->logger->warning(
                 'products-sign: Честный знак на продукцию на найден',
-                [var_export($message, true), self::class.':'.__LINE__]
+                [var_export($message, true), self::class.':'.__LINE__],
             );
 
             return;
@@ -77,7 +77,7 @@ final readonly class ProductSignDoneDispatcher
                 [
                     'ProductSignEventUid' => $ProductSignDoneDTO->getEvent(),
                     self::class.':'.__LINE__,
-                ]
+                ],
             );
 
             throw new InvalidArgumentException('Ошибка при обновлении статуса честного знака');
@@ -88,7 +88,7 @@ final readonly class ProductSignDoneDispatcher
             [
                 'ProductSignUid' => $ProductSignEvent->getMain(),
                 self::class.':'.__LINE__,
-            ]
+            ],
         );
 
     }

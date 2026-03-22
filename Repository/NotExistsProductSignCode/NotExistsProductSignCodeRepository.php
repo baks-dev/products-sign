@@ -106,7 +106,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
         $dbal->addSelect('product.event as product_event');
         $dbal->from(
             Product::class,
-            'product'
+            'product',
         );
 
 
@@ -114,7 +114,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
             'product',
             ProductEvent::class,
             'product_event',
-            'product_event.id = product.event'
+            'product_event.id = product.event',
         );
 
         $dbal
@@ -123,7 +123,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'product',
                 ProductInfo::class,
                 'product_info',
-                'product_info.product = product.id'
+                'product_info.product = product.id',
             );
 
 
@@ -133,7 +133,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'product',
                 ProductTrans::class,
                 'product_trans',
-                'product_trans.event = product.event AND product_trans.local = :local'
+                'product_trans.event = product.event AND product_trans.local = :local',
             );
 
 
@@ -149,7 +149,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'product',
                 ProductOffer::class,
                 'product_offer',
-                'product_offer.event = product.event'
+                'product_offer.event = product.event',
             );
 
 
@@ -167,7 +167,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'product_offer',
                 CategoryProductOffers::class,
                 'category_offer',
-                'category_offer.id = product_offer.category_offer'
+                'category_offer.id = product_offer.category_offer',
             );
 
         // Множественные варианты торгового предложения
@@ -179,7 +179,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'product_offer',
                 ProductVariation::class,
                 'product_variation',
-                'product_variation.offer = product_offer.id'
+                'product_variation.offer = product_offer.id',
             );
 
         if($this->filter?->getVariation())
@@ -195,7 +195,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'product_variation',
                 CategoryProductVariation::class,
                 'category_variation',
-                'category_variation.id = product_variation.category_variation'
+                'category_variation.id = product_variation.category_variation',
             );
 
 
@@ -209,7 +209,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'product_variation',
                 ProductModification::class,
                 'product_modification',
-                'product_modification.variation = product_variation.id'
+                'product_modification.variation = product_variation.id',
             );
 
         if($this->filter?->getModification())
@@ -225,7 +225,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'product_modification',
                 CategoryProductModification::class,
                 'category_offer_modification',
-                'category_offer_modification.id = product_modification.category_modification'
+                'category_offer_modification.id = product_modification.category_modification',
             );
 
         // Артикул продукта
@@ -236,7 +236,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 product_variation.article,
                 product_offer.article,
                 product_info.article
-            ) AS product_article'
+            ) AS product_article',
         );
 
 
@@ -249,7 +249,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
             '
                 product_modification_image.modification = product_modification.id AND
                 product_modification_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -259,7 +259,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
             '
                 product_variation_image.variation = product_variation.id AND
                 product_variation_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -270,7 +270,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 product_variation_image.name IS NULL AND
                 product_offer_images.offer = product_offer.id AND
                 product_offer_images.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -281,7 +281,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 product_offer_images.name IS NULL AND
                 product_photo.event = product.event AND
                 product_photo.root = true
-			'
+			',
         );
 
 
@@ -299,7 +299,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
 					CONCAT ( '/upload/".$dbal->table(ProductPhoto::class)."' , '/', product_photo.name)
 			   ELSE NULL
 			END AS product_image
-		"
+		",
         );
 
 
@@ -311,7 +311,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 product_variation_image.ext,
                 product_offer_images.ext,
                 product_photo.ext
-            ) AS product_image_ext'
+            ) AS product_image_ext',
         );
 
 
@@ -322,7 +322,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 product_variation_image.cdn,
                 product_offer_images.cdn,
                 product_photo.cdn
-            ) AS product_image_cdn'
+            ) AS product_image_cdn',
         );
 
 
@@ -333,7 +333,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'product_event',
                 ProductCategory::class,
                 'product_event_category',
-                'product_event_category.event = product_event.id AND product_event_category.root = true'
+                'product_event_category.event = product_event.id AND product_event_category.root = true',
             );
 
         if($this->filter?->getCategory())
@@ -346,7 +346,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
             'product_event_category',
             CategoryProduct::class,
             'category',
-            'category.id = product_event_category.category'
+            'category.id = product_event_category.category',
         );
 
         $dbal
@@ -355,7 +355,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'category',
                 CategoryProductInfo::class,
                 'category_info',
-                'category_info.event = category.event'
+                'category_info.event = category.event',
             );
 
         $dbal
@@ -364,7 +364,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'category',
                 CategoryProductTrans::class,
                 'category_trans',
-                'category_trans.event = category.event AND category_trans.local = :local'
+                'category_trans.event = category.event AND category_trans.local = :local',
             );
 
 
@@ -374,7 +374,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
             'product',
             ProductPrice::class,
             'product_price',
-            'product_price.event = product.event'
+            'product_price.event = product.event',
         );
 
         /* Наличие и резерв торгового предложения */
@@ -382,7 +382,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
             'product_offer',
             ProductOfferQuantity::class,
             'product_offer_quantity',
-            'product_offer_quantity.offer = product_offer.id'
+            'product_offer_quantity.offer = product_offer.id',
         );
 
         /* Наличие и резерв множественного варианта */
@@ -390,7 +390,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
             'product_variation',
             ProductVariationQuantity::class,
             'product_variation_quantity',
-            'product_variation_quantity.variation = product_variation.id'
+            'product_variation_quantity.variation = product_variation.id',
         );
 
         $dbal
@@ -398,7 +398,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'product_modification',
                 ProductModificationQuantity::class,
                 'product_modification_quantity',
-                'product_modification_quantity.modification = product_modification.id'
+                'product_modification_quantity.modification = product_modification.id',
             );
 
 
@@ -443,7 +443,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'invariable',
                 ProductSign::class,
                 'sign_exists',
-                'sign_exists.id = invariable.main'
+                'sign_exists.id = invariable.main',
             );
 
         $notExists
@@ -451,7 +451,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                 'sign_exists',
                 ProductSignEvent::class,
                 'event_exists',
-                'event_exists.id = sign_exists.event AND (event_exists.status = :status_new OR event_exists.status = :status_progress)'
+                'event_exists.id = sign_exists.event AND (event_exists.status = :status_new OR event_exists.status = :status_progress)',
             );
 
         $dbal
@@ -468,14 +468,14 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
             ->setParameter(
                 'status_new',
                 ProductSignStatusNew::class,
-                ProductSignStatus::TYPE
+                ProductSignStatus::TYPE,
             );
 
         $dbal
             ->setParameter(
                 'status_progress',
                 ProductSignStatusProcess::class,
-                ProductSignStatus::TYPE
+                ProductSignStatus::TYPE,
             );
 
 
@@ -509,7 +509,7 @@ final class NotExistsProductSignCodeRepository implements NotExistsProductSignCo
                         'product_property_'.$property->getType(),
                         'product_property_'.$property->getType().'.event = product.event AND 
                         product_property_'.$property->getType().'.field = :'.$property->getType().'_const AND 
-                        product_property_'.$property->getType().'.value = :'.$property->getType().'_value'
+                        product_property_'.$property->getType().'.value = :'.$property->getType().'_value',
                     );
 
                     $dbal->setParameter($property->getType().'_const', $property->getConst());

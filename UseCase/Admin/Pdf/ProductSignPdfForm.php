@@ -89,7 +89,7 @@ final class ProductSignPdfForm extends AbstractType
 
         $builder->add(
             'product',
-            HiddenType::class
+            HiddenType::class,
         );
 
         $builder->add('isNew', CheckboxType::class, ['required' => false]);
@@ -143,7 +143,7 @@ final class ProductSignPdfForm extends AbstractType
                         }
                     }
                 }
-            }
+            },
         );
 
 
@@ -152,7 +152,7 @@ final class ProductSignPdfForm extends AbstractType
             function(FormEvent $event) {
                 $category = $event->getForm()->getData();
                 $this->formProductModifier($event->getForm()->getParent(), $category);
-            }
+            },
         );
 
         $builder->get('product')->addModelTransformer(
@@ -162,19 +162,20 @@ final class ProductSignPdfForm extends AbstractType
                 },
                 function($product) {
                     return $product ? new ProductUid($product) : null;
-                }
-            )
+                },
+            ),
         );
 
 
         /**
          * Торговые предложения
+         *
          * @var ProductOfferConst $offer
          */
 
         $builder->add(
             'offer',
-            HiddenType::class
+            HiddenType::class,
         );
 
         $builder->get('offer')->addModelTransformer(
@@ -184,8 +185,8 @@ final class ProductSignPdfForm extends AbstractType
                 },
                 function($offer) {
                     return $offer ? new ProductOfferConst($offer) : null;
-                }
-            )
+                },
+            ),
         );
 
 
@@ -194,17 +195,18 @@ final class ProductSignPdfForm extends AbstractType
             function(FormEvent $event) {
                 $product = $event->getForm()->getData();
                 $this->formOfferModifier($event->getForm()->getParent(), $product);
-            }
+            },
         );
 
 
         /**
          * Множественный вариант торгового предложения
+         *
          * @var ProductVariationConst $variation
          */
         $builder->add(
             'variation',
-            HiddenType::class
+            HiddenType::class,
         );
 
         $builder->get('variation')->addModelTransformer(
@@ -214,8 +216,8 @@ final class ProductSignPdfForm extends AbstractType
                 },
                 function($variation) {
                     return $variation ? new ProductVariationConst($variation) : null;
-                }
-            )
+                },
+            ),
         );
 
         $builder->get('offer')->addEventListener(
@@ -223,17 +225,18 @@ final class ProductSignPdfForm extends AbstractType
             function(FormEvent $event) {
                 $offer = $event->getForm()->getData();
                 $this->formVariationModifier($event->getForm()->getParent(), $offer);
-            }
+            },
         );
 
 
         /**
          * Модификатор множественного варианта торгового предложения
+         *
          * @var ProductModificationConst $modification
          */
         $builder->add(
             'modification',
-            HiddenType::class
+            HiddenType::class,
         );
 
         $builder->get('modification')->addModelTransformer(
@@ -243,8 +246,8 @@ final class ProductSignPdfForm extends AbstractType
                 },
                 function($modification) {
                     return $modification ? new ProductModificationConst($modification) : null;
-                }
-            )
+                },
+            ),
         );
 
         $builder->get('variation')->addEventListener(
@@ -252,7 +255,7 @@ final class ProductSignPdfForm extends AbstractType
             function(FormEvent $event) {
                 $variation = $event->getForm()->getData();
                 $this->formModificationModifier($event->getForm()->getParent(), $variation);
-            }
+            },
         );
 
         $builder->add('files', CollectionType::class, [
@@ -274,7 +277,7 @@ final class ProductSignPdfForm extends AbstractType
         $builder->add(
             'product_sign_pdf',
             SubmitType::class,
-            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']]
+            ['label' => 'Save', 'label_html' => true, 'attr' => ['class' => 'btn-primary']],
         );
 
 
@@ -311,7 +314,7 @@ final class ProductSignPdfForm extends AbstractType
                     return $product?->getOption() ? ['data-filter' => '('.$product?->getOption().')'] : [];
                 },
 
-                'label' => false
+                'label' => false,
             ]);
     }
 

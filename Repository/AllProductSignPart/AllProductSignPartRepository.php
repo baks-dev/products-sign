@@ -92,7 +92,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
         $dbal
             ->select('invariable.number')
             ->from(
-                ProductSignInvariable::class, 'invariable'
+                ProductSignInvariable::class, 'invariable',
             );
 
         $dbal
@@ -111,7 +111,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'invariable',
                 ProductSign::class,
                 'main',
-                'main.id = invariable.main'
+                'main.id = invariable.main',
             );
 
         $dbal
@@ -121,7 +121,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'code',
                 ProductSignEvent::class,
                 'event',
-                'event.id = main.event'
+                'event.id = main.event',
             );
 
         $dbal
@@ -137,7 +137,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'main',
                 ProductSignCode::class,
                 'code',
-                'code.main = main.id'
+                'code.main = main.id',
             );
 
         $dbal
@@ -146,7 +146,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'code',
                 ProductSignModify::class,
                 'modify',
-                'modify.event = code.event'
+                'modify.event = code.event',
             );
 
 
@@ -157,7 +157,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
             'invariable',
             Product::class,
             'product',
-            'product.id = invariable.product'
+            'product.id = invariable.product',
         );
 
 
@@ -165,7 +165,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
             'product',
             ProductEvent::class,
             'product_event',
-            'product_event.id = product.event'
+            'product_event.id = product.event',
         );
 
         $dbal
@@ -174,7 +174,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'product_event',
                 ProductInfo::class,
                 'product_info',
-                'product_info.product = product.id'
+                'product_info.product = product.id',
             );
 
 
@@ -184,7 +184,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'product_event',
                 ProductTrans::class,
                 'product_trans',
-                'product_trans.event = product_event.id AND product_trans.local = :local'
+                'product_trans.event = product_event.id AND product_trans.local = :local',
             );
 
 
@@ -200,7 +200,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'product_event',
                 ProductOffer::class,
                 'product_offer',
-                'product_offer.event = product_event.id AND product_offer.const = invariable.offer'
+                'product_offer.event = product_event.id AND product_offer.const = invariable.offer',
             );
 
 
@@ -218,7 +218,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'product_offer',
                 CategoryProductOffers::class,
                 'category_offer',
-                'category_offer.id = product_offer.category_offer'
+                'category_offer.id = product_offer.category_offer',
             );
 
         // Множественные варианты торгового предложения
@@ -230,7 +230,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'product_offer',
                 ProductVariation::class,
                 'product_variation',
-                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation'
+                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation',
             );
 
         //        if($this->filter?->getVariation())
@@ -246,7 +246,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'product_variation',
                 CategoryProductVariation::class,
                 'category_variation',
-                'category_variation.id = product_variation.category_variation'
+                'category_variation.id = product_variation.category_variation',
             );
 
         // Модификация множественного варианта торгового предложения
@@ -259,7 +259,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'product_variation',
                 ProductModification::class,
                 'product_modification',
-                'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification'
+                'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification',
             );
 
         //        if($this->filter?->getModification())
@@ -275,7 +275,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'product_modification',
                 CategoryProductModification::class,
                 'category_offer_modification',
-                'category_offer_modification.id = product_modification.category_modification'
+                'category_offer_modification.id = product_modification.category_modification',
             );
 
         // Артикул продукта
@@ -299,7 +299,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
             '
                 product_modification_image.modification = product_modification.id AND
                 product_modification_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -309,7 +309,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
             '
                 product_variation_image.variation = product_variation.id AND
                 product_variation_image.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -320,7 +320,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 product_variation_image.name IS NULL AND
                 product_offer_images.offer = product_offer.id AND
                 product_offer_images.root = true
-			'
+			',
         );
 
         $dbal->leftJoin(
@@ -331,7 +331,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 product_offer_images.name IS NULL AND
                 product_photo.event = product_event.id AND
                 product_photo.root = true
-			'
+			',
         );
 
         $dbal->addSelect(
@@ -348,7 +348,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
 					CONCAT ( '/upload/".$dbal->table(ProductPhoto::class)."' , '/', product_photo.name)
 			   ELSE NULL
 			END AS product_image
-		"
+		",
         );
 
         // Расширение файла
@@ -363,7 +363,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
 			   ELSE NULL
 			   
 			END AS product_image_ext
-		"
+		",
         );
 
         // Флаг загрузки файла CDN
@@ -378,7 +378,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
 					product_photo.cdn
 			   ELSE NULL
 			END AS product_image_cdn
-		'
+		',
         );
 
         // Категория
@@ -386,7 +386,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
             'product_event',
             ProductCategory::class,
             'product_event_category',
-            'product_event_category.event = product_event.id AND product_event_category.root = true'
+            'product_event_category.event = product_event.id AND product_event_category.root = true',
         );
 
 
@@ -394,7 +394,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
             'product_event_category',
             CategoryProduct::class,
             'category',
-            'category.id = product_event_category.category'
+            'category.id = product_event_category.category',
         );
 
         $dbal
@@ -403,7 +403,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'category',
                 CategoryProductInfo::class,
                 'category_info',
-                'category_info.event = category.event'
+                'category_info.event = category.event',
             );
 
         $dbal
@@ -412,7 +412,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'category',
                 CategoryProductTrans::class,
                 'category_trans',
-                'category_trans.event = category.event AND category_trans.local = :local'
+                'category_trans.event = category.event AND category_trans.local = :local',
             );
 
         /** Ответственное лицо */
@@ -422,7 +422,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'event',
                 UserProfile::class,
                 'users_profile',
-                'users_profile.id = event.profile'
+                'users_profile.id = event.profile',
             );
 
 
@@ -433,7 +433,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
                 'users_profile',
                 UserProfilePersonal::class,
                 'users_profile_personal',
-                'users_profile_personal.event = users_profile.event'
+                'users_profile_personal.event = users_profile.event',
             );
 
         /* Поиск */

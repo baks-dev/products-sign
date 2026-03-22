@@ -28,7 +28,7 @@ use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignSt
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusDone;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusNew;
 
-return static function (ContainerConfigurator $container): void {
+return static function(ContainerConfigurator $container): void {
 
     $services = $container->services()
         ->defaults()
@@ -51,7 +51,7 @@ return static function (ContainerConfigurator $container): void {
     /* Статусы заказов */
     $services->load(
         $NAMESPACE.'Type\Status\ProductSignStatus\\',
-        $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'Status', 'ProductSignStatus']) //.'Type/Status/ProductSignStatus'
+        $PATH.implode(DIRECTORY_SEPARATOR, ['Type', 'Status', 'ProductSignStatus']), //.'Type/Status/ProductSignStatus'
     );
 
     /** @see https://symfony.com/doc/current/service_container/autowiring.html#dealing-with-multiple-implementations-of-the-same-type */

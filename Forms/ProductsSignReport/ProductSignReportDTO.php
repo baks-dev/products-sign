@@ -48,6 +48,8 @@ final class ProductSignReportDTO
 
 
     private ?DeliveryUid $delivery = null;
+    private ?DateTimeImmutable $from = null;
+    private ?DateTimeImmutable $to = null;
 
     /**
      * Delivery
@@ -68,11 +70,6 @@ final class ProductSignReportDTO
 
         return $this;
     }
-
-
-    private ?DateTimeImmutable $from = null;
-
-    private ?DateTimeImmutable $to = null;
 
     /**
      * Category

@@ -200,7 +200,6 @@ final class DecommissionProductSignDTO
     }
 
 
-
     /**
      * Total
      */

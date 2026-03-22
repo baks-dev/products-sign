@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Controller\Admin\Documents\Orders;
 
+use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Twig\CallTwigFuncExtension;
 use BaksDev\Orders\Order\Entity\Order;
 use BaksDev\Orders\Order\Repository\CurrentOrderEvent\CurrentOrderEventInterface;
@@ -33,10 +34,9 @@ use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use BaksDev\Core\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpKernel\Attribute\AsController;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Twig\Environment;
 
@@ -83,7 +83,7 @@ final class LinksListController extends AbstractController
                     $productSign->getProductOfferReference().'_render',
                 );
 
-                
+
                 /** Множественный вариант */
                 $variation = $call->call(
                     $environment,
@@ -92,8 +92,8 @@ final class LinksListController extends AbstractController
                 );
 
                 $strOffer = $variation ? ' '.trim($variation) : null;
-                
-                
+
+
                 /** Модификация множественного варианта */
                 $modification = $call->call(
                     $environment,
@@ -107,7 +107,7 @@ final class LinksListController extends AbstractController
                 $strOffer .= $productSign->getProductOfferPostfix() ? ' '.$productSign->getProductOfferPostfix() : '';
                 $strOffer .= $productSign->getProductVariationPostfix() ? ' '.$productSign->getProductVariationPostfix() : '';
                 $strOffer .= $productSign->getProductModificationPostfix() ? ' '.$productSign->getProductModificationPostfix() : '';
-                
+
                 $productName = $productSign->getProductName().$strOffer;
 
                 $parameters = [
@@ -117,13 +117,13 @@ final class LinksListController extends AbstractController
                     'product' => $productSign->getProductId(),
                     'offer' => $productSign->getProductOfferConst(),
                     'variation' => $productSign->getProductVariationConst(),
-                    'modification' => $productSign->getProductModificationConst()
+                    'modification' => $productSign->getProductModificationConst(),
                 ];
-                
+
                 $url = $UrlGenerator->generate(
                     'products-sign:document.pdf.orders',
                     $parameters,
-                    UrlGeneratorInterface::ABSOLUTE_URL
+                    UrlGeneratorInterface::ABSOLUTE_URL,
                 );
 
                 fwrite($handle, $productName.PHP_EOL.$url.PHP_EOL);

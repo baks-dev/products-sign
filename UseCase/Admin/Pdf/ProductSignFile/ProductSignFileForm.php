@@ -43,14 +43,14 @@ final class ProductSignFileForm extends AbstractType
                     'required' => false,
                     'attr' => ['accept' => ".pdf, .xlsx"],
                     'multiple' => true,
-                ]
+                ],
             );
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'data_class' => ProductSignFileDTO::class
+            'data_class' => ProductSignFileDTO::class,
         ]);
     }
 }

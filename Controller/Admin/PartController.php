@@ -56,7 +56,7 @@ final class PartController extends AbstractController
             ->createForm(
                 type: SearchForm::class,
                 data: $search,
-                options: ['action' => $this->generateUrl('products-sign:admin.part', ['part' => $part])]
+                options: ['action' => $this->generateUrl('products-sign:admin.part', ['part' => $part])],
             )
             ->handleRequest($request);
 
@@ -75,7 +75,7 @@ final class PartController extends AbstractController
             [
                 'query' => $ProductSign,
                 'search' => $searchForm->createView(),
-            ]
+            ],
         );
     }
 }

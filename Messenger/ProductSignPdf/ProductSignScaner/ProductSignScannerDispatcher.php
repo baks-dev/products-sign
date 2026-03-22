@@ -79,7 +79,7 @@ final readonly class ProductSignScannerDispatcher
             $this->logger->critical(
                 sprintf(
                     'Невозможно определить название таблицы из класса сущности %s ',
-                    ProductSignCode::class
+                    ProductSignCode::class,
                 ),
                 [self::class.':'.__LINE__],
             );
@@ -203,7 +203,7 @@ final readonly class ProductSignScannerDispatcher
                 {
                     $this->logger->warning(
                         sprintf('Баркод %s не соответствует выбранному продукту', $code),
-                        [self::class.':'.__LINE__],
+                        [self::class.':'.__LINE__, var_export($message, true)],
                     );
 
 

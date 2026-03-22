@@ -63,7 +63,7 @@ final class ProductSignHandler extends AbstractHandler
 
         $isExistsBarcode = $this->existsProductSignCode->isExists(
             $Invariable->getUsr(),
-            $Barcode->getCode()
+            $Barcode->getCode(),
         );
 
         if($isExistsBarcode === true)
@@ -87,13 +87,13 @@ final class ProductSignHandler extends AbstractHandler
         /** Отправляем сообщение в шину */
         $this->messageDispatch->dispatch(
             message: new ProductSignMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()),
-            transport: 'products-sign'
+            transport: 'products-sign',
         );
 
         /** Загружаем файл обложки раздела на CDN */
         $this->messageDispatch->dispatch(
             message: new CDNUploadImageMessage($this->main->getId(), ProductSignCode::class, $Barcode->getName()),
-            transport: 'files-res'
+            transport: 'files-res',
         );
 
         return $this->main;

@@ -22,22 +22,23 @@
 #}
 
 <div class="alert alert-secondary opacity-50 lh-1 small rounded-4 p-2" role="alert">
-	После оформления заказа обязательно подтвердите указанный адрес электронной почты для авторизации! В противном случае заказ не будет обработан менеджерами и не будет отправлен по месту доставки.
+    После оформления заказа обязательно подтвердите указанный адрес электронной почты для авторизации! В противном
+    случае заказ не будет обработан менеджерами и не будет отправлен по месту доставки.
 </div>
 
 
-	<div class="w-100">
-		{{ form_label(form.users.userAccount.email,  'user.form.label.email'|trans ) }}
-	
-		{{ form_widget(form.users.userAccount.email, { attr: { class : 'rounded-4' } }) }}
-	</div>
+<div class="w-100">
+    {{ form_label(form.users.userAccount.email,  'user.form.label.email'|trans ) }}
 
-	<div class="w-100">
-		{{ form_label(form.users.userAccount.passwordPlain, 'user.form.label.password'|trans) }}
-	
-		{{ form_widget(form.users.userAccount.passwordPlain, { attr: { class : 'rounded-4' } }) }}
-		
-		<div class="small"><span class="small text-muted">{{ 'user.form.help.password'|trans }}</span></div>
-		
-	</div>
+    {{ form_widget(form.users.userAccount.email, { attr: { class : 'rounded-4' } }) }}
+</div>
+
+<div class="w-100">
+    {{ form_label(form.users.userAccount.passwordPlain, 'user.form.label.password'|trans) }}
+
+    {{ form_widget(form.users.userAccount.passwordPlain, { attr: { class : 'rounded-4' } }) }}
+
+    <div class="small"><span class="small text-muted">{{ 'user.form.help.password'|trans }}</span></div>
+
+</div>
 

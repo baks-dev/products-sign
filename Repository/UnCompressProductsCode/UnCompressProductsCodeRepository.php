@@ -55,7 +55,7 @@ final readonly class UnCompressProductsCodeRepository implements UnCompressProdu
                 'product_sign',
                 ProductSignCode::class,
                 'product_sign_code',
-                'product_sign_code.main = product_sign.id AND product_sign_code.cdn IS FALSE'
+                'product_sign_code.main = product_sign.id AND product_sign_code.cdn IS FALSE',
             );
 
         $dbal->where('product_sign_code.name IS NOT NULL');

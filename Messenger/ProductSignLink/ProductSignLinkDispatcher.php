@@ -51,7 +51,7 @@ final readonly class ProductSignLinkDispatcher
             $this->Logger->critical(sprintf(
                 'Не удается получить файл по ссылке %s: код %s',
                 $message->getLink(),
-                $linkResponse->getStatusCode()
+                $linkResponse->getStatusCode(),
             ));
 
             return;
@@ -70,7 +70,7 @@ final readonly class ProductSignLinkDispatcher
                 'application/acrobat',
                 'application/nappdf',
                 'application/x-pdf',
-                'image/pdf'
+                'image/pdf',
             ])
         )
         {
@@ -98,7 +98,7 @@ final readonly class ProductSignLinkDispatcher
         {
             $this->Logger->critical(sprintf(
                 'Файл PDF с честным знаком %s не был корректно сохранен',
-                $message->getUploadDir().$name
+                $message->getUploadDir().$name,
             ));
 
             return;
@@ -125,7 +125,7 @@ final readonly class ProductSignLinkDispatcher
 
         $this->Logger->info(sprintf(
             'Сохранен файл PDF честного знака %s',
-            $message->getUploadDir().$name
+            $message->getUploadDir().$name,
         ));
     }
 }

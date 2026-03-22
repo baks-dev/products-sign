@@ -96,7 +96,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
 
         $dbal->from(
             ProductSignEvent::class,
-            'event'
+            'event',
         );
 
         $dbal
@@ -104,7 +104,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
             ->setParameter(
                 key: 'ord',
                 value: $this->order,
-                type: OrderUid::TYPE
+                type: OrderUid::TYPE,
             );
 
         $dbal
@@ -112,7 +112,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
             ->setParameter(
                 key: 'status',
                 value: ProductSignStatusProcess::class,
-                type: ProductSignStatus::TYPE
+                type: ProductSignStatus::TYPE,
             );
 
 
@@ -123,7 +123,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 'event',
                 ProductSignInvariable::class,
                 'invariable',
-                'invariable.main = event.main'
+                'invariable.main = event.main',
             );
 
         $dbal
@@ -131,7 +131,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 'invariable',
                 ProductSignCode::class,
                 'code',
-                'code.main = invariable.main'
+                'code.main = invariable.main',
             );
 
 
@@ -140,7 +140,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 'invariable',
                 ProductSign::class,
                 'main',
-                'main.id = invariable.main'
+                'main.id = invariable.main',
             );
 
 
@@ -151,14 +151,14 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 'invariable',
                 Product::class,
                 'product',
-                'product.id = invariable.product'
+                'product.id = invariable.product',
             );
 
         $dbal->join(
             'product',
             ProductEvent::class,
             'product_event',
-            'product_event.id = product.event'
+            'product_event.id = product.event',
         );
 
         $dbal
@@ -166,7 +166,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 'product',
                 ProductInfo::class,
                 'product_info',
-                'product_info.product = product.id'
+                'product_info.product = product.id',
             );
 
         $dbal
@@ -175,7 +175,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 'product',
                 ProductTrans::class,
                 'product_trans',
-                'product_trans.event = product.event AND product_trans.local = :local'
+                'product_trans.event = product.event AND product_trans.local = :local',
             );
 
 
@@ -191,7 +191,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 'product',
                 ProductOffer::class,
                 'product_offer',
-                'product_offer.event = product.event AND product_offer.const = invariable.offer'
+                'product_offer.event = product.event AND product_offer.const = invariable.offer',
             );
 
 
@@ -202,7 +202,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 'product_offer',
                 CategoryProductOffers::class,
                 'category_offer',
-                'category_offer.id = product_offer.category_offer'
+                'category_offer.id = product_offer.category_offer',
             );
 
         // Множественные варианты торгового предложения
@@ -215,7 +215,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 'product_offer',
                 ProductVariation::class,
                 'product_variation',
-                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation'
+                'product_variation.offer = product_offer.id AND product_variation.const = invariable.variation',
             );
 
 
@@ -226,7 +226,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 'product_variation',
                 CategoryProductVariation::class,
                 'category_variation',
-                'category_variation.id = product_variation.category_variation'
+                'category_variation.id = product_variation.category_variation',
             );
 
 
@@ -240,7 +240,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 'product_variation',
                 ProductModification::class,
                 'product_modification',
-                'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification'
+                'product_modification.variation = product_variation.id AND product_modification.const = invariable.modification',
             );
 
 
@@ -251,7 +251,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 'product_modification',
                 CategoryProductModification::class,
                 'category_offer_modification',
-                'category_offer_modification.id = product_modification.category_modification'
+                'category_offer_modification.id = product_modification.category_modification',
             );
 
         // Артикул продукта
@@ -262,7 +262,7 @@ final class GroupProductSignsByOrderRepository implements GroupProductSignsByOrd
                 product_variation.article,
                 product_offer.article,
                 product_info.article
-            ) AS product_article'
+            ) AS product_article',
         );
 
         $dbal->addOrderBy('invariable.part');

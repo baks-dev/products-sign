@@ -68,7 +68,7 @@ final class EditController extends AbstractController
             $this->addFlash(
                 'page.edit',
                 'success.update',
-                'products-sign.admin'
+                'products-sign.admin',
             );
 
             return $this->redirectToRoute('products-sign:admin.index');

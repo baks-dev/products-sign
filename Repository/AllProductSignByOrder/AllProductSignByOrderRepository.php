@@ -33,6 +33,7 @@ use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
+use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
 use Doctrine\DBAL\ArrayParameterType;
@@ -120,27 +121,35 @@ final class AllProductSignByOrderRepository implements AllProductSignByOrderInte
                 '
                     product_sign_event.ord = ord.id AND
                     product_sign_event.product = orders_product_item.const
-                    ',
+                ',
+            );
+
+        $dbal
+            ->join(
+                'product_sign_event',
+                ProductSign::class,
+                'product_sign',
+                'product_sign.event = product_sign_event.id',
             );
 
 
         $dbal
             ->addSelect('product_sign_invariable.number AS number')
-            ->join(
+            ->leftJoin(
                 'product_sign_event',
                 ProductSignInvariable::class,
                 'product_sign_invariable',
-                'product_sign_invariable.main = product_sign_event.main',
+                'product_sign_invariable.main = product_sign.id',
             );
 
         /** Кодировка ЧЗ */
         $dbal
             ->addSelect('product_sign_code.code AS code')
-            ->join(
+            ->leftJoin(
                 'product_sign_event',
                 ProductSignCode::class,
                 'product_sign_code',
-                'product_sign_code.event = product_sign_event.id',
+                'product_sign_code.main = product_sign.id',
             );
 
         if(false === empty($this->statuses))

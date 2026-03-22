@@ -176,7 +176,7 @@ final class ProductSignProcessByOrderProductRepository implements ProductSignPro
             ->setParameter(
                 key: 'ord',
                 value: $this->order,
-                type: OrderUid::TYPE
+                type: OrderUid::TYPE,
             );
 
         $orm
@@ -184,14 +184,14 @@ final class ProductSignProcessByOrderProductRepository implements ProductSignPro
             ->setParameter(
                 key: 'status',
                 value: ProductSignStatusProcess::class,
-                type: ProductSignStatus::TYPE
+                type: ProductSignStatus::TYPE,
             );
 
         $orm->join(
             ProductSign::class,
             'main',
             'WITH',
-            'main.event = event.id'
+            'main.event = event.id',
         );
 
         $orm
@@ -199,12 +199,12 @@ final class ProductSignProcessByOrderProductRepository implements ProductSignPro
                 ProductSignInvariable::class,
                 'invariable',
                 'WITH',
-                'invariable.event = event.id AND invariable.product = :product'
+                'invariable.event = event.id AND invariable.product = :product',
             )
             ->setParameter(
                 key: 'product',
                 value: $this->product,
-                type: ProductUid::TYPE
+                type: ProductUid::TYPE,
             );
 
 
@@ -215,7 +215,7 @@ final class ProductSignProcessByOrderProductRepository implements ProductSignPro
                 ->setParameter(
                     key: 'offer',
                     value: $this->offer,
-                    type: ProductOfferConst::TYPE
+                    type: ProductOfferConst::TYPE,
                 );
         }
         else
@@ -230,7 +230,7 @@ final class ProductSignProcessByOrderProductRepository implements ProductSignPro
                 ->setParameter(
                     key: 'variation',
                     value: $this->variation,
-                    type: ProductVariationConst::TYPE
+                    type: ProductVariationConst::TYPE,
                 );
 
         }
@@ -247,7 +247,7 @@ final class ProductSignProcessByOrderProductRepository implements ProductSignPro
                 ->setParameter(
                     key: 'modification',
                     value: $this->modification,
-                    type: ProductModificationConst::TYPE
+                    type: ProductModificationConst::TYPE,
                 );
         }
         else

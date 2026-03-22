@@ -566,9 +566,6 @@ final class ProductSignReportRepository implements ProductSignReportInterface
             );
 
 
-
-
-
         $dbal->leftJoin(
             'product_offer',
             CategoryProductOffers::class,

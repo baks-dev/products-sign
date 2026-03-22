@@ -23,33 +23,19 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Repository\AllProductSignByOrder;
+namespace BaksDev\Products\Sign\Repository\ProductSignByOrderProductItem;
 
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 
-final readonly class AllProductSignByOrderResult
+final readonly class ProductSignByOrderProductItemResult
 {
     public function __construct(
         private string $code,
         private string $status,
-        private ?string $comment,
-        private ?string $number,
     ) {}
 
     public function getCode(): string
     {
-        return $this->code;
-    }
-
-    public function getMarking()
-    {
-        preg_match('/^(.*?)\(\d{2}\).{4}\(\d{2}\)/', $this->code, $matches);
-
-        if(preg_match('/\(\d+\)[^\(]*\(\d+\)([^\(]+)\(\d+\)/', $this->code, $matches))
-        {
-            return $matches[1]; // 5LAYzhVqgXLnc
-        }
-
         return $this->code;
     }
 
@@ -104,15 +90,5 @@ final readonly class AllProductSignByOrderResult
     public function getStatus(): ProductSignStatus
     {
         return new ProductSignStatus($this->status);
-    }
-
-    public function getNumber(): ?string
-    {
-        return $this->number;
-    }
-
-    public function getComment(): ?string
-    {
-        return $this->comment;
     }
 }

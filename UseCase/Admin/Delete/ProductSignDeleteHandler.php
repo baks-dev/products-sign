@@ -53,7 +53,7 @@ final class ProductSignDeleteHandler extends AbstractHandler
         /* Отправляем сообщение в шину */
         $this->messageDispatch->dispatch(
             message: new ProductSignMessage($this->main->getId(), $this->main->getEvent(), $command->getEvent()),
-            transport: 'products-sign'
+            transport: 'products-sign',
         );
 
         return $this->main;
