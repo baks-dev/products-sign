@@ -66,7 +66,7 @@ class AllProductSignByOrderRepositoryTest extends KernelTestCase
                 {
                     // Вызываем метод
                     $data = $method->invoke($AllProductSignByOrderResult);
-                    dump($data);
+                    //dump($data);
                 }
             }
         }

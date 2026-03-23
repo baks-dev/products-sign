@@ -33,7 +33,6 @@ use BaksDev\Orders\Order\Type\Id\OrderUid;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
-use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\Collection\ProductSignStatusInterface;
 use Doctrine\DBAL\ArrayParameterType;
@@ -119,18 +118,29 @@ final class AllProductSignByOrderRepository implements AllProductSignByOrderInte
                 ProductSignEvent::class,
                 'product_sign_event',
                 '
-                    product_sign_event.ord = ord.id AND
-                    product_sign_event.product = orders_product_item.const
-                ',
+                    product_sign_event.ord = ord.id 
+                    AND product_sign_event.product = orders_product_item.const
+                '.(false === empty($this->statuses) ? ' AND product_sign_event.status IN (:statuses)' : ''),
             );
 
-        $dbal
-            ->join(
-                'product_sign_event',
-                ProductSign::class,
-                'product_sign',
-                'product_sign.event = product_sign_event.id',
+
+        if(false === empty($this->statuses))
+        {
+            $dbal->setParameter(
+                'statuses',
+                $this->statuses,
+                ArrayParameterType::STRING,
             );
+        }
+
+        //
+        //        $dbal
+        //            ->join(
+        //                'product_sign_event',
+        //                ProductSign::class,
+        //                'product_sign',
+        //                'product_sign.event = product_sign_event.id',
+        //            );
 
 
         $dbal
@@ -139,7 +149,7 @@ final class AllProductSignByOrderRepository implements AllProductSignByOrderInte
                 'product_sign_event',
                 ProductSignInvariable::class,
                 'product_sign_invariable',
-                'product_sign_invariable.main = product_sign.id',
+                'product_sign_invariable.main = product_sign_event.main',
             );
 
         /** Кодировка ЧЗ */
@@ -149,15 +159,8 @@ final class AllProductSignByOrderRepository implements AllProductSignByOrderInte
                 'product_sign_event',
                 ProductSignCode::class,
                 'product_sign_code',
-                'product_sign_code.main = product_sign.id',
+                'product_sign_code.main = product_sign_event.main',
             );
-
-        if(false === empty($this->statuses))
-        {
-            $dbal
-                ->andWhere('product_sign_event.status IN (:statuses)')
-                ->setParameter('statuses', $this->statuses, ArrayParameterType::STRING);
-        }
 
         $this->order = false;
         $this->statuses = null;

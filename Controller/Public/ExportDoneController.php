@@ -129,48 +129,13 @@ final class ExportDoneController extends AbstractController
 
             $products = array_map(static function($item) {
 
-                $chars = null;
-
-                preg_match('/^(.*?)\(\d{2}\).{4}\(\d{2}\)/', $item->code, $matches);
-
-                if(isset($matches[1]))
-                {
-                    // Преобразуем строку в массив символов
-                    $chars = str_split($matches[1]);
-
-                    // 1 символ (индекс 0)
-                    if($chars[0] === '(')
-                    {
-                        unset($chars[0]);
-                    }
-
-                    // 4 символ (индекс 3)
-                    if($chars[3] === ')')
-                    {
-                        unset($chars[3]);
-                    }
-
-                    // 19 символ (индекс 18)
-                    if($chars[18] === '(')
-                    {
-                        unset($chars[18]);
-                    }
-
-                    // 22 символ (индекс 21)
-                    if($chars[21] === ')')
-                    {
-                        unset($chars[21]);
-                    }
-
-                }
-
                 return [
                     'product' => $item->name,
                     'article' => $item->article,
                     'count' => 1,
                     'price' => new Money($item->price, true)->getValue(),
                     'amount' => new Money($item->price, true)->getValue(),
-                    'markingcode' => $chars ? implode('', $chars) : false,
+                    'markingcode' => $item->code,
                 ];
 
             }, $item->getProducts());
