@@ -24,20 +24,21 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Controller\Admin\Documents\Part;
+namespace BaksDev\Products\Sign\Controller\Admin\Documents;
 
 use BaksDev\Barcode\Writer\BarcodeFormat;
 use BaksDev\Barcode\Writer\BarcodeType;
 use BaksDev\Barcode\Writer\BarcodeWrite;
 use BaksDev\Core\Controller\AbstractController;
-use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Files\Resources\Twig\ImagePathExtension;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
-use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
+use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
+use BaksDev\Products\Sign\UseCase\Admin\New\ProductSignDTO;
 use Doctrine\ORM\Mapping\Table;
 use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
 use ReflectionClass;
+use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Filesystem;
@@ -49,44 +50,33 @@ use Symfony\Component\Process\Process;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * Скачивание Честных знаков по артукулу продукта и номеру партии
+ * Скачивание Честного знака по идентификатору события
  */
 #[AsController]
-#[RoleSecurity(['ROLE_ORDERS', 'ROLE_PRODUCT_SIGN'])]
-final class PdfPartsController extends AbstractController
+final class PdfController extends AbstractController
 {
-    private string $projectDir;
-
-    private ImagePathExtension $ImagePathExtension;
-
-    private string $article;
-
-    #[Route('/admin/product/sign/document/pdf/parts/{article}/{part}', name: 'document.pdf.parts', methods: ['GET'])]
-    public function parts(
+    #[Route(
+        path: '/admin/document/product/sign/pdf/{event}',
+        name: 'document.pdf',
+        methods: ['GET'])
+    ]
+    public function pdf(
+        #[Target('productsSignLogger')] LoggerInterface $logger,
         #[Autowire('%kernel.project_dir%')] $projectDir,
-        #[Target('ordersOrderLogger')] LoggerInterface $logger,
-        BarcodeWrite $BarcodeWrite,
-        ProductSignByPartInterface $productSignByPart,
-        ImagePathExtension $ImagePathExtension,
-        string $part,
-        string $article,
-
+        #[MapEntity(id: 'event')] ProductSignEvent $event,
+        ImagePathExtension $imagePathExtension,
+        BarcodeWrite $barcodeWrite,
     ): Response
     {
-        $this->projectDir = $projectDir;
-        $this->ImagePathExtension = $ImagePathExtension;
-        $this->article = $article;
-
-        $codes = $productSignByPart
-            ->forPart($part)
-            ->withStatusDone()
-            ->findAll();
+        $ProductSignDTO = new ProductSignDTO();
+        $event->getDto($ProductSignDTO);
 
         /**
          * Создаем путь для создания PDF файла
          */
 
         $ref = new ReflectionClass(ProductSignCode::class);
+
         /** @var ReflectionAttribute $current */
         $current = current($ref->getAttributes(Table::class));
         $dirName = $current->getArguments()['name'] ?? 'barcode';
@@ -97,8 +87,7 @@ final class PdfPartsController extends AbstractController
         $paths[] = 'upload';
         $paths[] = $dirName;
 
-        $paths[] = (string) $part;
-
+        $paths[] = $ProductSignDTO->getInvariable()->getPart();
 
         $filesystem = new Filesystem();
 
@@ -106,20 +95,14 @@ final class PdfPartsController extends AbstractController
 
         $uploadFile = $uploadDir.DIRECTORY_SEPARATOR.'output.pdf';
 
-        /**
-         * Если файл имеется - отдаем
-         */
-
-        if($filesystem->exists($uploadFile))
+        /** Удаляем старый файл */
+        if(true === $filesystem->exists($uploadFile))
         {
             $filesystem->remove($uploadFile);
         }
 
-        /**
-         * Создаем директорию при отсутствии
-         */
-
-        if($filesystem->exists($uploadDir) === false)
+        /** Создаем директорию под новый файл */
+        if(false === $filesystem->exists($uploadDir))
         {
             $filesystem->mkdir($uploadDir);
         }
@@ -130,41 +113,53 @@ final class PdfPartsController extends AbstractController
 
         $Process[] = 'convert';
 
-        /** Присваиваем директорию public для локальных файлов */
-        $projectDir = implode(DIRECTORY_SEPARATOR, [
-            $this->projectDir,
-            'public',
-            '',
-        ]);
+        $ProductSignCodeDTO = $ProductSignDTO->getCode();
 
+        $url = $imagePathExtension->imagePath(
+            sprintf('%s%s%s', $dirName, DIRECTORY_SEPARATOR, $ProductSignCodeDTO->getName()),
+            $ProductSignCodeDTO->getExt(),
+            $ProductSignCodeDTO->getCdn()
+        );
 
-        foreach($codes as $key => $code)
+        /** Если Честные знаки на CDN */
+        if(true === $ProductSignCodeDTO->getCdn())
         {
-
-            $url = ($code->isCodeCdn() === false ? $projectDir : '').$ImagePathExtension->imagePath($code->getCodeImage(), $code->getCodeExt(), $code->isCodeCdn());
             $headers = get_headers($url, true);
 
             if($headers !== false && (str_contains($headers[0], '200') && $headers['Content-Length'] > 100))
             {
                 $Process[] = $url;
-                continue;
             }
+        }
 
-            /**
-             * В случае отсутствия марки - генерируем из кода
-             */
+        /** Если Честные знаки локально */
+        if(false === $ProductSignCodeDTO->getCdn())
+        {
+            /** Присваиваем директорию public для локальных файлов */
+            $publicDir = $projectDir.'/public/upload/';
 
-            $BarcodeWrite
-                ->text($code->getBigCode())
-                ->type(BarcodeType::DataMatrix)
-                ->format(BarcodeFormat::PNG)
-                ->generate(filename: $code['id']);
+            if(true === file_exists($publicDir.$url))
+            {
+                $Process[] = $publicDir.$url;
+            }
+            else
+            {
+                /** В случае отсутствия файла Честного знака - генерируем из кода, сохраненного в БД */
+                $barcodeWrite
+                    ->text($ProductSignCodeDTO->getCode())
+                    ->type(BarcodeType::DataMatrix)
+                    ->format(BarcodeFormat::PNG)
+                    ->generate(filename: (string) $event->getMain());
 
-            $path = $BarcodeWrite->getPath();
+                $path = $barcodeWrite->getPath();
 
-            $Process[] = $path.DIRECTORY_SEPARATOR.$code['id'].'.png';
+                $Process[] = $path.$event->getMain().'.png';
 
-            $logger->critical(sprintf('Лист %s: ошибка изображения %s', $key, $url), [$code->getSignId()]);
+                $logger->critical(
+                    message: sprintf('ошибка изображения %s', $url),
+                    context: [$event->getMain()],
+                );
+            }
         }
 
         $Process[] = $uploadFile;
@@ -175,10 +170,8 @@ final class PdfPartsController extends AbstractController
         return new BinaryFileResponse($uploadFile, Response::HTTP_OK)
             ->setContentDisposition(
                 ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-                $this->article.'['.$part.'].pdf',
+                $ProductSignCodeDTO->getName().'['.$ProductSignDTO->getInvariable()->getPart().'].pdf',
             );
 
     }
-
-
 }
