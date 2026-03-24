@@ -43,7 +43,7 @@ use Symfony\Component\HttpKernel\Attribute\AsController;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * Форма загрузки Честных знаков
+ * Форма загрузки Честных знаков с привязкой продукта и возможностью создания закупки
  */
 #[AsController]
 #[RoleSecurity('ROLE_PRODUCT_SIGN_NEW')]

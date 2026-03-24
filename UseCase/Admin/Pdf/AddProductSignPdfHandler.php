@@ -29,9 +29,9 @@ namespace BaksDev\Products\Sign\UseCase\Admin\Pdf;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Core\Validator\ValidatorCollectionInterface;
 use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Products\Sign\Messenger\ProductSignLink\ProductSignLinkMessage;
 use BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignPdfMessage;
 use BaksDev\Products\Sign\UseCase\Admin\Pdf\ProductSignFile\ProductSignFileDTO;
+use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
@@ -42,58 +42,38 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 /**
  * Загружает файлы на сервер и запускает процесс их асинхронной обработки
  */
-final readonly class ProductSignPdfHandler
+final readonly class AddProductSignPdfHandler
 {
     public function __construct(
-        #[Autowire('%kernel.project_dir%')] private string $project_dir,
+        #[Autowire('%kernel.project_dir%')] private string $projectDir,
         #[Target('productsSignLogger')] private LoggerInterface $logger,
         private MessageDispatchInterface $messageDispatch,
         private ValidatorCollectionInterface $validatorCollection,
     ) {}
 
-
     /** @see ProductSign */
-    public function handle(ProductSignPdfDTO $command): string|bool
+    public function handle(AddProductSignPdfDTO $command): string|bool
     {
         /**
          * Общая директория для всех Честных знаков
          */
         $upload = [
-            $this->project_dir,
+            $this->projectDir,
             'public',
             'upload',
             'barcode',
             'products-sign',
+            '',
         ];
 
         $upload[] = (string) $command->getUsr();
 
-        if($command->getProfile())
+        if(true === $command->getProfile() instanceof UserProfileUid)
         {
             $upload[] = (string) $command->getProfile();
         }
 
-        $upload[] = (string) $command->getProduct();
-
-        if($command->getOffer())
-        {
-            $upload[] = (string) $command->getOffer();
-        }
-
-        if($command->getVariation())
-        {
-            $upload[] = (string) $command->getVariation();
-        }
-
-        if($command->getModification())
-        {
-            $upload[] = (string) $command->getModification();
-        }
-
-
-        $upload[] = '';
-
-        // Директория загрузки файла
+        /** Директория загрузки файла */
         $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
 
         $Filesystem = new Filesystem();
@@ -108,24 +88,18 @@ final readonly class ProductSignPdfHandler
             catch(IOExceptionInterface)
             {
                 $this->logger->critical(
-                    'Ошибка при создании директории. Попробуйте применить комманду ',
-                    [
-                        'chown -R unit:unit '.$uploadDir,
-                    ],
+                    message: 'Ошибка при создании директории',
+                    context: [self::class.':'.__LINE__],
                 );
 
-                return 'Ошибка при создании директории.';
+                return false;
             }
         }
 
 
         $filename = [];
 
-        /**
-         * @var ProductSignFileDTO $files
-         * @var UploadedFile $file
-         */
-
+        /** @var ProductSignFileDTO $files */
         foreach($command->getFiles() as $files)
         {
             if(true === empty($files->pdf))
@@ -133,6 +107,7 @@ final readonly class ProductSignPdfHandler
                 continue;
             }
 
+            /** @var UploadedFile $file */
             foreach($files->pdf as $file)
             {
                 $name = null;
@@ -153,7 +128,7 @@ final readonly class ProductSignPdfHandler
                     $name = uniqid('original_', true).'.xlsx';
                 }
 
-                if(empty($name))
+                if(null === $name)
                 {
                     continue;
                 }
@@ -167,52 +142,10 @@ final readonly class ProductSignPdfHandler
             }
         }
 
-        /** Получаем (если есть) введенные текстом ссылки на скачивание PDF */
-        if(false === empty($command->getLinks()))
-        {
-            $text = $command->getLinks();
-
-            /** Разделение текста на строки */
-            $lines = preg_split('/\r\n|\r|\n/', $text);
-
-            foreach($lines as $line)
-            {
-                /** Если строка является ссылкой - пытаемся скачать  */
-                if(str_starts_with($line, 'https:'))
-                {
-                    $this->messageDispatch->dispatch(
-                        new ProductSignLinkMessage(
-                            $line,
-                            $uploadDir,
-                            $command->getUsr(),
-                            $command->getProfile(),
-                            $command->getProduct(),
-                            $command->getOffer(),
-                            $command->getVariation(),
-                            $command->getModification(),
-                            $command->isPurchase(),
-                            $command->isNotShare(),
-                            $command->getNumber(),
-                            $command->isNew(),
-                        ),
-                        transport: 'products-sign',
-                    );
-                }
-            }
-        }
-
-        /**
-         * Добавляем в коллекцию dto, т.к. пустая коллекция валидатора (в случае, если файлы не загружались
-         * пользователем, а были добавлены через ссылки) не позволит отправить сообщение на сканирование честных знаков
-         */
-        if(true === empty($filename))
-        {
-            $this->validatorCollection->add($command);
-        }
-
         /** Валидация всех объектов */
         if($this->validatorCollection->isInvalid())
         {
+            /** Удаляем загруженный файл */
             foreach($filename as $item)
             {
                 $Filesystem->remove($uploadDir.'/'.$item);
@@ -221,9 +154,9 @@ final readonly class ProductSignPdfHandler
             return $this->validatorCollection->getErrorUniqid();
         }
 
-        /** @var ProductSignPdfMessage $message */
-
-        /* Отправляем сообщение в шину для обработки файлов */
+        /**
+         * Отправляем сообщение в шину для обработки файлов
+         */
         $this->messageDispatch->dispatch(
             message: new ProductSignPdfMessage(
                 $command->getUsr(),
@@ -233,7 +166,7 @@ final readonly class ProductSignPdfHandler
                 $command->getVariation(),
                 $command->getModification(),
                 $command->isPurchase(),
-                $command->isNotShare(),
+                $command->getShare(),
                 $command->getNumber(),
                 $command->isNew(),
             ),

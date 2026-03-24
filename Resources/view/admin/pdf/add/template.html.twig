@@ -1,0 +1,21 @@
+{% trans_default_domain('products-sign.admin') %}
+
+{% extends Template('/admin/base.html.twig') %}
+
+{% block title %}{{ 'page.new'|trans }}{% endblock %}
+
+ {% block stylesheets %}
+     <link href="/assets/{{ version }}/plugins/nice-select2/nice-select2.min.css" rel="stylesheet">
+ {% endblock %}
+
+{% block content %}
+    {{ include(_self|replace({ "template.html.twig":baks_settings.device~"/content.html.twig" })) }}
+{% endblock %}
+
+
+{% block javascript %}
+<script nonce='{{ csp_nonce() }}' async  data-src="/assets/{{ version }}/js/radio.input.min.js?v={{ version }}" class="lazy"></script>
+<script nonce='{{ csp_nonce() }}' async data-src='/assets/{{ version }}/plugins/nice-select2/nice-select2.min.js?v={{ version }}' class='lazy'></script>
+
+{# <script nonce='{{ csp_nonce() }}' async  data-src="/assets/{{ version }}/products-sign/pdf.js?v={{ version }}" class="lazy"></script>#}
+{% endblock %}

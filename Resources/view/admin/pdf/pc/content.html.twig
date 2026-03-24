@@ -62,9 +62,9 @@
 
                             id="tab_files-tab"
                             data-bs-target="#tab_files"
-                            aria-controls="nav-products-sign"
-                    >
-                        <small class="text-uppercase px-3">
+                            aria-controls="nav-products-sign">
+
+                    <small class="text-uppercase px-3">
                             Загрузка файлов
                         </small>
                     </button>
@@ -80,9 +80,9 @@
 
                             id="tab_links-tab"
                             data-bs-target="#tab_links"
-                            aria-controls="nav-products-sign"
-                    >
-                        <small class="text-uppercase px-3">
+                            aria-controls="nav-products-sign">
+
+                    <small class="text-uppercase px-3">
                             Добавление ссылок
                         </small>
                     </button>
@@ -138,9 +138,8 @@
                             id="pdf-add-collection"
                             data-prototype="{{ include(_self|replace({ "content.html.twig": "_pdf.prototype.html.twig" }) )|e('html_attr') }}"
                             data-collection="{{ form.files.vars.id }}-collection"
-                            data-index="{{ form.files.count }}"
+                            data-index="{{ form.files.count }}">
 
-                    >
 						<span class="svg-icon svg-icon-2">
 							<svg xmlns="http://www.w3.org/2000/svg"
                                  width="24"
