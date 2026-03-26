@@ -19,12 +19,12 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignPackUpdate;
-
 
 use BaksDev\Core\Deduplicator\DeduplicatorInterface;
 use BaksDev\Core\Messenger\MessageDelay;
@@ -35,10 +35,14 @@ use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Sign\UseCase\Admin\Part\UpdateProductSignPartDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Part\UpdateProductSignPartHandler;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-/** Обновляем упаковку по коду маркировки */
+/**
+ * Обновляем упаковку по коду маркировки
+ */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final class ProductSignPackUpdateDispatcher
 {
@@ -121,6 +125,5 @@ final class ProductSignPackUpdateDispatcher
         ), [self::class.':'.__LINE__]);
 
         $Deduplicator->save();
-
     }
 }

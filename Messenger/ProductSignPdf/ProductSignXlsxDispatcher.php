@@ -19,25 +19,17 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignPdf;
 
-use BaksDev\Barcode\Reader\BarcodeRead;
-use BaksDev\Core\Deduplicator\DeduplicatorInterface;
-use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
-use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Products\Sign\Messenger\ProductSignPackUpdate\ProductSignPackUpdateMessage;
-use BaksDev\Products\Stocks\UseCase\Admin\Purchase\Products\ProductStockDTO;
-use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockDTO;
-use BaksDev\Products\Stocks\UseCase\Admin\Purchase\PurchaseProductStockHandler;
-use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use DirectoryIterator;
-use Doctrine\ORM\Mapping\Table;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
@@ -46,9 +38,12 @@ use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-// #[Autoconfigure(public: true)]
+/**
+ * Обрабатывает загруженный файл с типом XLSX, XLS, CSV и т.д.
+ */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
-final readonly class ProductSignXlsxHandler
+final readonly class ProductSignXlsxDispatcher
 {
     public function __construct(
         #[Target('productsSignLogger')] private LoggerInterface $logger,
@@ -59,12 +54,16 @@ final readonly class ProductSignXlsxHandler
 
     public function __invoke(ProductSignPdfMessage $message): void
     {
-        $upload = null;
-        $upload[] = $this->upload;
-        $upload[] = 'public';
-        $upload[] = 'upload';
-        $upload[] = 'barcode';
-        $upload[] = 'products-sign';
+        /**
+         * Общая директория для всех Честных знаков
+         */
+        $upload = [
+            $this->upload,
+            'public',
+            'upload',
+            'barcode',
+            'products-sign',
+        ];
 
         $upload[] = (string) $message->getUsr();
 
@@ -73,7 +72,10 @@ final readonly class ProductSignXlsxHandler
             $upload[] = (string) $message->getProfile();
         }
 
-        $upload[] = (string) $message->getProduct();
+        if($message->getProduct())
+        {
+            $upload[] = (string) $message->getProduct();
+        }
 
         if($message->getOffer())
         {
@@ -94,6 +96,19 @@ final readonly class ProductSignXlsxHandler
 
         // Директория загрузки файла
         $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
+
+        if(false === is_dir($uploadDir))
+        {
+            $this->logger->critical(
+                message: 'products-sign: Неверная директория для обработки Честных знаков',
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
+            );
+
+            return;
+        }
 
         if(false === $this->filesystem->exists($uploadDir))
         {

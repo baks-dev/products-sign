@@ -24,49 +24,68 @@
 
 declare(strict_types=1);
 
-namespace BaksDev\Products\Sign\Messenger\ProductSignPdf\Tests;
+namespace BaksDev\Products\Sign\UseCase\Admin\Pdf;
 
-use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
-use BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignPdfMessage;
-use BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignXlsxDispatcher;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Users\User\Type\Id\UserUid;
-use Doctrine\ORM\EntityManagerInterface;
-use PHPUnit\Framework\Attributes\DependsOnClass;
-use PHPUnit\Framework\Attributes\Group;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
-use Symfony\Component\DependencyInjection\Attribute\When;
 
-#[When(env: 'test')]
-#[Group('product-sign')]
-class ProductSignXlsxHandlerTest extends KernelTestCase
+/**
+ * Интерфейс для загрузки Честных знаков
+ * @see ProductSignPdfHandler
+ */
+interface ProductSignPdfInterface
 {
+    /**
+     * Usr
+     */
+    public function getUsr(): UserUid;
 
-    public function testUseCase(): void
-    {
-        /** @var ProductSignXlsxDispatcher $ProductSignXlsxHandler */
-        $ProductSignXlsxHandler = self::getContainer()->get(ProductSignXlsxDispatcher::class);
+    /**
+     * Profile
+     */
+    public function getProfile(): ?UserProfileUid;
 
-        $ProductSignPdfMessage = new ProductSignPdfMessage(
-            usr: new UserUid(),
-            profile: new UserProfileUid(),
-            product: new ProductUid(),
-            offer: new ProductOfferConst(),
-            variation: new ProductVariationConst(),
-            modification: new ProductModificationConst(),
-            purchase: false,
-            share: true,
-            number: null,
-        );
+    /**
+     * Number
+     */
+    public function getNumber(): ?string;
 
-        $ProductSignXlsxHandler($ProductSignPdfMessage);
+    /**
+     * Share
+     */
+    public function getShare(): bool;
 
-        self::assertTrue(true);
+    /**
+     * New
+     */
+    public function isNew(): bool;
 
-    }
+    /**
+     * Purchase
+     */
+    public function isPurchase(): bool;
 
+    /**
+     * Product
+     */
+    public function getProduct(): ?ProductUid;
+
+    /**
+     * Offer
+     */
+    public function getOffer(): ?ProductOfferConst;
+
+    /**
+     * Variation
+     */
+    public function getVariation(): ?ProductVariationConst;
+
+    /**
+     * Modification
+     */
+    public function getModification(): ?ProductModificationConst;
 }

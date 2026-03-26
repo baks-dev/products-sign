@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -30,7 +31,10 @@ use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Files\Resources\Messenger\Request\Images\CDNUploadImageMessage;
 use BaksDev\Products\Product\Repository\ExistProductBarcode\ExistProductBarcodeInterface;
+use BaksDev\Products\Product\Repository\Ids\ProductIdsByBarcodesRepository\ProductIdsByBarcodesInterface;
+use BaksDev\Products\Product\Repository\Ids\ProductIdsByBarcodesRepository\ProductIdsByBarcodesResult;
 use BaksDev\Products\Product\Type\Barcode\ProductBarcode;
+use BaksDev\Products\Product\Type\Id\ProductUid;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
@@ -42,11 +46,16 @@ use Imagick;
 use Psr\Log\LoggerInterface;
 use ReflectionAttribute;
 use ReflectionClass;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+/**
+ * Сканирует предварительно разделенные и обрезанные страницы pdf с ЧЗ и сохраняет информацию о них в БД
+ */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final readonly class ProductSignScannerDispatcher
 {
@@ -58,6 +67,7 @@ final readonly class ProductSignScannerDispatcher
         private BarcodeRead $barcodeRead,
         private Filesystem $filesystem,
         private ExistProductBarcodeInterface $ExistProductBarcodeRepository,
+        private ProductIdsByBarcodesInterface $productIdentifiersByBarcodeRepository,
     ) {}
 
     public function __invoke(ProductSignScannerMessage $message): void
@@ -86,12 +96,13 @@ final readonly class ProductSignScannerDispatcher
         }
 
         /** Создаем полный путь для сохранения изображения с кодом по таблице сущности */
-        $pathCode = null;
-        $pathCode[] = $this->upload;
-        $pathCode[] = 'public';
-        $pathCode[] = 'upload';
-        $pathCode[] = $current->getArguments()['name'];
-        $pathCode[] = '';
+        $pathCode = [
+            $this->upload,
+            'public',
+            'upload',
+            $current->getArguments()['name'],
+            '',
+        ];
 
         $dirCode = implode(DIRECTORY_SEPARATOR, $pathCode);
 
@@ -222,7 +233,7 @@ final readonly class ProductSignScannerDispatcher
             $scanDirName = md5($code);
             $renameDir = $dirCode.$scanDirName.DIRECTORY_SEPARATOR;
 
-            if($this->filesystem->exists($renameDir) === true)
+            if(true === $this->filesystem->exists($renameDir))
             {
                 // Удаляем директорию если уже имеется
                 $this->filesystem->remove($dirMove);
@@ -251,11 +262,90 @@ final readonly class ProductSignScannerDispatcher
                 ->setUsr($message->getUsr())
                 ->setProfile($message->getProfile())
                 ->setSeller($message->isNotShare() ? $message->getProfile() : null)
-                ->setProduct($message->getProduct())
-                ->setOffer($message->getOffer())
-                ->setVariation($message->getVariation())
-                ->setModification($message->getModification())
                 ->setNumber($message->getNumber());
+
+            /**
+             * Если продукт НЕ ПЕРЕДАН в сообщении - находим его по штрихкоду из файла Честного знака
+             */
+            if(false === ($message->getProduct() instanceof ProductUid))
+            {
+                /** Получаем Штрихкод (GTIN) из Честного знака */
+                $parseCode = preg_match('/^\(\d+\)(.*?)\(\d+\)/', $code, $matches);
+
+                if(0 === $parseCode || false === $parseCode)
+                {
+                    $this->logger->critical(
+                        message: 'products-supply: Не удалось извлечь штрихкод после сканирования Честного знака. Code: '.$code,
+                        context: [self::class.':'.__LINE__, $code],
+                    );
+
+                    /** Удаляем файл в случае неудачной обработки */
+                    $this->filesystem->remove($pdfPath);
+
+                    return;
+                }
+
+                /** Находим продукт по штрихкоду */
+                if(1 === $parseCode)
+                {
+                    /** Код партии */
+                    $partCode = $matches[1];
+                    $barcodes = [$matches[1]];
+
+                    /** Если штрихкод начинается с 0 - добавляем вариант без 0 */
+                    if(str_starts_with($matches[1], '0'))
+                    {
+                        $barcodes[] = ltrim($matches[1], '0');
+                    }
+
+                    /** Продукт по штрихкоду */
+                    $product = $this->productIdentifiersByBarcodeRepository
+                        ->byBarcodes($barcodes)
+                        ->find();
+
+                    /** Присваиваем продукт Честному знаку */
+                    if(true === ($product instanceof ProductIdsByBarcodesResult))
+                    {
+                        $ProductSignInvariableDTO
+                            ->setProduct($product->getProduct())
+                            ->setOffer($product->getOfferConst())
+                            ->setVariation($product->getVariationConst())
+                            ->setModification($product->getModificationConst());
+                    }
+
+                    /** Если продукт не найден */
+                    if(false === ($product instanceof ProductIdsByBarcodesResult))
+                    {
+                        $this->logger->warning(
+                            message: sprintf(
+                                'Не удалось найти продукт по штрихкоду %s из Честного знака. Честный знак НЕ БУДЕТ создан',
+                                $partCode,
+                            ),
+                            context: [
+                                'штрихкоды' => $barcodes,
+                                self::class.':'.__LINE__,
+                            ],
+                        );
+
+                        /** Удаляем файл в случае неудачной обработки */
+                        $this->filesystem->remove($pdfPath);
+
+                        return;
+                    }
+                }
+            }
+
+            /**
+             * Если продукт ПЕРЕДАН в сообщении - присваиваем его из сообщения
+             */
+            if(true === ($message->getProduct() instanceof ProductUid))
+            {
+                $ProductSignInvariableDTO
+                    ->setProduct($message->getProduct())
+                    ->setOffer($message->getOffer())
+                    ->setVariation($message->getVariation())
+                    ->setModification($message->getModification());
+            }
 
             $handle = $this->productSignHandler->handle($ProductSignDTO);
 
@@ -283,7 +373,7 @@ final readonly class ProductSignScannerDispatcher
                     [self::class.':'.__LINE__],
                 );
 
-                /** Создаем комманду для отправки файла CDN */
+                /** Создаем команду для отправки файла CDN */
                 $this->messageDispatch->dispatch(
                     new CDNUploadImageMessage($handle->getId(), ProductSignCode::class, $md5),
                     transport: 'files-res-low',

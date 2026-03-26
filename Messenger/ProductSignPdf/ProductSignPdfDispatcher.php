@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -38,12 +39,17 @@ use DirectoryIterator;
 use Exception;
 use Imagick;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+/**
+ * Отправляет сообщения для асинхронного сканирования pdf с ЧЗ и опционально создает закупку
+ */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 1)]
-final readonly class ProductSignPdfHandler
+final readonly class ProductSignPdfDispatcher
 {
     public function __construct(
         #[Autowire('%kernel.project_dir%')] private string $upload,
@@ -51,17 +57,20 @@ final readonly class ProductSignPdfHandler
         private PurchaseProductStockHandler $purchaseProductStockHandler,
         private MessageDispatchInterface $messageDispatch,
         private UserByUserProfileInterface $UserByUserProfileInterface
-
     ) {}
 
     public function __invoke(ProductSignPdfMessage $message): void
     {
-        $upload = null;
-        $upload[] = $this->upload;
-        $upload[] = 'public';
-        $upload[] = 'upload';
-        $upload[] = 'barcode';
-        $upload[] = 'products-sign';
+        /**
+         * Общая директория для всех Честных знаков
+         */
+        $upload = [
+            $this->upload,
+            'public',
+            'upload',
+            'barcode',
+            'products-sign',
+        ];
 
         $upload[] = (string) $message->getUsr();
 
@@ -70,7 +79,10 @@ final readonly class ProductSignPdfHandler
             $upload[] = (string) $message->getProfile();
         }
 
-        $upload[] = (string) $message->getProduct();
+        if($message->getProduct())
+        {
+            $upload[] = (string) $message->getProduct();
+        }
 
         if($message->getOffer())
         {
@@ -89,8 +101,21 @@ final readonly class ProductSignPdfHandler
 
         $upload[] = '';
 
-        // Директория загрузки файла PDF
+        /** Директория с обработанными PDF */
         $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
+
+        if(false === is_dir($uploadDir))
+        {
+            $this->logger->critical(
+                message: 'products-sign: Неверная директория для обработки Честных знаков',
+                context: [
+                    self::class.':'.__LINE__,
+                    var_export($message, true),
+                ],
+            );
+
+            return;
+        }
 
 
         /** Обрабатываем страницы */
@@ -122,7 +147,8 @@ final readonly class ProductSignPdfHandler
              */
 
             // Генерируем идентификатор группы для отмены
-            $part = new ProductSignUid()->stringToUuid($SignFile->getPath().(new DateTimeImmutable('now')->format('Ymd')));
+            $part = new ProductSignUid()
+                ->stringToUuid($SignFile->getPath().(new DateTimeImmutable('now')->format('Ymd')));
 
             $ProductSignScannerMessage = new ProductSignScannerMessage(
                 path: $SignFile->getRealPath(),
@@ -130,6 +156,7 @@ final readonly class ProductSignPdfHandler
 
                 usr: $message->getUsr(),
                 profile: $message->getProfile(),
+
                 product: $message->getProduct(),
                 offer: $message->getOffer(),
                 variation: $message->getVariation(),
@@ -144,6 +171,7 @@ final readonly class ProductSignPdfHandler
                 message: $ProductSignScannerMessage,
                 transport: 'barcode',
             );
+
 
             /**
              * Подсчет количества страниц для создания закупки

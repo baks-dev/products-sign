@@ -19,21 +19,23 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
 
 namespace BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignReturn;
 
-
 use BaksDev\Products\Sign\Entity\ProductSign;
 use BaksDev\Products\Sign\UseCase\Admin\Status\Return\ReturnProductSignStatusDTO;
 use BaksDev\Products\Sign\UseCase\Admin\Status\Return\ReturnProductSignStatusHandler;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /** Делаем отмену Честный знак на статус New «Новый» */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final readonly class ProductSignReturnDispatcher
 {
