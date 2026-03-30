@@ -275,7 +275,7 @@ final readonly class ProductSignScannerDispatcher
                 if(0 === $parseCode || false === $parseCode)
                 {
                     $this->logger->critical(
-                        message: 'products-supply: Не удалось извлечь штрихкод после сканирования Честного знака. Code: '.$code,
+                        message: 'products-sign: Не удалось извлечь штрихкод после сканирования Честного знака. Code: '.$code,
                         context: [self::class.':'.__LINE__, $code],
                     );
 
