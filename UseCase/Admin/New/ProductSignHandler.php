@@ -61,10 +61,7 @@ final class ProductSignHandler extends AbstractHandler
         $Invariable = $command->getInvariable();
         $Barcode = $command->getCode();
 
-        $isExistsBarcode = $this->existsProductSignCode->isExists(
-            $Invariable->getUsr(),
-            $Barcode->getCode(),
-        );
+        $isExistsBarcode = $this->existsProductSignCode->isExists($Barcode->getCode());
 
         if($isExistsBarcode === true)
         {

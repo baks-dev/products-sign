@@ -80,10 +80,7 @@ class ExistsProductSignCodeTest extends KernelTestCase
         {
             /** @var ExistsProductSignCodeInterface $ExistsProductSignCodeInterface */
             $ExistsProductSignCodeInterface = self::getContainer()->get(ExistsProductSignCodeInterface::class);
-            $ExistsProductSignCodeEvent = $ExistsProductSignCodeInterface->isExists(
-                self::$usr,
-                self::$code,
-            );
+            $ExistsProductSignCodeEvent = $ExistsProductSignCodeInterface->isExists(self::$code);
 
             self::assertTrue($ExistsProductSignCodeEvent);
         }

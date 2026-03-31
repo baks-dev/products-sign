@@ -27,11 +27,7 @@ namespace BaksDev\Products\Sign\Repository\ExistsProductSignCode;
 
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
-use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
-use BaksDev\Products\Sign\Entity\Invariable\ProductSignInvariable;
 use BaksDev\Products\Sign\Entity\ProductSign;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus;
-use BaksDev\Products\Sign\Type\Status\ProductSignStatus\ProductSignStatusError;
 use BaksDev\Users\User\Type\Id\UserUid;
 
 final class ExistsProductSignCodeRepository implements ExistsProductSignCodeInterface
@@ -46,7 +42,7 @@ final class ExistsProductSignCodeRepository implements ExistsProductSignCodeInte
     }
 
     /** Метод проверяет имеется ли у пользователя такой код (Без ошибки)  */
-    public function isExists(UserUid $user, string $code): bool
+    public function isExists(string $code): bool
     {
         $dbal = $this->DBALQueryBuilder->createQueryBuilder(self::class);
 
@@ -61,33 +57,6 @@ final class ExistsProductSignCodeRepository implements ExistsProductSignCodeInte
                 ProductSign::class,
                 'sign',
                 'sign.id = sign_code.main',
-            );
-
-        $dbal
-            ->join(
-                'sign_code',
-                ProductSignInvariable::class,
-                'invariable',
-                'invariable.main = sign_code.main AND invariable.usr = :usr',
-            )
-            ->setParameter(
-                'usr',
-                $user,
-                UserUid::TYPE,
-            );
-
-
-        $dbal
-            ->join(
-                'sign',
-                ProductSignEvent::class,
-                'event',
-                'event.id = sign.event AND event.status != :status',
-            )
-            ->setParameter(
-                'status',
-                ProductSignStatusError::class,
-                ProductSignStatus::TYPE,
             );
 
         return $dbal->fetchExist();

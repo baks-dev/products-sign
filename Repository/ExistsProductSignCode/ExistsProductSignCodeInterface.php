@@ -30,5 +30,5 @@ use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 interface ExistsProductSignCodeInterface
 {
     /** Метод проверяет, имеется ли у пользователя такой код (Без ошибки)  */
-    public function isExists(UserUid $user, string $code): bool;
+    public function isExists(string $code): bool;
 }
