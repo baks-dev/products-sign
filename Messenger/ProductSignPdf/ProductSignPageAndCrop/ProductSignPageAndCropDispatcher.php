@@ -30,6 +30,7 @@ use BaksDev\Barcode\Pdf\PdfCropImg;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignPdfMessage;
 use BaksDev\Products\Sign\Messenger\ProductSignPdf\ProductSignScaner\ProductSignScannerMessage;
+use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Stocks\BaksDevProductsStocksBundle;
 use BaksDev\Products\Stocks\Messenger\PurchaseProductStock\PurchaseProductStockMessage;
 use BaksDev\Products\Supply\Type\ProductSupplyUid;
@@ -137,7 +138,7 @@ final readonly class ProductSignPageAndCropDispatcher
             }
 
             /** Генерируем идентификатор группы для отмены */
-            $part = new ProductSupplyUid();
+            $part = new ProductSignUid();
 
             /**
              * Парсит pdf документ, разбивает его на отдельные файлы с одной страницей и сохраняет как изображение
