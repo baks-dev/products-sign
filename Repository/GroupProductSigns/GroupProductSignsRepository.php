@@ -29,6 +29,7 @@ namespace BaksDev\Products\Sign\Repository\GroupProductSigns;
 use BaksDev\Core\Doctrine\DBALQueryBuilder;
 use BaksDev\Core\Form\Search\SearchDTO;
 use BaksDev\Core\Services\Paginator\PaginatorInterface;
+use BaksDev\Orders\Order\Entity\Event\Posting\OrderPosting;
 use BaksDev\Orders\Order\Entity\Invariable\OrderInvariable;
 use BaksDev\Products\Category\Entity\CategoryProduct;
 use BaksDev\Products\Category\Entity\Info\CategoryProductInfo;
@@ -211,15 +212,24 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
         }
 
 
-        $dbal
+        /*$dbal
             ->addSelect('orders_invariable.number AS order_number')
             ->leftJoin(
                 'event',
                 OrderInvariable::class,
                 'orders_invariable',
                 'orders_invariable.main = event.ord',
-            );
+            );*/
 
+
+        $dbal
+            ->addSelect('orders_posting.value AS order_number')
+            ->leftJoin(
+                'event',
+                OrderPosting::class,
+                'orders_posting',
+                'orders_posting.main = event.ord',
+            );
 
         /**
          * Product
@@ -583,16 +593,19 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
 
             elseif(
                 preg_match('/^\d{3}\.\d{3}\.\d{3}\.\d{3}$/', $this->search->getQuery())
+                || preg_match('/^\d{3}\.\d{3}\.\d{3}\.\d{3}-\d$/', $this->search->getQuery())
                 || str_starts_with($this->search->getQuery(), 'o-')
                 || str_starts_with($this->search->getQuery(), 'y-')
                 || str_starts_with($this->search->getQuery(), 'w-')
+                || str_starts_with($this->search->getQuery(), 'a-')
             )
             {
 
                 $dbal
                     ->createSearchQueryBuilder($this->search)
-                    ->addSearchLike('orders_invariable.number');
+                    ->addSearchLike('orders_posting.value');
             }
+
 
             // поиск по номеру ГТД формата 10702070/190725/5247456
             elseif(preg_match('/^\d{8}\/\d{6}\/\d{7}$/', $this->search->getQuery()))
@@ -607,7 +620,7 @@ final class GroupProductSignsRepository implements GroupProductSignsInterface
                 $dbal
                     ->createSearchQueryBuilder($this->search)
                     ->addSearchLike('code.code')
-                    ->addSearchLike('orders_invariable.number')
+                    ->addSearchLike('orders_posting.value')
                     ->addSearchLike('invariable.number')
                     ->addSearchLike('product_modification.article')
                     ->addSearchLike('product_variation.article')

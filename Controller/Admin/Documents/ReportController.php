@@ -132,7 +132,7 @@ final class ReportController extends AbstractController
                         $name = trim($name).' '.(
                             $product->getModificationReference() ?
                                 $translator->trans(id: $product->getModificationValue(), domain: $product->getModificationReference()) :
-                                $product->getVariationValue()
+                                $product->getModificationValue()
                             );
                     }
 
