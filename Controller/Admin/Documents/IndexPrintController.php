@@ -127,6 +127,8 @@ final class IndexPrintController extends AbstractController
         $sheet->getColumnDimension('F')->setAutoSize(true);
         $sheet->getColumnDimension('G')->setAutoSize(true);
         $sheet->getColumnDimension('H')->setAutoSize(true);
+        $sheet->getColumnDimension('I')->setAutoSize(true);
+        $sheet->getColumnDimension('J')->setAutoSize(true);
 
         $key = 1;
 
@@ -184,7 +186,8 @@ final class IndexPrintController extends AbstractController
             $sheet->setCellValue('G'.$key, implode(',', array_column($array, 'number'))); // ГТД
 
             $sheet->setCellValue('H'.$key, $item['order_number']); // заказ
-
+            $sheet->setCellValue('I'.$key, $item['users_profile_username']); // владелец
+            $sheet->setCellValue('J'.$key, $item['seller_username']); // продавец
 
             $key++;
 

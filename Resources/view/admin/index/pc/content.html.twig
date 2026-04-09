@@ -329,7 +329,7 @@
                     <th class="text-center vertical-middle">Продавец</th>
                     <th class="text-end">
 
-                        <a href="{{ path('products-sign:admin.index.print') }}"
+                        <a href="{{ path('products-sign:admin.index.print', { page: app.request.get('_route_params').page }) }}"
                            class="btn btn-light btn-sm text-decoration-none text-dark border-1 border-secondary"
                                 {# data-bs-toggle="modal" #}
                                 {# data-bs-target="#modal" #}
