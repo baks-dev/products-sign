@@ -237,7 +237,7 @@ final readonly class ProductSignPdfHandler
                 $command->getNumber(),
                 $command->isNew(),
             ),
-            transport: 'products-sign',
+            transport: 'barcode',
         );
 
         return true;

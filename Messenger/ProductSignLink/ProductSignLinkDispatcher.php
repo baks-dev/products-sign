@@ -123,7 +123,7 @@ final readonly class ProductSignLinkDispatcher
                 $message->getNumber(),
                 $message->isNew(),
             ),
-            transport: 'products-sign',
+            transport: 'barcode',
         );
 
         $this->Logger->info(sprintf(
