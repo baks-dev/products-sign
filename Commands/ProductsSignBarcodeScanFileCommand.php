@@ -128,7 +128,7 @@ class ProductsSignBarcodeScanFileCommand extends Command
             /* Отправляем сообщение в шину для обработки файлов */
             $this->MessageDispatch->dispatch(
                 message: $ProductSignPdfMessage,
-                transport: 'barcode',
+                transport: 'products-sign',
             );
 
             $io->writeln(sprintf(
