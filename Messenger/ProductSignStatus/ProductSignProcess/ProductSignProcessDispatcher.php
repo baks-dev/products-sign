@@ -31,6 +31,7 @@ use BaksDev\Core\Messenger\MessageDelay;
 use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Orders\Order\Entity\Event\OrderEvent;
 use BaksDev\Orders\Order\Repository\CurrentOrderEvent\CurrentOrderEventInterface;
+use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusDecommission;
 use BaksDev\Ozon\Orders\BaksDevOzonOrdersBundle;
 use BaksDev\Ozon\Orders\Type\DeliveryType\TypeDeliveryDbsOzon;
 use BaksDev\Ozon\Orders\Type\DeliveryType\TypeDeliveryFbsOzon;
@@ -46,6 +47,7 @@ use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileOrganization;
 use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileUser;
 use BaksDev\Users\Profile\TypeProfile\Type\Id\Choice\TypeProfileWorker;
 use BaksDev\Users\Profile\UserProfile\Repository\CurrentUserProfileEvent\CurrentUserProfileEventInterface;
+use BaksDev\Users\Profile\UserProfile\Type\Event\UserProfileEventUid;
 use BaksDev\Users\Profile\UserProfile\Type\Id\UserProfileUid;
 use BaksDev\Wildberries\Orders\BaksDevWildberriesOrdersBundle;
 use BaksDev\Wildberries\Orders\Type\DeliveryType\TypeDeliveryDbsWildberries;
@@ -83,7 +85,6 @@ final readonly class ProductSignProcessDispatcher
 
     public function __invoke(ProductSignProcessMessage $message): void
     {
-
         /**
          * Получаем информацию о заказе
          */
@@ -100,6 +101,13 @@ final readonly class ProductSignProcessDispatcher
 
             return;
         }
+
+
+        if($CurrentOrderEvent->isStatusEquals(OrderStatusDecommission::class))
+        {
+            return;
+        }
+
 
         /**
          * Если тип заказа Wildberries, Озон, Яндекс, Авито
@@ -185,19 +193,22 @@ final readonly class ProductSignProcessDispatcher
         $ProductSignInvariableDTO = $ProductSignProcessDTO->getInvariable();
 
 
-        /** Если тип заказа Wildberries, Озон, Яндекс, Озон - Присваиваем владельца в качестве продавца */
-
-        if($this->isMarketplace($CurrentOrderEvent))
-        {
-            $ProductSignInvariableDTO
-                ->setSeller($ProductSignEvent->getOwnerSignProfile());
-        }
-
         /**
          * Определяем тип профиля клиента
          */
 
         $UserProfileEventUid = $CurrentOrderEvent->getClientProfile();
+
+        if(false === ($UserProfileEventUid instanceof UserProfileEventUid))
+        {
+            $this->logger->critical(
+                'products-sign: Тип профиля клиента не определен',
+                [var_export($message, true), self::class.':'.__LINE__],
+            );
+
+            return;
+        }
+
         $UserProfileEvent = $this->CurrentUserProfileEvent->findByEvent($UserProfileEventUid);
         $TypeProfileUid = $UserProfileEvent->getType();
 
@@ -208,6 +219,15 @@ final readonly class ProductSignProcessDispatcher
         if(true === $TypeProfileUid->equals(TypeProfileWorker::class))
         {
             $ProductSignInvariableDTO->setNullSeller();
+        }
+
+        /**
+         * Если тип заказа Wildberries, Озон, Яндекс, Озон - Присваиваем владельца в качестве продавца
+         */
+        if(true === $this->isMarketplace($CurrentOrderEvent))
+        {
+            $ProductSignInvariableDTO
+                ->setSeller($ProductSignEvent->getOwnerSignProfile());
         }
 
         /**
