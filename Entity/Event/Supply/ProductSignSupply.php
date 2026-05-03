@@ -28,15 +28,17 @@ declare(strict_types=1);
 namespace BaksDev\Products\Sign\Entity\Event\Supply;
 
 use BaksDev\Core\Entity\EntityEvent;
+use BaksDev\Core\Type\UidType\Uid;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use Doctrine\ORM\Mapping as ORM;
 use InvalidArgumentException;
 use Symfony\Bridge\Doctrine\Types\UuidType;
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'product_sign_supply')]
-#[ORM\Index(columns: ['supply'])]
+#[ORM\Index(columns: ['value'])]
 class ProductSignSupply extends EntityEvent
 {
     /**
@@ -53,7 +55,7 @@ class ProductSignSupply extends EntityEvent
      * Uuid поставки
      */
     #[ORM\Column(type: UuidType::NAME, nullable: true)]
-    private ?string $supply = null;
+    private ?string $value = null;
 
     public function __construct(ProductSignEvent $event)
     {
@@ -79,7 +81,7 @@ class ProductSignSupply extends EntityEvent
     {
         if($dto instanceof ProductSignSupplyInterface || $dto instanceof self)
         {
-            if(empty($dto->getSupply()))
+            if(empty($dto->getValue()))
             {
                 return false;
             }

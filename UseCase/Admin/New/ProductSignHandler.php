@@ -58,16 +58,18 @@ final class ProductSignHandler extends AbstractHandler
     public function handle(ProductSignEventInterface $command): ProductSign|string|false
     {
         /** Делаем проверку на дубли */
-        $Invariable = $command->getInvariable();
         $Barcode = $command->getCode();
 
         $isExistsBarcode = $this->existsProductSignCode->isExists($Barcode->getCode());
 
         if($isExistsBarcode === true)
         {
+            $this->validatorCollection->error(
+                message: sprintf('Дубликат честного знака %s', $Barcode->getCode()),
+            );
+
             return false;
         }
-
 
         $this
             ->setCommand($command)

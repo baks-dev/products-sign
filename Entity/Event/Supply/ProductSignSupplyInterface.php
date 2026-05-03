@@ -24,4 +24,8 @@
 
 namespace BaksDev\Products\Sign\Entity\Event\Supply;
 
-interface ProductSignSupplyInterface { }
+interface ProductSignSupplyInterface
+{
+
+    public function getValue(): ?string;
+}
