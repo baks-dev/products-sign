@@ -189,37 +189,7 @@
 
                 <div class="w-100 d-flex align-items-center gap-3" style="max-width: 500px;">
 
-                    {{ form_start(search) }}
-
-                    <div class="w-100 d-flex" style="max-width: 350px;">
-
-
-                        <div class="w-100 d-flex align-items-center">
-                            <div class="position-absolute">
-                                <a href="{{ path('core:refresh') }}" class="btn btn-link text-muted">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" fill="currentColor"
-                                         class="mb-1" viewBox="0 0 16 16">
-                                        <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
-                                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-
-
-                        {{ form_widget(search.query, {
-                            attr: {
-                                class : 'border-light w-100 ps-5',
-                                style : 'min-width: 100%;'
-                            }
-                        }) }}
-
-                        {# <input type="hidden" name="token" value="{{ csrf_token('search') }}"/> #}
-
-                    </div>
-
-                    {{ form_end(search) }}
-
+                    {% include Template('/_includes/'~baks_settings.device~'/search.html.twig') %}
 
                     {{ form_start(status) }}
 

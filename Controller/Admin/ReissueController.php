@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -35,7 +36,6 @@ use BaksDev\Orders\Order\Type\Status\OrderStatus\Collection\OrderStatusPackage;
 use BaksDev\Products\Sign\Forms\ProductsSignsReissue\ProductsSignsReissueDTO;
 use BaksDev\Products\Sign\Forms\ProductsSignsReissue\ProductsSignsReissueForm;
 use BaksDev\Products\Sign\Messenger\ProductSignReissue\ProductsSignsReissueMessage;
-use JsonException;
 use Symfony\Bridge\Doctrine\Attribute\MapEntity;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -47,9 +47,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[RoleSecurity('ROLE_PRODUCT_SIGN_REISSUE')]
 final class ReissueController extends AbstractController
 {
-    /**
-     * @throws JsonException
-     */
+
     #[Route('/admin/product/signs/reissue/{id}', name: 'admin.reissue', methods: ['GET', 'POST'])]
     public function reissue(
         #[MapEntity] OrderEvent $orderEvent,

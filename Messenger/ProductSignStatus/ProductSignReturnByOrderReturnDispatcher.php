@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -36,6 +37,7 @@ use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignReturn\ProductS
 use BaksDev\Products\Sign\Repository\ProductSignProcessByOrder\ProductSignProcessByOrderInterface;
 use BaksDev\Products\Sign\Type\Event\ProductSignEventUid;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
@@ -43,6 +45,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
  * Если статус заказа Return «Возврат» - применяем статус «Честного знака» на статус Return «Возврат»
  * Если заказ НЕ был выполнен - следовательно это отмена @see ProductSignReturnByOrderCancelDispatcher
  */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 80)]
 final readonly class ProductSignReturnByOrderReturnDispatcher
 {

@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -36,23 +37,24 @@ use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignProcess\Product
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
 use BaksDev\Products\Sign\Type\Id\ProductSignUid;
 use BaksDev\Products\Stocks\Entity\Stock\Event\ProductStockEvent;
-use BaksDev\Products\Stocks\Entity\Stock\Products\ProductStockProduct;
 use BaksDev\Products\Stocks\Messenger\Orders\EditProductStockTotal\EditProductStockTotalMessage;
-use BaksDev\Products\Stocks\Messenger\ProductStockMessage;
 use BaksDev\Products\Stocks\Repository\ProductStocksEvent\ProductStocksEventInterface;
 use BaksDev\Products\Stocks\Type\Event\ProductStockEventUid;
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusCompleted;
 use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusIncoming;
-use BaksDev\Products\Stocks\Type\Status\ProductStockStatus\ProductStockStatusPackage;
 use BaksDev\Users\Profile\UserProfile\Repository\UserByUserProfile\UserByUserProfileInterface;
 use BaksDev\Users\User\Entity\User;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
 /**
- * Запускаем процесс резервирования и снятия резерва с честных знаков при изменении складской заявки
+ * Запускаем процесс резервирования и снятия резерва с Честных знаков при изменении складской заявки
+ *
+ * @note складская заявка изменяется когда редактируется заказ
  */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: -5)]
 final readonly class ProductSignProcessByProductStocksPackageDispatcher
 {
@@ -96,7 +98,8 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         }
 
         /**
-         * Если заявка уже выполнена - происходит возврат
+         * Если заявка уже выполнена - это происходит возврат -
+         * завершаем обработчик
          *
          * @see ProductSignReturnByOrderReturnDispatcher
          */
@@ -110,14 +113,15 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         if(false === ($OrderUid instanceof OrderUid))
         {
             $this->logger->notice(
-                'Не резервируем честный знак: упаковка без идентификатора заказа',
+                'Не резервируем честный знак: в складской заявке отсутствует идентификатора заказа',
                 [var_export($message, true), self::class.':'.__LINE__],
             );
 
             return;
         }
 
-        if($message->getLast() instanceof ProductStockEventUid)
+        /** Проверяем, есть ли предыдущее событие  */
+        if(true === ($message->getLast() instanceof ProductStockEventUid))
         {
             $lastProductStockEvent = $this->ProductStocksEventRepository
                 ->forEvent($message->getLast())
@@ -136,14 +140,14 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         }
 
 
-        // Получаем всю продукцию в ордере
+        /** Получаем всю продукцию в из складской заявки */
         $products = $ProductStockEvent->getProduct();
 
-        if($products->isEmpty())
+        if(true === $products->isEmpty())
         {
             $this->logger->warning(
-                'Заявка на упаковку не имеет продукции в коллекции',
-                [var_export($message, true), self::class.':'.__LINE__],
+                message: sprintf('%s: Отсутствует продукция в складской заявке', $ProductStockEvent->getNumber()),
+                context: [var_export($message, true), self::class.':'.__LINE__],
             );
 
             return;
@@ -152,45 +156,43 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         if(false === $ProductStockEvent->isInvariable())
         {
             $this->logger->warning(
-                'Заявка на упаковку не может определить ProductStocksInvariable',
-                [self::class.':'.__LINE__, var_export($message, true)],
+                message: sprintf('%s: не определено ProductStocksInvariable', $ProductStockEvent->getNumber()),
+                context: [self::class.':'.__LINE__, var_export($message, true)],
             );
 
             return;
         }
 
-        $UserProfileUid = $ProductStockEvent->getInvariable()?->getProfile();
+        $UserProfileUid = $ProductStockEvent->getInvariable()->getProfile();
 
         $User = $this
             ->userByUserProfileRepository
             ->forProfile($UserProfileUid)
             ->find();
 
-
         if(false === ($User instanceof User))
         {
-            $this->logger
-                ->critical(
-                    sprintf(
-                        'products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ',
-                        $UserProfileUid,
-                    ),
-                    [var_export($message, true), self::class.':'.__LINE__],
-                );
+            $this->logger->critical(
+                message: sprintf(
+                    'products-sign: Невозможно зарезервировать «Честный знак»! Пользователь профиля %s не найден ',
+                    $UserProfileUid,
+                ),
+                context: [var_export($message, true), self::class.':'.__LINE__],
+            );
 
             return;
         }
 
         /**
-         * Снимаем резервы с честных знаков на удаленные продукты из заказа
+         * Снимаем резервы с Честных знаков на удаленные единицы продукты из заказа
          */
 
         $result = $this->productSignByOrderRepository
             ->forOrder($OrderUid)
-            ->withoutItem()
+            ->withoutItem() // Честные знаки, у которых нет связи с единицей продукта
             ->findAll();
 
-        if(false !== $result && $result->valid())
+        if(false !== $result)
         {
             $this->logger->info(
                 message: sprintf('%s: снимаем резерв Честных знаков', $OrderUid),
@@ -219,7 +221,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
             ->findAll($OrderUid);
 
         /** Если нет для резерва продуктов - завершаем обработчик */
-        if(false === $productItemsConst || false === $productItemsConst->valid())
+        if(false === $productItemsConst)
         {
             $this->logger->info(
                 message: sprintf('%s: Не найдены новые единицы продукции для резервирования Честных знаков', $ProductStockEvent->getNumber()),
@@ -238,7 +240,7 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         );
 
 
-        $ProductSignPart = new ProductSignUid(); // Идентификатор партии
+        $ProductSignPart = new ProductSignUid(); // Генерируем идентификатор партии
 
         foreach($productItemsConst as $key => $const)
         {
@@ -287,23 +289,24 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
                 return;
             }
 
+            $ProductSignProcessMessage = new ProductSignProcessMessage(
+                order: $OrderUid,
+                part: $ProductSignPart,
+
+                user: $User->getId(),
+                profile: $UserProfileUid,
+
+                product: $CurrentProductIdentifierResult->getProduct(),
+                offer: $CurrentProductIdentifierResult->getOfferConst(),
+                variation: $CurrentProductIdentifierResult->getVariationConst(),
+                modification: $CurrentProductIdentifierResult->getModificationConst(),
+
+                itemConst: $const,
+            );
+
             $this->MessageDispatch
                 ->dispatch(
-                    message: new ProductSignProcessMessage(
-                        order: $OrderUid,
-                        part: $ProductSignPart,
-
-                        user: $User->getId(),
-                        profile: $UserProfileUid,
-
-                        product: $CurrentProductIdentifierResult->getProduct(),
-                        offer: $CurrentProductIdentifierResult->getOfferConst(),
-                        variation: $CurrentProductIdentifierResult->getVariationConst(),
-                        modification: $CurrentProductIdentifierResult->getModificationConst(),
-
-                        itemConst: $const,
-                    ),
-
+                    message: $ProductSignProcessMessage,
                     transport: 'products-sign',
                 );
 
@@ -319,91 +322,5 @@ final readonly class ProductSignProcessByProductStocksPackageDispatcher
         }
 
         $Deduplicator->save();
-
-
-        /**
-         * @depricated
-         *
-         * Если продукты в заказе НЕ РАЗДЕЛЕНЫ - резервируем Честные знаки по КОЛИЧЕСТВУ продукции
-         */
-
-        //        if(false === $productItemsConst)
-        //        {
-        //            $this->logger->info(
-        //                message: 'резервируем Честные знаки по КОЛИЧЕСТВУ продукции',
-        //                context: [self::class.':'.__LINE__],
-        //            );
-        //
-        //            $ProductSignProcessMessage = new ProductSignProcessMessage(
-        //                order: $OrderUid,
-        //                part: $ProductSignPart,
-        //                user: $User->getId(),
-        //                profile: $UserProfileUid,
-        //                product: $product->getProduct(),
-        //                offer: $product->getOffer(),
-        //                variation: $product->getVariation(),
-        //                modification: $product->getModification(),
-        //            );
-        //
-        //            $productTotal = $product->getTotal();
-        //
-        //            for($i = 1; $i <= $productTotal; $i++)
-        //            {
-        //                $ProductSignProcessMessage->setPart($ProductSignPart);
-        //
-        //                $this->MessageDispatch
-        //                    ->dispatch(
-        //                        message: $ProductSignProcessMessage,
-        //                        transport: 'products-sign',
-        //                    );
-        //
-        //                /** Разбиваем партии по 100 шт */
-        //                if(($i % 100) === 0)
-        //                {
-        //                    $ProductSignPart = new ProductSignUid();
-        //                }
-        //            }
-        //            //}
-        //
-        //            /** Если продукты в заказе РАЗДЕЛЕНЫ - резервируем Честные знаки по ЕДИНИЦАМ продукции */
-        //            if(false !== $productItemsConst)
-        //            {
-        //                $this->logger->info(
-        //                    message: 'резервируем Честные знаки по ЕДИНИЦАМ продукции',
-        //                    context: [self::class.':'.__LINE__],
-        //                );
-        //
-        //                foreach($productItemsConst as $key => $OrderProductItemConst)
-        //                {
-        //                    /** Разбиваем партии по 100 шт */
-        //                    if((($key + 1) % 100) === 0)
-        //                    {
-        //                        /** Переопределяем группу */
-        //                        $ProductSignPart = new ProductSignUid();
-        //                    }
-        //
-        //                    $ProductSignProcessMessage = new ProductSignProcessMessage(
-        //                        order: $OrderUid,
-        //                        part: $ProductSignPart,
-        //                        user: $User->getId(),
-        //                        profile: $UserProfileUid,
-        //                        product: $product->getProduct(),
-        //                        offer: $product->getOffer(),
-        //                        variation: $product->getVariation(),
-        //                        modification: $product->getModification(),
-        //
-        //                        itemConst: $OrderProductItemConst,
-        //                    );
-        //
-        //                    $this->MessageDispatch
-        //                        ->dispatch(
-        //                            message: $ProductSignProcessMessage,
-        //                            transport: 'products-sign',
-        //                        );
-        //                }
-        //            }
-        //        }
-        //
-        //        $Deduplicator->save();
     }
 }
