@@ -31,6 +31,7 @@ use BaksDev\Core\Messenger\MessageDispatchInterface;
 use BaksDev\Orders\Order\Entity\Event\OrderEvent;
 use BaksDev\Orders\Order\Repository\CurrentOrderEvent\CurrentOrderEventInterface;
 use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierByEventInterface;
+use BaksDev\Products\Product\Repository\CurrentProductIdentifier\CurrentProductIdentifierResult;
 use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignCancel\ProductSignCancelMessage;
 use BaksDev\Products\Sign\Messenger\ProductSignStatus\ProductSignProcess\ProductSignProcessMessage;
 use BaksDev\Products\Sign\Repository\ProductSignProcessByOrder\ProductSignProcessByOrderInterface;
@@ -40,6 +41,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
+/**
+ * Перевыпуск честных знаков на продукцию - отменяет и резервирует заново
+ */
 #[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: 0)]
 final readonly class ProductsSignsReissueDispatcher
@@ -52,7 +56,6 @@ final readonly class ProductsSignsReissueDispatcher
         private CurrentProductIdentifierByEventInterface $CurrentProductIdentifierByEventRepository,
     ) {}
 
-    /** Перевыпуск честных знаков на продукцию */
     public function __invoke(ProductsSignsReissueMessage $message): void
     {
         /** Находим событие заказа */
@@ -75,9 +78,9 @@ final readonly class ProductsSignsReissueDispatcher
             ->forOrder($orderEvent->getMain())
             ->findAll();
 
+        /** Отменяем ВСЕ Честные знаки в заказе */
         foreach($signs as $productSignEventUid)
         {
-            /** Отменяем честный знак */
             $this->MessageDispatch->dispatch(
                 message: new ProductSignCancelMessage(
                     $message->getProfile(),
@@ -87,39 +90,51 @@ final readonly class ProductsSignsReissueDispatcher
             );
         }
 
-
         /**
          * Отправляем запросы на повторное резервирование
          */
 
-        foreach($orderEvent->getProduct() as $orderProduct)
+        foreach($orderEvent->getProduct() as $OrderProduct)
         {
             /** Получаем текущие идентификаторы */
-            $currentProductIdentifierResult = $this->CurrentProductIdentifierByEventRepository
-                ->forEvent($orderProduct->getProduct())
-                ->forOffer($orderProduct->getOffer())
-                ->forVariation($orderProduct->getVariation())
-                ->forModification($orderProduct->getModification())
+            $CurrentProductIdentifierResult = $this->CurrentProductIdentifierByEventRepository
+                ->forEvent($OrderProduct->getProduct())
+                ->forOffer($OrderProduct->getOffer())
+                ->forVariation($OrderProduct->getVariation())
+                ->forModification($OrderProduct->getModification())
                 ->find();
 
-            $productSignPart = new ProductSignUid();
-
-            $productSignProcessMessage = new ProductSignProcessMessage(
-                order: $orderEvent->getMain(),
-                part: $productSignPart,
-                user: $message->getUser(),
-                profile: $message->getProfile(),
-                product: $currentProductIdentifierResult->getProduct(),
-                offer: $currentProductIdentifierResult->getOfferConst(),
-                variation: $currentProductIdentifierResult->getVariationConst(),
-                modification: $currentProductIdentifierResult->getModificationConst(),
-            );
-
-            $productTotal = $orderProduct->getTotal();
-
-            for($i = 1; $i <= $productTotal; $i++)
+            if(false === $CurrentProductIdentifierResult instanceof CurrentProductIdentifierResult)
             {
-                $productSignProcessMessage->setPart($productSignPart);
+                $this->Logger->critical(
+                    message: 'products-sign: Невозможно получить CurrentProductIdentifierResult',
+                    context: [
+                        self::class.':'.__LINE__,
+                        var_export($OrderProduct, true),
+                    ],
+                );
+
+                return;
+            }
+
+            $ProductSignPart = new ProductSignUid(); // Генерируем идентификатор партии
+
+            /** Резервируем на каждую единицу продукции в заказе */
+            foreach($OrderProduct->getItems() as $key => $OrderProductItem)
+            {
+                $productSignProcessMessage = new ProductSignProcessMessage(
+                    order: $orderEvent->getMain(),
+                    part: $ProductSignPart,
+
+                    user: $message->getUser(),
+                    profile: $message->getProfile(),
+
+                    product: $CurrentProductIdentifierResult->getProduct(),
+                    offer: $CurrentProductIdentifierResult->getOfferConst(),
+                    variation: $CurrentProductIdentifierResult->getVariationConst(),
+                    modification: $CurrentProductIdentifierResult->getModificationConst(),
+                    itemConst: $OrderProductItem->getConst(),
+                );
 
                 $this->MessageDispatch
                     ->dispatch(
@@ -128,10 +143,11 @@ final readonly class ProductsSignsReissueDispatcher
                         transport: 'products-sign',
                     );
 
-                /** Разбиваем по 100 шт */
-                if(($i % 100) === 0)
+                /** Генерируем новый идентификатор партии по 100 шт */
+                if((($key + 1) % 100) === 0)
                 {
-                    $productSignPart = new ProductSignUid();
+                    /** Переопределяем группу */
+                    $ProductSignPart = new ProductSignUid();
                 }
             }
         }

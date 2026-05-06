@@ -54,14 +54,14 @@ final readonly class ProductSignCancelDispatcher
             ->getInvariable()
             ->setPart($message->getProfile());
 
-        $handle = $this->productSignStatusHandler->handle($ProductSignCancelDTO);
+        $ProductSign = $this->productSignStatusHandler->handle($ProductSignCancelDTO);
 
-        if($handle instanceof ProductSign)
+        if(false === ($ProductSign instanceof ProductSign))
         {
-            $this->logger->warning(
-                'Отменили «Честный знак» (возвращаем статус New «Новый»)',
-                [
-                    'ProductSignEventUid' => (string) $message->getEvent(),
+            $this->logger->critical(
+                message: sprintf('products-sign: %s Ошибка при отмене честного знака', $ProductSign),
+                context: [
+                    var_export($message, true),
                     self::class.':'.__LINE__,
                 ],
             );
@@ -69,13 +69,14 @@ final readonly class ProductSignCancelDispatcher
             return;
         }
 
-        $this->logger->critical(
-            'products-sign: Ошибка при отмене честного знака',
-            [
-                $handle,
-                self::class.':'.__LINE__,
+        $this->logger->warning(
+            message: 'Отменили «Честный знак» (возвращаем статус New «Новый»)',
+            context: [
+                '$ProductSign' => (string) $ProductSign->getId(),
                 var_export($message, true),
+                self::class.':'.__LINE__,
             ],
         );
+
     }
 }

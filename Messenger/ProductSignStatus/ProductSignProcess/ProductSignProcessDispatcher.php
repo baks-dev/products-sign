@@ -260,21 +260,25 @@ final readonly class ProductSignProcessDispatcher
         /** Присваиваем партию упаковки */
         $ProductSignInvariableDTO->setPart($message->getPart());
 
-        $handle = $this->ProductSignStatusHandler->handle($ProductSignProcessDTO);
+        $ProductSign = $this->ProductSignStatusHandler->handle($ProductSignProcessDTO);
 
-        if(false === ($handle instanceof ProductSign))
+        if(false === ($ProductSign instanceof ProductSign))
         {
             $this->logger->critical(
-                sprintf('products-sign: Ошибка %s при обновлении статуса честного знака', $handle),
-                [var_export($message, true), self::class.':'.__LINE__],
+                message: sprintf('products-sign: Ошибка %s при обновлении статуса честного знака', $ProductSign),
+                context: [var_export($message, true), self::class.':'.__LINE__],
             );
 
             throw new InvalidArgumentException('Ошибка при обновлении статуса честного знака');
         }
 
         $this->logger->info(
-            'Отметили Честный знак Process «В резерве»',
-            [var_export($message, true), self::class.':'.__LINE__],
+            message: 'Отметили Честный знак Process «В резерве»',
+            context: [
+                'ProductSign' => (string) $ProductSign->getId(),
+                var_export($message, true),
+                self::class.':'.__LINE__
+            ],
         );
     }
 

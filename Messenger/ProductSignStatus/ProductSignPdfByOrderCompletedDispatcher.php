@@ -19,6 +19,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *  THE SOFTWARE.
+ *
  */
 
 declare(strict_types=1);
@@ -38,6 +39,7 @@ use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterf
 use Doctrine\ORM\Mapping\Table;
 use ReflectionAttribute;
 use ReflectionClass;
+use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
@@ -46,6 +48,7 @@ use Symfony\Component\Process\Process;
 /**
  * Генерируем PDF честных знаков продукции если статус заказа Completed «Выполнен»
  */
+#[Autoconfigure(shared: false)]
 #[AsMessageHandler(priority: -100)]
 final readonly class ProductSignPdfByOrderCompletedDispatcher
 {
