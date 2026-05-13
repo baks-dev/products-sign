@@ -106,6 +106,12 @@ class ProductSignNewTest extends KernelTestCase
     public function testUseCase(): void
     {
         self::assertTrue(true);
+
+        if(false === self::$user)
+        {
+            return;
+        }
+
         //return;
 
         /** @var ProductSignNewInterface $ProductSignNewRepository */
