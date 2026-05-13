@@ -32,12 +32,9 @@ use BaksDev\Barcode\Writer\BarcodeWrite;
 use BaksDev\Core\Controller\AbstractController;
 use BaksDev\Core\Listeners\Event\Security\RoleSecurity;
 use BaksDev\Files\Resources\Twig\ImagePathExtension;
-use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Repository\ProductSignByPart\ProductSignByPartInterface;
 use Doctrine\ORM\Mapping\Table;
 use Psr\Log\LoggerInterface;
-use ReflectionAttribute;
-use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\Filesystem\Filesystem;
@@ -86,16 +83,11 @@ final class PdfPartsController extends AbstractController
          * Создаем путь для создания PDF файла
          */
 
-        $ref = new ReflectionClass(ProductSignCode::class);
-        /** @var ReflectionAttribute $current */
-        $current = current($ref->getAttributes(Table::class));
-        $dirName = $current->getArguments()['name'] ?? 'barcode';
-
         $paths = null;
         $paths[] = $projectDir;
         $paths[] = 'public';
         $paths[] = 'upload';
-        $paths[] = $dirName;
+        $paths[] = 'barcode';
 
         $paths[] = (string) $part;
 

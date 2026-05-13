@@ -34,11 +34,8 @@ use BaksDev\Orders\Order\Repository\OrderProducts\OrderProductsInterface;
 use BaksDev\Products\Product\Type\Offers\ConstId\ProductOfferConst;
 use BaksDev\Products\Product\Type\Offers\Variation\ConstId\ProductVariationConst;
 use BaksDev\Products\Product\Type\Offers\Variation\Modification\ConstId\ProductModificationConst;
-use BaksDev\Products\Sign\Entity\Code\ProductSignCode;
 use BaksDev\Products\Sign\Repository\ProductSignByOrder\ProductSignByOrderInterface;
 use Doctrine\ORM\Mapping\Table;
-use ReflectionAttribute;
-use ReflectionClass;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Filesystem\Filesystem;
@@ -102,19 +99,13 @@ final readonly class ProductSignPdfByOrderCompletedDispatcher
          * Создаем путь для создания PDF файла
          */
 
-        $ref = new ReflectionClass(ProductSignCode::class);
-        /** @var ReflectionAttribute $current */
-        $current = current($ref->getAttributes(Table::class));
-        $dirName = $current->getArguments()['name'] ?? 'barcode';
-
-
         foreach($products as $OrderProductResult)
         {
             $paths = null;
             $paths[] = $this->projectDir;
             $paths[] = 'public';
             $paths[] = 'upload';
-            $paths[] = $dirName;
+            $paths[] = 'barcode';
             $paths[] = $OrderUid;
             $paths[] = (string) $OrderProductResult->getProduct();
 

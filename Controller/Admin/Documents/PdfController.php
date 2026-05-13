@@ -85,7 +85,7 @@ final class PdfController extends AbstractController
         $paths[] = $projectDir;
         $paths[] = 'public';
         $paths[] = 'upload';
-        $paths[] = $dirName;
+        $paths[] = 'barcode';
 
         $paths[] = $ProductSignDTO->getInvariable()->getPart();
 

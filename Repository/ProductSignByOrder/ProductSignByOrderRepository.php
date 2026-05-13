@@ -330,7 +330,7 @@ final class ProductSignByOrderRepository implements ProductSignByOrderInterface
                 "
                 CASE
                    WHEN code.name IS NOT NULL 
-                   THEN CONCAT ( '/upload/".$dbal->table(ProductSignCode::class)."' , '/', code.name)
+                   THEN CONCAT ( '/upload/barcode', '/', code.name)
                    ELSE NULL
                 END AS code_image
             ",

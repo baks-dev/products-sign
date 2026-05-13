@@ -38,8 +38,6 @@ use Doctrine\ORM\Mapping\Table;
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
-use ReflectionAttribute;
-use ReflectionClass;
 use SplFileInfo;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -111,19 +109,11 @@ class ProductsCodeRepackWebpCdnCommand extends Command
          * Проверяем директории на признак не пережатых файлов
          */
 
-
-        /** Выделяем из сущности название таблицы для директории файлов */
-        $ref = new ReflectionClass(ProductSignCode::class);
-
-        /** @var ReflectionAttribute $current */
-        $current = current($ref->getAttributes(Table::class));
-        $TABLE = $current->getArguments()['name'] ?? 'images';
-
         $upload = null;
         $upload[] = $this->upload;
         $upload[] = 'public';
         $upload[] = 'upload';
-        $upload[] = $TABLE;
+        $upload[] = 'barcode';
 
         $uploadDir = implode(DIRECTORY_SEPARATOR, $upload);
 

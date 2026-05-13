@@ -128,7 +128,7 @@ final class AllProductSignPartRepository implements AllProductSignPartInterface
             ->addSelect('code.code AS sign_code')
             ->addSelect("CASE
 			    WHEN code.name IS NOT NULL THEN
-					CONCAT ( '/upload/".$dbal->table(ProductSignCode::class)."' , '/', code.name)
+					CONCAT ( '/upload/barcode', '/', code.name)
                    ELSE NULL
                 END AS code_image")
             ->addSelect('code.ext AS code_ext')
