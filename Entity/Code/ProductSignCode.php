@@ -103,6 +103,10 @@ class ProductSignCode extends EntityReadonly implements UploadEntityInterface
         $this->code = uniqid('delete-', true).'-'.$this->code;
     }
 
+    public function getCode(): string
+    {
+        return $this->code;
+    }
 
     public function setEntity($dto): mixed
     {

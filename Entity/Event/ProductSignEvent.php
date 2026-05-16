@@ -219,6 +219,17 @@ class ProductSignEvent extends EntityEvent
         $this->code->deleteCode();
     }
 
+    public function getCode(): string
+    {
+        return $this->code->getCode();
+    }
+
+
+    /** Возвращает идентификатор заказа в случае резерва */
+    public function getOrderId(): ?OrderUid
+    {
+        return $this->ord;
+    }
 
     public function getDto($dto): mixed
     {
