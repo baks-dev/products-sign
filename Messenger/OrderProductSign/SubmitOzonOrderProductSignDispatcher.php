@@ -48,7 +48,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class SubmitOzonOrderProductSignDispatcher
 {
     public function __construct(
-        #[Target('ozonOrdersLogger')] private LoggerInterface $Logger,
+        #[Target('productsSignLogger')] private LoggerInterface $Logger,
         private DeduplicatorInterface $deduplicator,
         private readonly ProductSignCurrentEventInterface $ProductSignCurrentEventRepository,
         private readonly CurrentOrderEventInterface $CurrentOrderEventRepository,
@@ -77,7 +77,6 @@ final class SubmitOzonOrderProductSignDispatcher
             $Deduplicator->save();
             return;
         }
-
 
         /** Получаем текущее состояние честного знака */
 

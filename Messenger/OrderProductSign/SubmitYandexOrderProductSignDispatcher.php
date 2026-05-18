@@ -52,7 +52,7 @@ use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 final class SubmitYandexOrderProductSignDispatcher
 {
     public function __construct(
-        #[Target('yandexMarketOrdersLogger')] private LoggerInterface $Logger,
+        #[Target('productsSignLogger')] private LoggerInterface $Logger,
         private DeduplicatorInterface $deduplicator,
         private readonly ProductSignCurrentEventInterface $ProductSignCurrentEventRepository,
         private readonly CurrentOrderEventInterface $CurrentOrderEventRepository,
