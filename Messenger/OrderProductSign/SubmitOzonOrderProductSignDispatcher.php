@@ -128,10 +128,19 @@ final class SubmitOzonOrderProductSignDispatcher
             return;
         }
 
-        $OzonTokenUid = new OzonTokenUid($OrderEvent->getOrderTokenIdentifier());
+        if(empty($OrderEvent->getPostingNumber()))
+        {
+            $this->Logger->critical(
+                message: 'ozon-orders: Не найдено идентификатора отправления для передачи маркировки честного знака',
+                context: [$OrderEvent->getMain(), self::class.':'.__LINE__],
+            );
 
+            return;
+        }
 
         /** Получаем информацию о заказе в селлере  */
+
+        $OzonTokenUid = new OzonTokenUid($OrderEvent->getOrderTokenIdentifier());
 
         $NewOzonOrderDTO = $this->GetOzonOrderInfoRequest
             ->forTokenIdentifier($OzonTokenUid)
