@@ -195,7 +195,9 @@ final class SubmitYandexOrderProductSignDispatcher
 
             /** Ищем грузоместо согласно отправлению */
 
-            $orderPostingNumber = str_replace('Y-', '', $PostingOrderEvent->getPostingNumber());
+            $orderPostingNumber = $PostingOrderEvent->getPostingNumber()
+                ? str_replace('Y-', '', $PostingOrderEvent->getPostingNumber())
+                : $PostingOrderEvent->getPostingNumber();
 
             foreach($NewOzonOrderDTO->getPostingBox() as $NewYaMarketOrderBoxDTO)
             {

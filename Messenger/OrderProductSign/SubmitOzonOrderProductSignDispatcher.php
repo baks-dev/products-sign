@@ -148,9 +148,14 @@ final class SubmitOzonOrderProductSignDispatcher
 
         foreach($NewOzonOrderDTO->getProduct() as $NewOzonOrderProductDTO)
         {
-            /** Пропускаем если в заказе отсутствует информация о грузоместе */
+            /** Пропускаем если в заказе отсутствует информация об отправлениях */
             if(true === empty($NewOzonOrderProductDTO->getExemplar()))
             {
+                $this->Logger->critical(
+                    'products-sign: В заказе отсутствует информация об отправлениях ',
+                    [self::class.':'.__LINE__, $OrderEvent->getPostingNumber(), var_export($message, true)],
+                );
+
                 continue;
             }
 
@@ -160,14 +165,30 @@ final class SubmitOzonOrderProductSignDispatcher
             $code = $matches[0][1].$matches[0][2].$matches[1][1].$matches[1][2].$subChar.$matches[2][1].$matches[2][2].$subChar.$matches[3][1].$matches[3][2];
 
             /** Обновляем информацию о честном знаке */
-            $this->UpdateOzonOrdersExemplarRequest
+            $isUpdate = $this->UpdateOzonOrdersExemplarRequest
                 ->forTokenIdentifier($OzonTokenUid)
                 ->posting($NewOzonOrderDTO->getPostingNumber())
                 ->product($NewOzonOrderProductDTO->getSku())
                 ->exemplar($NewOzonOrderProductDTO->getExemplar())
                 ->sign($code)
                 ->update();
+
+            if(false === $isUpdate)
+            {
+                $this->Logger->critical(
+                    'ozon-orders: Не удалось обновить информацию о честном знаке',
+                    [self::class.':'.__LINE__, $OrderEvent->getPostingNumber(), var_export($message, true)],
+                );
+
+                continue;
+            }
+
+            $this->Logger->info(
+                sprintf('%s: обновили информацию о честном знаке', $OrderEvent->getPostingNumber()),
+                [self::class.':'.__LINE__, var_export($message, true)],
+            );
         }
+
 
         $Deduplicator->save();
     }
