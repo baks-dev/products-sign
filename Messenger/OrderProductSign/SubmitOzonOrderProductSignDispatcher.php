@@ -33,6 +33,7 @@ use BaksDev\Ozon\Orders\Api\Exemplar\UpdateOzonOrdersExemplarRequest;
 use BaksDev\Ozon\Orders\Api\GetOzonOrderInfoRequest;
 use BaksDev\Ozon\Orders\BaksDevOzonOrdersBundle;
 use BaksDev\Ozon\Orders\Type\DeliveryType\TypeDeliveryFbsOzon;
+use BaksDev\Ozon\Orders\UseCase\New\NewOzonOrderDTO;
 use BaksDev\Ozon\Type\Id\OzonTokenUid;
 use BaksDev\Products\Sign\Entity\Event\ProductSignEvent;
 use BaksDev\Products\Sign\Messenger\ProductSignMessage;
@@ -146,14 +147,25 @@ final class SubmitOzonOrderProductSignDispatcher
             ->forTokenIdentifier($OzonTokenUid)
             ->find($OrderEvent->getPostingNumber());
 
+        /** Пропускаем если отсутствует информация о заказе */
+        if(false === $NewOzonOrderDTO instanceof NewOzonOrderDTO)
+        {
+            $this->Logger->critical(
+                sprintf('products-sign: Не удалось получить информацию о заказе %s', $OrderEvent->getPostingNumber()),
+                [self::class.':'.__LINE__],
+            );
+
+            return;
+        }
+
         foreach($NewOzonOrderDTO->getProduct() as $NewOzonOrderProductDTO)
         {
             /** Пропускаем если в заказе отсутствует информация об отправлениях */
             if(true === empty($NewOzonOrderProductDTO->getExemplar()))
             {
-                $this->Logger->critical(
-                    'products-sign: В заказе отсутствует информация об отправлениях ',
-                    [self::class.':'.__LINE__, $OrderEvent->getPostingNumber(), var_export($message, true)],
+                $this->Logger->warning(
+                    sprintf('%s: В заказе отсутствует информация об отправлениях требующих обязательной маркировки', $OrderEvent->getPostingNumber()),
+                    [self::class.':'.__LINE__],
                 );
 
                 continue;

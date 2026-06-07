@@ -74,19 +74,19 @@ class ProductSignEvent extends EntityEvent
     /**
      * Код честного знака
      */
-    #[ORM\OneToOne(targetEntity: ProductSignCode::class, mappedBy: 'event', cascade: ['all'])]
+    #[ORM\OneToOne(targetEntity: ProductSignCode::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
     private ?ProductSignCode $code = null;
 
     /**
      * Постоянная величина
      */
-    #[ORM\OneToOne(targetEntity: ProductSignInvariable::class, mappedBy: 'event', cascade: ['all'])]
+    #[ORM\OneToOne(targetEntity: ProductSignInvariable::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
     private ?ProductSignInvariable $invariable;
 
     /**
      * Модификатор
      */
-    #[ORM\OneToOne(targetEntity: ProductSignModify::class, mappedBy: 'event', cascade: ['all'])]
+    #[ORM\OneToOne(targetEntity: ProductSignModify::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
     private ProductSignModify $modify;
 
     /**
@@ -108,7 +108,7 @@ class ProductSignEvent extends EntityEvent
     private ?OrderProductItemConst $product = null;
 
     /** Идентификатор поставки */
-    #[ORM\OneToOne(targetEntity: ProductSignSupply::class, mappedBy: 'event', cascade: ['all'])]
+    #[ORM\OneToOne(targetEntity: ProductSignSupply::class, mappedBy: 'event', cascade: ['all'], fetch: 'EAGER')]
     private ?ProductSignSupply $supply = null;
 
     /** Комментарий */
@@ -219,9 +219,9 @@ class ProductSignEvent extends EntityEvent
         $this->code->deleteCode();
     }
 
-    public function getCode(): string
+    public function getCode(): ?string
     {
-        return $this->code->getCode();
+        return $this->code?->getCode();
     }
 
 
