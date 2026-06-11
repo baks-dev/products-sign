@@ -171,6 +171,11 @@ final class SubmitOzonOrderProductSignDispatcher
                 continue;
             }
 
+            if(empty($ProductSignEvent->getCode()))
+            {
+                continue;
+            }
+
             /** Преобразуем код маркировки к требуемому формату */
             $subChar = "";
             preg_match_all('/\((\d{2})\)((?:(?!\(\d{2}\)).)*)/', $ProductSignEvent->getCode(), $matches, PREG_SET_ORDER);
