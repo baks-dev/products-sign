@@ -48,7 +48,7 @@ value="{{ item.sign_event }}">
 
         {# Редактировать #}
 
-        {% if  item.sign_status == 'new' and (is_granted(ROLE~'_EDIT') or is_granted('ROLE_ADMIN')) %}
+        {% if (item.sign_status == 'new' or item.sign_status == 'return') and (is_granted(ROLE~'_EDIT') or is_granted('ROLE_ADMIN')) %}
             <li class="list-group-item d-flex justify-content-between bg-transparent border-0 text-truncate rounded-5">
                 <a href="{{ path('products-sign:admin.edit', { part: item.sign_part }) }}"
                    class="text-decoration-none text-dark w-100 modal-link disabled"
@@ -65,7 +65,7 @@ value="{{ item.sign_event }}">
 
         {# Удалить #}
 
-        {% if (item.sign_status == 'new' or item.sign_status == 'error') and (is_granted(ROLE~'_DELETE') or is_granted('ROLE_ADMIN')) %}
+        {% if (item.sign_status == 'new' or item.sign_status == 'return' or item.sign_status == 'error') and (is_granted(ROLE~'_DELETE') or is_granted('ROLE_ADMIN')) %}
             <li class="list-group-item d-flex justify-content-between bg-transparent border-0 text-truncate rounded-5">
                 <a href="{{ path('products-sign:admin.delete', { part: item.sign_part }) }}"
                    class="text-decoration-none text-dark w-100 modal-link disabled"

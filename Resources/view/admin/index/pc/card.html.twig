@@ -300,7 +300,7 @@
             {% endif %}
 
 
-            {% if item.sign_status == 'new' and (is_granted('ROLE_PRODUCT_SIGN_STATUS') or is_granted('ROLE_ADMIN')) %}
+            {% if (item.sign_status == 'new' or item.sign_status == 'return') and (is_granted('ROLE_PRODUCT_SIGN_STATUS') or is_granted('ROLE_ADMIN')) %}
 
                 <button
                         data-href="{{ path('products-sign:admin.decommission', {
