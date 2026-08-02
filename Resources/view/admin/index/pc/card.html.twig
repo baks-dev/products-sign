@@ -206,35 +206,39 @@
 
                 {% else %}
 
-                    {% set document_pdf = path('products-sign:document.pdf.orders', {
-                        article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
-                        part: item.sign_part,
-                        order: item.order_id,
-                        product: item.product_id,
-                        offer: item.product_offer_const,
-                        variation: item.product_variation_const,
-                        modification: item.product_modification_const
-                    }) %}
+                    {% if item.order_id %}
 
-                    {% set document_small_txt = path('products-sign:document.small.orders', {
-                        article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
-                        part: item.sign_part,
-                        order: item.order_id,
-                        product: item.product_id,
-                        offer: item.product_offer_const,
-                        variation: item.product_variation_const,
-                        modification: item.product_modification_const
-                    }) %}
+                        {% set document_pdf = path('products-sign:document.pdf.orders', {
+                            article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
+                            part: item.sign_part,
+                            order: item.order_id,
+                            product: item.product_id,
+                            offer: item.product_offer_const,
+                            variation: item.product_variation_const,
+                            modification: item.product_modification_const
+                        }) %}
 
-                    {% set document_big_txt = path('products-sign:document.big.orders', {
-                        article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
-                        part: item.sign_part,
-                        order: item.order_id,
-                        product: item.product_id,
-                        offer: item.product_offer_const,
-                        variation: item.product_variation_const,
-                        modification: item.product_modification_const
-                    }) %}
+                        {% set document_small_txt = path('products-sign:document.small.orders', {
+                            article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
+                            part: item.sign_part,
+                            order: item.order_id,
+                            product: item.product_id,
+                            offer: item.product_offer_const,
+                            variation: item.product_variation_const,
+                            modification: item.product_modification_const
+                        }) %}
+
+                        {% set document_big_txt = path('products-sign:document.big.orders', {
+                            article: item.product_article ~ (item.order_number ? '.' ~ item.order_number ~ '.'),
+                            part: item.sign_part,
+                            order: item.order_id,
+                            product: item.product_id,
+                            offer: item.product_offer_const,
+                            variation: item.product_variation_const,
+                            modification: item.product_modification_const
+                        }) %}
+
+                    {% endif %}
 
                 {% endif %}
 

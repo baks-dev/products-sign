@@ -42,13 +42,17 @@ executeFunc(function submitProductSignFilter()
 
 
     const myCollapsible = document.getElementById("filterProductSign");
-    myCollapsible.addEventListener("show.bs.collapse", event =>
+
+    if(myCollapsible)
     {
-        if(typeof idFormDebounce !== "undefined" && idFormDebounce !== false)
+        myCollapsible.addEventListener("show.bs.collapse", event =>
         {
-            clearTimeout(idFormDebounce);
-        }
-    });
+            if(typeof idFormDebounce !== "undefined" && idFormDebounce !== false)
+            {
+                clearTimeout(idFormDebounce);
+            }
+        });
+    }
 
     return true;
 });
