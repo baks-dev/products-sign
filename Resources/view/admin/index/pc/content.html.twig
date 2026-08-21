@@ -124,6 +124,12 @@
                 </button>
 
                 <ul class="dropdown-menu">
+
+                    <li>
+                        <h6 class="dropdown-header w-100 text-primary">Отчет о выполненных честных знаках</h6>
+                    </li>
+
+
                     <li>
                         <a href="{{ path('products-sign:admin.transfer') }}"
                            class="dropdown-item"
@@ -141,6 +147,38 @@
                            data-bs-target="#modal">
 
                             Вывод из оборота
+                        </a>
+                    </li>
+
+
+                    <li>
+                        <h6 class="dropdown-header w-100 text-primary">Експорт маркировки по статусам</h6>
+                    </li>
+
+                    <li>
+                        <a href="{{ path('products-sign:admin.export', { status : 'new' }) }}"
+                           class="dropdown-item"
+                           target="_blank"
+                        >
+                            Новый
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ path('products-sign:admin.export', { status : 'process' }) }}"
+                           class="dropdown-item"
+                           target="_blank"
+                        >
+                            В резерве
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ path('products-sign:admin.export', { status : 'done' }) }}"
+                           class="dropdown-item"
+                           target="_blank"
+                        >
+                            Выполнен
                         </a>
                     </li>
 
